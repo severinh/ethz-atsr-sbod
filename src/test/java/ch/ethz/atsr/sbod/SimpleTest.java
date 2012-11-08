@@ -8,7 +8,9 @@ public class SimpleTest {
 
 	@Test
 	public void test() {
-		assertEquals(true, true);
+		String javaFilePath = SimpleTest.class.getResource(
+				"/SimpleBufferOverflow.java").getPath();
+		assertFalse(javaFilePath.isEmpty());
 	}
 
 }
