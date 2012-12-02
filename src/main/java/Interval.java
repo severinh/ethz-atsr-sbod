@@ -263,6 +263,26 @@ public class Interval {
 		return result;
 	}
 
+	public static Interval cond(Interval leftInterval, Interval rightInterval,
+			ConditionExprEnum conditionExpr) {
+		switch (conditionExpr) {
+		case LT:
+			return lt(leftInterval, rightInterval);
+		case LE:
+			return le(leftInterval, rightInterval);
+		case EQ:
+			return eq(leftInterval, rightInterval);
+		case NE:
+			return ne(leftInterval, rightInterval);
+		case GE:
+			return ge(leftInterval, rightInterval);
+		case GT:
+			return gt(leftInterval, rightInterval);
+		default:
+			throw new IllegalStateException("no such condition expression");
+		}
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

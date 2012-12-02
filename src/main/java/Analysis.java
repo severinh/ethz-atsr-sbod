@@ -188,80 +188,35 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 
 			if (condition instanceof ConditionExpr) {
 				ConditionExpr conditionExpr = (ConditionExpr) condition;
+				ConditionExprEnum conditionExprEnum = ConditionExprEnum
+						.fromConditionExprClass(conditionExpr.getClass());
+
 				Value left = conditionExpr.getOp1();
 				Value right = conditionExpr.getOp2();
 				Interval leftInterval = tryGetIntervalForValue(current, left);
 				Interval rightInterval = tryGetIntervalForValue(current, right);
 
-				Interval leftBranchInterval = null;
-				Interval leftFallInterval = null;
-				Interval rightBranchInterval = null;
-				Interval rightFallInterval = null;
-
-				if (condition instanceof LtExpr) {
-					leftBranchInterval = Interval.lt(leftInterval,
-							rightInterval);
-					leftFallInterval = Interval.ge(leftInterval, rightInterval);
-					rightBranchInterval = Interval.gt(rightInterval,
-							leftInterval);
-					rightFallInterval = Interval
-							.le(rightInterval, leftInterval);
-				} else if (condition instanceof LeExpr) {
-					leftBranchInterval = Interval.le(leftInterval,
-							rightInterval);
-					leftFallInterval = Interval.gt(leftInterval, rightInterval);
-					rightBranchInterval = Interval.ge(rightInterval,
-							leftInterval);
-					rightFallInterval = Interval
-							.lt(rightInterval, leftInterval);
-				} else if (condition instanceof EqExpr) {
-					leftBranchInterval = Interval.eq(leftInterval,
-							rightInterval);
-					leftFallInterval = Interval.ne(leftInterval, rightInterval);
-					rightBranchInterval = Interval.eq(rightInterval,
-							leftInterval);
-					rightFallInterval = Interval
-							.ne(rightInterval, leftInterval);
-				} else if (condition instanceof NeExpr) {
-					leftBranchInterval = Interval.ne(leftInterval,
-							rightInterval);
-					leftFallInterval = Interval.eq(leftInterval, rightInterval);
-					rightBranchInterval = Interval.ne(rightInterval,
-							leftInterval);
-					rightFallInterval = Interval
-							.eq(rightInterval, leftInterval);
-				} else if (condition instanceof GeExpr) {
-					leftBranchInterval = Interval.ge(leftInterval,
-							rightInterval);
-					leftFallInterval = Interval.lt(leftInterval, rightInterval);
-					rightBranchInterval = Interval.le(rightInterval,
-							leftInterval);
-					rightFallInterval = Interval
-							.gt(rightInterval, leftInterval);
-				} else if (condition instanceof GtExpr) {
-					leftBranchInterval = Interval.gt(leftInterval,
-							rightInterval);
-					leftFallInterval = Interval.le(leftInterval, rightInterval);
-					rightBranchInterval = Interval.lt(rightInterval,
-							leftInterval);
-					rightFallInterval = Interval
-							.ge(rightInterval, leftInterval);
-				} else {
-					unhandled("condition");
-				}
-
 				if (left instanceof JimpleLocal) {
 					JimpleLocal leftLocal = (JimpleLocal) left;
 					String varName = leftLocal.getName();
-					branchState.putIntervalForVar(varName, leftBranchInterval);
-					fallState.putIntervalForVar(varName, leftFallInterval);
+					Interval branchInterval = Interval.cond(leftInterval,
+							rightInterval, conditionExprEnum);
+					Interval fallInterval = Interval.cond(leftInterval,
+							rightInterval, conditionExprEnum.getNegation());
+					branchState.putIntervalForVar(varName, branchInterval);
+					fallState.putIntervalForVar(varName, fallInterval);
 				}
 
 				if (right instanceof JimpleLocal) {
 					JimpleLocal rightLocal = (JimpleLocal) right;
 					String varName = rightLocal.getName();
-					branchState.putIntervalForVar(varName, rightBranchInterval);
-					fallState.putIntervalForVar(varName, rightFallInterval);
+					Interval branchInterval = Interval.cond(rightInterval,
+							leftInterval, conditionExprEnum.getSwapped());
+					Interval fallInterval = Interval.cond(rightInterval,
+							leftInterval, conditionExprEnum.getSwapped()
+									.getNegation());
+					branchState.putIntervalForVar(varName, branchInterval);
+					fallState.putIntervalForVar(varName, fallInterval);
 				}
 			} else {
 				unhandled("condition");
