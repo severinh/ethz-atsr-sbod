@@ -1,22 +1,27 @@
 public class Interval {
 
-	// TODO: It might be necessary to model top not by using actual integers
 	public static final Interval TOP = new Interval(Integer.MIN_VALUE,
 			Integer.MAX_VALUE);
+	public static final Interval BOTTOM = new Interval(1, 0);
 
-	// TODO: Do you need to handle infinity or empty interval?
 	private final int lower;
 	private final int upper;
 
-	public Interval(int value) {
-		this.lower = value;
-		this.upper = value;
-	}
-
-	public Interval(int lower, int upper) {
-		// TODO: What if l > u?
+	private Interval(int lower, int upper) {
 		this.lower = lower;
 		this.upper = upper;
+	}
+
+	public static Interval of(int value) {
+		return new Interval(value, value);
+	}
+
+	public static Interval of(int lower, int upper) {
+		if (lower > upper) {
+			return BOTTOM;
+		} else {
+			return new Interval(lower, upper);
+		}
 	}
 
 	public int getLower() {
