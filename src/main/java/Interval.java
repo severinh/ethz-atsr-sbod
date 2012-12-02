@@ -27,6 +27,14 @@ public class Interval {
 		return upper;
 	}
 
+	public boolean isBottom() {
+		return getLower() > getUpper();
+	}
+
+	public boolean isTop() {
+		return equals(TOP);
+	}
+
 	@Override
 	public String toString() {
 		return String.format("[%d,%d]", getLower(), getUpper());
