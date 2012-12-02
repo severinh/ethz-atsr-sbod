@@ -205,6 +205,7 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 		} else if (op instanceof IfStmt) {
 			IfStmt ifStmt = (IfStmt) op;
 			Value condition = ifStmt.getCondition();
+			LOG.debug("\tCondition: " + condition.getClass().getName());
 
 			if (condition instanceof ConditionExpr) {
 				ConditionExpr conditionExpr = (ConditionExpr) condition;
@@ -244,16 +245,15 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 								fallUpper);
 						fallState.putIntervalForVar(varName, fallInterval);
 					} else {
-						unhandled("condition " + condition.getClass().getName());
+						unhandled("condition");
 					}
 				} else {
 					unhandled("left-hand side of condition "
 							+ left.getClass().getName());
 				}
 			} else {
-				unhandled("condition " + condition.getClass().getName());
+				unhandled("condition");
 			}
-			LOG.debug("\tCondition: " + condition.getClass().getName());
 		}
 
 		// TODO: Maybe avoid copying objects too much. Feel free to optimize.
