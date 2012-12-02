@@ -147,7 +147,11 @@ public class Interval {
 	 * @return the constrained left-hand side interval
 	 */
 	public static Interval ne(Interval leftInterval, Interval rightInterval) {
+		// Constrain the left interval only if the right interval contains
+		// exactly one value
 		if (rightInterval.getUpper() - rightInterval.getLower() == 1) {
+			// Constrain the left interval only if the right value marks the
+			// start or end of the left interval
 			if (leftInterval.getLower() == rightInterval.getLower()) {
 				return new Interval(leftInterval.getLower() + 1,
 						leftInterval.getUpper());
