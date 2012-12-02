@@ -21,7 +21,6 @@ import soot.jimple.Stmt;
 import soot.jimple.SubExpr;
 import soot.jimple.internal.JArrayRef;
 import soot.jimple.internal.JInstanceFieldRef;
-import soot.jimple.internal.JLengthExpr;
 import soot.jimple.internal.JNewArrayExpr;
 import soot.jimple.internal.JimpleLocal;
 import soot.toolkits.graph.UnitGraph;

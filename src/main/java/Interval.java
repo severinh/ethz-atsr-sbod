@@ -66,6 +66,21 @@ public class Interval {
 		return result;
 	}
 
+	/**
+	 * Returns the constrained left-hand side interval of a less-than comparison
+	 * of two intervals under the assumption that the condition holds, i.e., the
+	 * branch is taken.
+	 * 
+	 * Calling this method is only useful if the left-hand side of the condition
+	 * is actually a variable such that the corresponding interval can be
+	 * constrained inside of the branch.
+	 * 
+	 * @param leftInterval
+	 *            the interval associated with the left-hand side
+	 * @param rightInterval
+	 *            the interval associated with the right-hand side
+	 * @return the constrained left-hand side interval
+	 */
 	public static Interval lt(Interval leftInterval, Interval rightInterval) {
 		int lower = leftInterval.getLower();
 		int upper = Math.min(leftInterval.getUpper(),
@@ -74,6 +89,21 @@ public class Interval {
 		return result;
 	}
 
+	/**
+	 * Returns the constrained left-hand side interval of a less-or-equal
+	 * comparison of two intervals under the assumption that the condition
+	 * holds, i.e., the branch is taken.
+	 * 
+	 * Calling this method is only useful if the left-hand side of the condition
+	 * is actually a variable such that the corresponding interval can be
+	 * constrained inside of the branch.
+	 * 
+	 * @param leftInterval
+	 *            the interval associated with the left-hand side
+	 * @param rightInterval
+	 *            the interval associated with the right-hand side
+	 * @return the constrained left-hand side interval
+	 */
 	public static Interval le(Interval leftInterval, Interval rightInterval) {
 		int lower = leftInterval.getLower();
 		int upper = Math.min(leftInterval.getUpper(), rightInterval.getUpper());
@@ -81,11 +111,41 @@ public class Interval {
 		return result;
 	}
 
+	/**
+	 * Returns the constrained left-hand side interval of an equality comparison
+	 * of two intervals under the assumption that the condition holds, i.e., the
+	 * branch is taken.
+	 * 
+	 * Calling this method is only useful if the left-hand side of the condition
+	 * is actually a variable such that the corresponding interval can be
+	 * constrained inside of the branch.
+	 * 
+	 * @param leftInterval
+	 *            the interval associated with the left-hand side
+	 * @param rightInterval
+	 *            the interval associated with the right-hand side
+	 * @return the constrained left-hand side interval
+	 */
 	public static Interval eq(Interval leftInterval, Interval rightInterval) {
 		Interval result = join(leftInterval, rightInterval);
 		return result;
 	}
 
+	/**
+	 * Returns the constrained left-hand side interval of a greater-or-equal
+	 * comparison of two intervals under the assumption that the condition
+	 * holds, i.e., the branch is taken.
+	 * 
+	 * Calling this method is only useful if the left-hand side of the condition
+	 * is actually a variable such that the corresponding interval can be
+	 * constrained inside of the branch.
+	 * 
+	 * @param leftInterval
+	 *            the interval associated with the left-hand side
+	 * @param rightInterval
+	 *            the interval associated with the right-hand side
+	 * @return the constrained left-hand side interval
+	 */
 	public static Interval ge(Interval leftInterval, Interval rightInterval) {
 		int lower = Math.max(leftInterval.getLower(), rightInterval.getLower());
 		int upper = leftInterval.getUpper();
@@ -93,6 +153,21 @@ public class Interval {
 		return result;
 	}
 
+	/**
+	 * Returns the constrained left-hand side interval of a greater-than
+	 * comparison of two intervals under the assumption that the condition
+	 * holds, i.e., the branch is taken.
+	 * 
+	 * Calling this method is only useful if the left-hand side of the condition
+	 * is actually a variable such that the corresponding interval can be
+	 * constrained inside of the branch.
+	 * 
+	 * @param leftInterval
+	 *            the interval associated with the left-hand side
+	 * @param rightInterval
+	 *            the interval associated with the right-hand side
+	 * @return the constrained left-hand side interval
+	 */
 	public static Interval gt(Interval leftInterval, Interval rightInterval) {
 		int lower = Math.max(leftInterval.getLower(),
 				rightInterval.getLower() + 1);
