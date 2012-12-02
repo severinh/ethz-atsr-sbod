@@ -194,13 +194,13 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 				} else if (right instanceof JArrayRef) {
 					// Do nothing
 				} else {
-					unhandled("unexpected right-hand side of assignment");
+					unhandled("right-hand side of assignment");
 				}
 			} else if (left instanceof JArrayRef) {
 				// Do nothing
 				// The array access is relevant at the end of the analysis
 			} else {
-				unhandled("unexpected left-hand side of assignment");
+				unhandled("left-hand side of assignment");
 			}
 		} else if (op instanceof IfStmt) {
 			IfStmt ifStmt = (IfStmt) op;
@@ -243,8 +243,15 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 						Interval fallInterval = new Interval(fallLower,
 								fallUpper);
 						fallState.putIntervalForVar(varName, fallInterval);
+					} else {
+						unhandled("condition " + condition.getClass().getName());
 					}
+				} else {
+					unhandled("left-hand side of condition "
+							+ left.getClass().getName());
 				}
+			} else {
+				unhandled("condition " + condition.getClass().getName());
 			}
 			LOG.debug("\tCondition: " + condition.getClass().getName());
 		}
