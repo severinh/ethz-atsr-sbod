@@ -18,57 +18,75 @@ import soot.toolkits.graph.BriefUnitGraph;
 
 public class BufferOverflowDetector {
 
-	public static final boolean USE_POINTS_TO_ANALYSIS = false;
+	private static final boolean USE_POINTS_TO_ANALYSIS = false;
+	private static final Logger LOG = Logger
+			.getLogger(BufferOverflowDetector.class.getName());
 
-	public static Logger LOG = Logger.getLogger(BufferOverflowDetector.class
-			.getName());
+	private final String className;
+	private final SootClass sootClass;
 
-	public static void main(String[] args) {
-		for (String analyzedClass : args) {
-			LOG.info("Analyzing " + analyzedClass + "...");
-			SootClass c = loadClass(analyzedClass, true);
-			soot.Scene.v().loadNecessaryClasses();
-			soot.Scene.v().setEntryPoints(EntryPoints.v().all());
+	public BufferOverflowDetector(String className) {
+		this.className = className;
+		this.sootClass = loadClass(className, true);
 
-			List<AnalysisResult> analysisResults = new ArrayList<AnalysisResult>();
+		soot.Scene.v().loadNecessaryClasses();
+		soot.Scene.v().setEntryPoints(EntryPoints.v().all());
+	}
 
-			for (SootMethod method : c.getMethods()) {
-				if (!method.getName().startsWith("test"))
-					continue;
+	public List<AnalysisResult> analyzeClass() {
+		LOG.info("Analyzing " + className + "...");
+		List<AnalysisResult> results = new ArrayList<AnalysisResult>();
 
-				LOG.info("Analyzing method " + method.getName() + "...");
-				Analysis analysis = new Analysis(new BriefUnitGraph(
-						method.retrieveActiveBody()));
-				LOG.info(String.format(
-						"Running intervals analysis on %s.%s...",
-						analyzedClass, method.getName()));
-				boolean isSafe = analysis.run();
-				AnalysisResult result = new AnalysisResult(c.getName(),
-						method.getName(), isSafe);
-				analysisResults.add(result);
+		for (SootMethod method : sootClass.getMethods()) {
+			if (method.getName().startsWith("test")) {
+				AnalysisResult result = analyzeMethod(method.getName());
+				results.add(result);
 			}
+		}
 
-			if (USE_POINTS_TO_ANALYSIS) {
-				setSparkPointsToAnalysis();
-				soot.PointsToAnalysis pta = Scene.v().getPointsToAnalysis();
-				for (SootMethod method : c.getMethods()) {
-					if (!method.getName().startsWith("test")) {
-						continue;
-					}
-					JimpleBody body = (JimpleBody) method.retrieveActiveBody();
-					for (Local local : body.getLocals()) {
-						if (local.getType() instanceof RefLikeType) {
-							PointsToSet points_to = pta.reachingObjects(local);
-							// TODO: Decide how to use the points_to set and
-							// check if a method is safe.
-							System.out.println(local.getName() + " points to "
-									+ points_to);
-						}
+		if (USE_POINTS_TO_ANALYSIS) {
+			setSparkPointsToAnalysis();
+			soot.PointsToAnalysis pta = Scene.v().getPointsToAnalysis();
+			for (SootMethod method : sootClass.getMethods()) {
+				if (!method.getName().startsWith("test")) {
+					continue;
+				}
+				JimpleBody body = (JimpleBody) method.retrieveActiveBody();
+				for (Local local : body.getLocals()) {
+					if (local.getType() instanceof RefLikeType) {
+						PointsToSet points_to = pta.reachingObjects(local);
+						// TODO: Decide how to use the points_to set and
+						// check if a method is safe.
+						LOG.info(local.getName() + " points to " + points_to);
 					}
 				}
 			}
+		}
 
-			for (AnalysisResult result : analysisResults) {
+		return results;
+	}
+
+	public AnalysisResult analyzeMethod(String methodName) {
+		SootMethod method = sootClass.getMethodByName(methodName);
+
+		LOG.info("Analyzing method " + method.getName() + "...");
+		Analysis analysis = new Analysis(new BriefUnitGraph(
+				method.retrieveActiveBody()));
+		LOG.info(String.format("Running intervals analysis on %s.%s...",
+				className, method.getName()));
+		boolean isSafe = analysis.run();
+		AnalysisResult result = new AnalysisResult(className, methodName,
+				isSafe);
+
+		return result;
+	}
+
+	public static void main(String[] args) {
+		for (String className : args) {
+			BufferOverflowDetector detector = new BufferOverflowDetector(
+					className);
+			List<AnalysisResult> results = detector.analyzeClass();
+			for (AnalysisResult result : results) {
 				if (result.getMethodName().startsWith("test")) {
 					System.out.println(result.toCanonicalString());
 				}

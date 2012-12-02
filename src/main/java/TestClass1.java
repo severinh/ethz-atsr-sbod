@@ -1,4 +1,16 @@
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Test;
+
 public class TestClass1 {
+
+	private final BufferOverflowDetector detector;
+
+	public TestClass1() {
+		detector = new BufferOverflowDetector(TestClass1.class.getName());
+	}
+
 	// This is a program the tool will try to prove.
 	// Every method that has name starting with test must be analyzed and
 	// reported.
@@ -26,6 +38,11 @@ public class TestClass1 {
 		test2(code);
 	}
 
+	@Test
+	public void _test1() {
+		assertSafe("test1");
+	}
+
 	public static void test2(int[] code) {
 		// The pointer analysis should be able to tell you that code was
 		// allocated with size 7 and prove this method.
@@ -34,6 +51,11 @@ public class TestClass1 {
 			sum += code[i];
 		}
 		System.out.println("Sum = " + sum);
+	}
+
+	@Test
+	public void _test2() {
+		assertSafe("test2");
 	}
 
 	public static void test3(int[] code) {
@@ -46,11 +68,31 @@ public class TestClass1 {
 		}
 	}
 
+	@Test
+	public void _test3() {
+		assertMaybeUnsafe("test3");
+	}
+
 	public static void test4() {
 		int[] code = new int[7];
-		// This method is UNSAFE.
 		for (int i = 0; i < 8; ++i) {
 			code[i] = i;
 		}
 	}
+
+	@Test
+	public void _test4() {
+		assertMaybeUnsafe("test4");
+	}
+
+	private void assertSafe(String methodName) {
+		AnalysisResult result = detector.analyzeMethod(methodName);
+		assertTrue(result.isSafe());
+	}
+
+	private void assertMaybeUnsafe(String methodName) {
+		AnalysisResult result = detector.analyzeMethod(methodName);
+		assertFalse(result.isSafe());
+	}
+
 }
