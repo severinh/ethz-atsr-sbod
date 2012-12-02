@@ -1,8 +1,8 @@
 public class Interval {
 
 	// TODO: Do you need to handle infinity or empty interval?
-	private int lower;
-	private int upper;
+	private final int lower;
+	private final int upper;
 
 	public Interval(int startValue) {
 		lower = startValue;
@@ -28,11 +28,6 @@ public class Interval {
 		return String.format("[%d,%d]", lower, upper);
 	}
 
-	public void copyFrom(Interval other) {
-		lower = other.lower;
-		upper = other.upper;
-	}
-
 	public static Interval plus(Interval interval, Interval otherInterval) {
 		// TODO: Handle overflow.
 		return new Interval(interval.getLower() + otherInterval.getLower(),
@@ -55,6 +50,13 @@ public class Interval {
 	public static Interval neg(Interval interval) {
 		// TODO: Handle overflow
 		return new Interval(-interval.getUpper(), -interval.getLower());
+	}
+
+	public static Interval meet(Interval interval, Interval otherInterval) {
+		int lower = Math.min(interval.getLower(), otherInterval.getLower());
+		int upper = Math.max(interval.getUpper(), otherInterval.getUpper());
+		Interval result = new Interval(lower, upper);
+		return result;
 	}
 
 	@Override

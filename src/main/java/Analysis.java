@@ -164,7 +164,6 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 							secondValue);
 
 					if (firstInterval != null && secondInterval != null) {
-						// Implement transformers.
 						if (right instanceof AddExpr) {
 							fallState.putIntervalForVar(varName, Interval.plus(
 									firstInterval, secondInterval));
@@ -227,8 +226,8 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 	}
 
 	@Override
-	protected void copy(IntervalPerVar source, IntervalPerVar dest) {
-		dest.copyFrom(source);
+	protected void copy(IntervalPerVar source, IntervalPerVar target) {
+		target.copyFrom(source);
 	}
 
 	@Override
@@ -238,13 +237,13 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 	}
 
 	@Override
-	protected void merge(IntervalPerVar src1, IntervalPerVar src2,
-			IntervalPerVar trg) {
-		// TODO: Fix this:
-		trg.copyFrom(src1);
-		LOG.debug(String.format(
-				"Merge:\n    %s\n    %s\n    ============\n    %s\n",
-				src1.toString(), src2.toString(), trg.toString()));
+	protected void merge(IntervalPerVar firstSource,
+			IntervalPerVar secondSource, IntervalPerVar target) {
+		target.mergeFrom(firstSource, secondSource);
+		LOG.debug("Merge:");
+		LOG.debug("\tSource: " + firstSource);
+		LOG.debug("\tSource: " + secondSource);
+		LOG.debug("\tResult: " + target);
 	}
 
 	@Override

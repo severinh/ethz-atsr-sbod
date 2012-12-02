@@ -1,5 +1,7 @@
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class IntervalPerVar {
 
@@ -27,15 +29,33 @@ public class IntervalPerVar {
 	// to optimize.
 	public void copyFrom(IntervalPerVar other) {
 		values.clear();
-		for (Map.Entry<String, Interval> entry : other.values.entrySet()) {
-			Interval n = new Interval(0);
-			n.copyFrom(entry.getValue());
-			values.put(entry.getKey(), n);
+		values.putAll(other.values);
+	}
+
+	public void mergeFrom(IntervalPerVar first, IntervalPerVar second) {
+		values.clear();
+
+		Set<String> varNames = new HashSet<String>();
+		varNames.addAll(first.values.keySet());
+		varNames.addAll(second.values.keySet());
+
+		for (String varName : varNames) {
+			Interval firstInterval = first.values.get(varName);
+			Interval secondInterval = second.values.get(varName);
+			if (firstInterval == null) {
+				values.put(varName, secondInterval);
+			} else if (secondInterval == null) {
+				values.put(varName, firstInterval);
+			} else {
+				Interval mergedInterval = Interval.meet(secondInterval,
+						firstInterval);
+				values.put(varName, mergedInterval);
+			}
 		}
 	}
 
-	void putIntervalForVar(String var, Interval i) {
-		values.put(var, i);
+	void putIntervalForVar(String varName, Interval interval) {
+		values.put(varName, interval);
 	}
 
 	Interval getIntervalForVar(String var) {
