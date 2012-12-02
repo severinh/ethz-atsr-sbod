@@ -75,7 +75,7 @@ public class LoopTests extends AbstractTest {
 
 	@Test
 	public void _testUnsafeLoopLength() {
-		assertSafe("testUnsafeLoopLength");
+		assertMaybeUnsafe("testUnsafeLoopLength");
 	}
 
 }
