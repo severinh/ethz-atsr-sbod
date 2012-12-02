@@ -4,15 +4,15 @@ public class Interval {
 	private final int lower;
 	private final int upper;
 
-	public Interval(int startValue) {
-		lower = startValue;
-		upper = startValue;
+	public Interval(int value) {
+		this.lower = value;
+		this.upper = value;
 	}
 
-	public Interval(int l, int u) {
+	public Interval(int lower, int upper) {
 		// TODO: What if l > u?
-		lower = l;
-		upper = u;
+		this.lower = lower;
+		this.upper = upper;
 	}
 
 	public int getLower() {
@@ -25,7 +25,7 @@ public class Interval {
 
 	@Override
 	public String toString() {
-		return String.format("[%d,%d]", lower, upper);
+		return String.format("[%d,%d]", getLower(), getUpper());
 	}
 
 	public static Interval plus(Interval interval, Interval otherInterval) {

@@ -6,8 +6,11 @@ import soot.Unit;
 import soot.Value;
 import soot.jimple.AddExpr;
 import soot.jimple.BinopExpr;
+import soot.jimple.ConditionExpr;
 import soot.jimple.DefinitionStmt;
+import soot.jimple.IfStmt;
 import soot.jimple.IntConstant;
+import soot.jimple.LtExpr;
 import soot.jimple.MulExpr;
 import soot.jimple.NegExpr;
 import soot.jimple.NewArrayExpr;
@@ -120,7 +123,6 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 	@Override
 	protected void flowThrough(IntervalPerVar current, Unit op,
 			List<IntervalPerVar> fallOut, List<IntervalPerVar> branchOuts) {
-		// TODO: This can be optimized.
 		LOG.debug(op.getClass().getName() + ": " + op);
 
 		Stmt stmt = (Stmt) op;
@@ -199,6 +201,38 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 			} else {
 				unhandled("unexpected left-hand side of assignment");
 			}
+		} else if (op instanceof IfStmt) {
+			IfStmt ifStmt = (IfStmt) op;
+			Value condition = ifStmt.getCondition();
+
+			if (condition instanceof ConditionExpr) {
+				ConditionExpr conditionExpr = (ConditionExpr) condition;
+				Value left = conditionExpr.getOp1();
+				Value right = conditionExpr.getOp2();
+
+				if (left instanceof JimpleLocal) {
+					JimpleLocal leftLocal = (JimpleLocal) left;
+					String varName = leftLocal.getName();
+					Interval leftInterval = current.getIntervalForVar(varName);
+					Interval rightInterval = tryGetIntervalForValue(current,
+							right);
+					if (condition instanceof LtExpr) {
+						int branchLower = leftInterval.getLower();
+						int branchUpper = Math.min(leftInterval.getUpper(),
+								rightInterval.getUpper() - 1);
+						Interval branchInterval = new Interval(branchLower,
+								branchUpper);
+						branchState.putIntervalForVar(varName, branchInterval);
+						int fallLower = Math.max(leftInterval.getLower(),
+								rightInterval.getLower());
+						int fallUpper = leftInterval.getUpper();
+						Interval fallInterval = new Interval(fallLower,
+								fallUpper);
+						fallState.putIntervalForVar(varName, fallInterval);
+					}
+				}
+			}
+			LOG.debug("\tCondition: " + condition.getClass().getName());
 		}
 
 		// TODO: Maybe avoid copying objects too much. Feel free to optimize.
