@@ -46,18 +46,27 @@ public class Interval {
 	}
 
 	public static Interval plus(Interval interval, Interval otherInterval) {
+		if (interval.isBottom() || otherInterval.isBottom()) {
+			return BOTTOM;
+		}
 		// TODO: Handle overflow.
 		return new Interval(interval.getLower() + otherInterval.getLower(),
 				interval.getUpper() + otherInterval.getUpper());
 	}
 
 	public static Interval sub(Interval interval, Interval otherInterval) {
+		if (interval.isBottom() || otherInterval.isBottom()) {
+			return BOTTOM;
+		}
 		// TODO: Handle overflow.
 		return new Interval(interval.getLower() - otherInterval.getLower(),
 				interval.getUpper() - otherInterval.getUpper());
 	}
 
 	public static Interval mul(Interval interval, Interval otherInterval) {
+		if (interval.isBottom() || otherInterval.isBottom()) {
+			return BOTTOM;
+		}
 		// TODO: Handle overflow.
 		// TODO: Not correct yet...
 		return new Interval(interval.getLower() * otherInterval.getLower(),
@@ -65,18 +74,32 @@ public class Interval {
 	}
 
 	public static Interval neg(Interval interval) {
+		if (interval.isBottom()) {
+			return BOTTOM;
+		}
 		// TODO: Handle overflow
 		return new Interval(-interval.getUpper(), -interval.getLower());
 	}
 
 	public static Interval meet(Interval interval, Interval otherInterval) {
-		int lower = Math.min(interval.getLower(), otherInterval.getLower());
-		int upper = Math.max(interval.getUpper(), otherInterval.getUpper());
-		Interval result = new Interval(lower, upper);
-		return result;
+		if (interval.isBottom() && otherInterval.isBottom()) {
+			return BOTTOM;
+		} else if (interval.isBottom()) {
+			return otherInterval;
+		} else if (otherInterval.isBottom()) {
+			return interval;
+		} else {
+			int lower = Math.min(interval.getLower(), otherInterval.getLower());
+			int upper = Math.max(interval.getUpper(), otherInterval.getUpper());
+			Interval result = new Interval(lower, upper);
+			return result;
+		}
 	}
 
 	public static Interval join(Interval interval, Interval otherInterval) {
+		if (interval.isBottom() || otherInterval.isBottom()) {
+			return BOTTOM;
+		}
 		int lower = Math.max(interval.getLower(), otherInterval.getLower());
 		int upper = Math.min(interval.getUpper(), otherInterval.getUpper());
 		Interval result = new Interval(lower, upper);
@@ -99,6 +122,9 @@ public class Interval {
 	 * @return the constrained left-hand side interval
 	 */
 	public static Interval lt(Interval leftInterval, Interval rightInterval) {
+		if (leftInterval.isBottom() || rightInterval.isBottom()) {
+			return BOTTOM;
+		}
 		int lower = leftInterval.getLower();
 		int upper = Math.min(leftInterval.getUpper(),
 				rightInterval.getUpper() - 1);
@@ -122,6 +148,9 @@ public class Interval {
 	 * @return the constrained left-hand side interval
 	 */
 	public static Interval le(Interval leftInterval, Interval rightInterval) {
+		if (leftInterval.isBottom() || rightInterval.isBottom()) {
+			return BOTTOM;
+		}
 		int lower = leftInterval.getLower();
 		int upper = Math.min(leftInterval.getUpper(), rightInterval.getUpper());
 		Interval result = new Interval(lower, upper);
@@ -164,6 +193,9 @@ public class Interval {
 	 * @return the constrained left-hand side interval
 	 */
 	public static Interval ne(Interval leftInterval, Interval rightInterval) {
+		if (leftInterval.isBottom() || rightInterval.isBottom()) {
+			return BOTTOM;
+		}
 		// Constrain the left interval only if the right interval contains
 		// exactly one value
 		if (rightInterval.getUpper() - rightInterval.getLower() == 1) {
@@ -196,6 +228,9 @@ public class Interval {
 	 * @return the constrained left-hand side interval
 	 */
 	public static Interval ge(Interval leftInterval, Interval rightInterval) {
+		if (leftInterval.isBottom() || rightInterval.isBottom()) {
+			return BOTTOM;
+		}
 		int lower = Math.max(leftInterval.getLower(), rightInterval.getLower());
 		int upper = leftInterval.getUpper();
 		Interval result = new Interval(lower, upper);
@@ -218,6 +253,9 @@ public class Interval {
 	 * @return the constrained left-hand side interval
 	 */
 	public static Interval gt(Interval leftInterval, Interval rightInterval) {
+		if (leftInterval.isBottom() || rightInterval.isBottom()) {
+			return BOTTOM;
+		}
 		int lower = Math.max(leftInterval.getLower(),
 				rightInterval.getLower() + 1);
 		int upper = leftInterval.getUpper();
