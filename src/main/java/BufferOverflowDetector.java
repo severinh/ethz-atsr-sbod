@@ -1,5 +1,8 @@
 import java.util.HashMap;
 
+import org.apache.log4j.Logger;
+import org.apache.log4j.xml.DOMConfigurator;
+
 import soot.EntryPoints;
 import soot.Scene;
 import soot.SootClass;
@@ -8,13 +11,31 @@ import soot.jimple.spark.SparkTransformer;
 import soot.toolkits.graph.BriefUnitGraph;
 
 public class BufferOverflowDetector {
-	// Use this method to report safe methods.
+
+	public static Logger LOG = Logger.getLogger(BufferOverflowDetector.class
+			.getName());
+
+	/**
+	 * Report a method as safe.
+	 * 
+	 * @param className
+	 *            name of the class
+	 * @param methodName
+	 *            name of the safe method
+	 */
 	public static void reportMethodIsSafe(String className, String methodName) {
 		System.out.printf("***$$$***(:=:) %s.%s is SAFE\n", className,
 				methodName);
 	}
 
-	// Use this method to report maybe unsafe methods.
+	/**
+	 * Report a method as potentially unsafe.
+	 * 
+	 * @param className
+	 *            name of the class
+	 * @param methodName
+	 *            name of the potentially unsafe method
+	 */
 	public static void reportMethodMaybeUnsafe(String className,
 			String methodName) {
 		System.out.printf("***$$$***):=:( %s.%s is UNSAFE ???\n", className,
@@ -29,7 +50,7 @@ public class BufferOverflowDetector {
 						soot.options.Options.v().soot_classpath()
 								+ ":/home/severinh/Documents/ETH/9/ATSR/sbod/target/classes");
 		for (String analyzedClass : args) {
-			System.out.println(analyzedClass);
+			LOG.info("Analyzing " + analyzedClass + "...");
 			SootClass c = loadClass(analyzedClass, true);
 			soot.Scene.v().loadNecessaryClasses();
 			soot.Scene.v().setEntryPoints(EntryPoints.v().all());
@@ -40,13 +61,12 @@ public class BufferOverflowDetector {
 				if (!method.getName().startsWith("test"))
 					continue;
 
-				System.out
-						.println("***********************************************************");
-				System.out.println("Testing method: " + method.getName());
+				LOG.info("Analyzing method " + method.getName() + "...");
 				Analysis analysis = new Analysis(new BriefUnitGraph(
 						method.retrieveActiveBody()));
-				System.out.printf("Running intervals analysis on %s.%s",
-						analyzedClass, method.getName());
+				LOG.info(String.format(
+						"Running intervals analysis on %s.%s...",
+						analyzedClass, method.getName()));
 				analysis.run();
 				perMethodIntervalAnalysis.put(method.getName(), analysis);
 			}
@@ -68,8 +88,9 @@ public class BufferOverflowDetector {
 			// We didn't finish doing any work, so we just report we can't prove
 			// anything:
 			for (SootMethod method : c.getMethods()) {
-				if (!method.getName().startsWith("test"))
+				if (!method.getName().startsWith("test")) {
 					continue;
+				}
 				reportMethodMaybeUnsafe(analyzedClass, method.getName());
 			}
 		}
@@ -83,16 +104,18 @@ public class BufferOverflowDetector {
 		soot.options.Options.v().setPhaseOption("cg", "verbose:true");
 	}
 
-	private static SootClass loadClass(String name, boolean main) {
-		SootClass c = Scene.v().loadClassAndSupport(name);
-		c.setApplicationClass();
-		if (main)
-			Scene.v().setMainClass(c);
-		return c;
+	private static SootClass loadClass(String name, boolean isMainClass) {
+		SootClass sootClass = Scene.v().loadClassAndSupport(name);
+		sootClass.setApplicationClass();
+		if (isMainClass) {
+			Scene.v().setMainClass(sootClass);
+		}
+		return sootClass;
 	}
 
 	static void setSparkPointsToAnalysis() {
-		System.out.println("[spark] Starting points-to analysis ...");
+		LOG.debug("[spark] Starting points-to analysis...");
+
 		HashMap<String, String> flags = new HashMap<String, String>();
 		flags.put("enabled", "true");
 		flags.put("verbose", "true");
@@ -126,6 +149,16 @@ public class BufferOverflowDetector {
 		flags.put("set-mass", "false");
 
 		SparkTransformer.v().transform("", flags);
-		System.out.println("[spark] Pointer analysis Done!");
+		LOG.debug("[spark] Pointer analysis Done!");
 	}
+
+	public static void setup() {
+		Logger root = Logger.getRootLogger();
+		if (root.getAllAppenders().hasMoreElements()) {
+			// Logger is already initialized
+			return;
+		}
+		DOMConfigurator.configure(BufferOverflowDetector.class.getResource("/log4j.xml"));
+	}
+
 }

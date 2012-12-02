@@ -1,6 +1,11 @@
 public class Interval {
-	public Interval(int start_value) {
-		lower = upper = start_value;
+
+	// TODO: Do you need to handle infinity or empty interval?
+	int lower;
+	int upper;
+
+	public Interval(int startValue) {
+		lower = upper = startValue;
 	}
 
 	public Interval(int l, int u) {
@@ -24,13 +29,28 @@ public class Interval {
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if (!(o instanceof Interval))
-			return false;
-		Interval i = (Interval) o;
-		return lower == i.lower && upper == i.upper;
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + lower;
+		result = prime * result + upper;
+		return result;
 	}
 
-	// TODO: Do you need to handle infinity or empty interval?
-	int lower, upper;
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Interval other = (Interval) obj;
+		if (lower != other.lower)
+			return false;
+		if (upper != other.upper)
+			return false;
+		return true;
+	}
+
 }

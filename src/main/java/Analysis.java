@@ -1,5 +1,7 @@
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import soot.Unit;
 import soot.Value;
 import soot.jimple.AddExpr;
@@ -16,9 +18,13 @@ import soot.toolkits.scalar.ForwardBranchedFlowAnalysis;
 
 // Implement your numerical analysis here.
 public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
+
+	private static final Logger LOG = Logger
+			.getLogger(Analysis.class.getName());
+
 	public Analysis(UnitGraph g) {
 		super(g);
-		System.out.println(g.toString());
+		LOG.debug(g.toString());
 	}
 
 	void run() {
@@ -26,7 +32,7 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 	}
 
 	static void unhandled(String what) {
-		System.err.println("Can't handle " + what);
+		LOG.error("Can't handle " + what);
 		System.exit(1);
 	}
 
@@ -34,8 +40,8 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 	protected void flowThrough(IntervalPerVar current, Unit op,
 			List<IntervalPerVar> fallOut, List<IntervalPerVar> branchOuts) {
 		// TODO: This can be optimized.
-		System.out.println("Operation: " + op + "   - "
-				+ op.getClass().getName() + "\n      state: " + current);
+		LOG.debug("Operation: " + op + "   - " + op.getClass().getName()
+				+ "\n      state: " + current);
 
 		Stmt s = (Stmt) op;
 		IntervalPerVar fallState = new IntervalPerVar();
@@ -47,7 +53,7 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 			DefinitionStmt sd = (DefinitionStmt) s;
 			Value left = sd.getLeftOp();
 			Value right = sd.getRightOp();
-			System.out.println(left.getClass().getName() + " "
+			LOG.debug(left.getClass().getName() + " "
 					+ right.getClass().getName());
 
 			// You do not need to handle these cases:
@@ -134,8 +140,9 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 			IntervalPerVar trg) {
 		// TODO: Fix this:
 		trg.copyFrom(src1);
-		System.out.printf("Merge:\n    %s\n    %s\n    ============\n    %s\n",
-				src1.toString(), src2.toString(), trg.toString());
+		LOG.debug(String.format(
+				"Merge:\n    %s\n    %s\n    ============\n    %s\n",
+				src1.toString(), src2.toString(), trg.toString()));
 	}
 
 	@Override
