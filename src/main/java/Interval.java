@@ -1,5 +1,9 @@
 public class Interval {
 
+	// TODO: It might be necessary to model top not by using actual integers
+	public static final Interval TOP = new Interval(Integer.MIN_VALUE,
+			Integer.MAX_VALUE);
+
 	// TODO: Do you need to handle infinity or empty interval?
 	private final int lower;
 	private final int upper;
