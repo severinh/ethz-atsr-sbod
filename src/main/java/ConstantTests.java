@@ -1,5 +1,9 @@
 import org.junit.Test;
 
+/**
+ * Holds tests where the array sizes and indices are simple integer constants.
+ * There are no control flow branches in the test methods.
+ */
 public class ConstantTests extends AbstractTest {
 
 	public static void main(String[] args) {

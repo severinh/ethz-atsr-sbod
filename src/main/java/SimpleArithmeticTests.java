@@ -1,5 +1,9 @@
 import org.junit.Test;
 
+/**
+ * Holds tests where the array sizes and indices are simple arithmetic
+ * expressions. There are no control flow branches in the test methods.
+ */
 public class SimpleArithmeticTests extends AbstractTest {
 
 	public static void main(String[] args) {
@@ -29,7 +33,7 @@ public class SimpleArithmeticTests extends AbstractTest {
 		assertSafe("testSafeComputedIndices");
 	}
 
-	public static void testUnsafeComputedIndices1() {
+	public static void testUnsafeComputedIndicesPlus() {
 		int[] array = new int[8];
 		int one = 1;
 		int seven = 7;
@@ -38,11 +42,11 @@ public class SimpleArithmeticTests extends AbstractTest {
 	}
 
 	@Test
-	public void _testUnsafeComputedIndices1() {
-		assertMaybeUnsafe("testUnsafeComputedIndices1");
+	public void _testUnsafeComputedIndicesPlus() {
+		assertMaybeUnsafe("testUnsafeComputedIndicesPlus");
 	}
 
-	public static void testUnsafeComputedIndices2() {
+	public static void testUnsafeComputedIndicesNeg() {
 		int[] array = new int[8];
 		int one = 1;
 		array[-one] = 1;
@@ -50,11 +54,11 @@ public class SimpleArithmeticTests extends AbstractTest {
 	}
 
 	@Test
-	public void _testUnsafeComputedIndices2() {
-		assertMaybeUnsafe("testUnsafeComputedIndices2");
+	public void _testUnsafeComputedIndicesNeg() {
+		assertMaybeUnsafe("testUnsafeComputedIndicesNeg");
 	}
 
-	public static void testUnsafeComputedIndices3() {
+	public static void testUnsafeComputedIndicesSub() {
 		int[] array = new int[8];
 		int nine = 9;
 		int one = 1;
@@ -63,11 +67,11 @@ public class SimpleArithmeticTests extends AbstractTest {
 	}
 
 	@Test
-	public void _testUnsafeComputedIndices3() {
-		assertMaybeUnsafe("testUnsafeComputedIndices3");
+	public void _testUnsafeComputedIndicesSub() {
+		assertMaybeUnsafe("testUnsafeComputedIndicesSub");
 	}
 
-	public static void testUnsafeComputedIndices4() {
+	public static void testUnsafeComputedIndicesSub2() {
 		int[] array = new int[8];
 		int eight = 8;
 		int nine = 9;
@@ -76,11 +80,11 @@ public class SimpleArithmeticTests extends AbstractTest {
 	}
 
 	@Test
-	public void _testUnsafeComputedIndices4() {
-		assertMaybeUnsafe("testUnsafeComputedIndices4");
+	public void _testUnsafeComputedIndicesSub2() {
+		assertMaybeUnsafe("testUnsafeComputedIndicesSub2");
 	}
 
-	public static void testUnsafeComputedIndices5() {
+	public static void testUnsafeComputedIndicesMul() {
 		int[] array = new int[8];
 		int two = 2;
 		int four = 4;
@@ -89,8 +93,8 @@ public class SimpleArithmeticTests extends AbstractTest {
 	}
 
 	@Test
-	public void _testUnsafeComputedIndices5() {
-		assertMaybeUnsafe("testUnsafeComputedIndices5");
+	public void _testUnsafeComputedIndicesMul() {
+		assertMaybeUnsafe("testUnsafeComputedIndicesMul");
 	}
 
 }
