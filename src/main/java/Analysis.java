@@ -115,13 +115,13 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 		}
 	}
 
-	Interval tryGetIntervalForValue(IntervalPerVar currentState, Value v) {
-		if (v instanceof IntConstant) {
-			IntConstant c = ((IntConstant) v);
-			return new Interval(c.value, c.value);
-		} else if (v instanceof JimpleLocal) {
-			JimpleLocal l = ((JimpleLocal) v);
-			return currentState.getIntervalForVar(l.getName());
+	Interval tryGetIntervalForValue(IntervalPerVar currentState, Value value) {
+		if (value instanceof IntConstant) {
+			IntConstant constant = ((IntConstant) value);
+			return new Interval(constant.value, constant.value);
+		} else if (value instanceof JimpleLocal) {
+			JimpleLocal local = ((JimpleLocal) value);
+			return currentState.getIntervalForVar(local.getName());
 		}
 		return null;
 	}

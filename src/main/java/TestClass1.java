@@ -1,15 +1,6 @@
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Test;
 
-public class TestClass1 {
-
-	private final BufferOverflowDetector detector;
-
-	public TestClass1() {
-		detector = new BufferOverflowDetector(TestClass1.class.getName());
-	}
+public class TestClass1 extends AbstractTest {
 
 	// This is a program the tool will try to prove.
 	// Every method that has name starting with test must be analyzed and
@@ -83,16 +74,6 @@ public class TestClass1 {
 	@Test
 	public void _test4() {
 		assertMaybeUnsafe("test4");
-	}
-
-	private void assertSafe(String methodName) {
-		AnalysisResult result = detector.analyzeMethod(methodName);
-		assertTrue(result.isSafe());
-	}
-
-	private void assertMaybeUnsafe(String methodName) {
-		AnalysisResult result = detector.analyzeMethod(methodName);
-		assertFalse(result.isSafe());
 	}
 
 }
