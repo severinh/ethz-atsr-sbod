@@ -102,9 +102,6 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 					.getIntervalForVar(arrayVarName);
 			Interval indexInterval = tryGetIntervalForValue(intervalPerVar,
 					arrayIndex);
-			if (indexInterval == null) {
-				System.out.println("notgoogd");
-			}
 			if (indexInterval.getLower() < 0
 					|| indexInterval.getUpper() >= arraySizeInterval.getLower()) {
 				return false;

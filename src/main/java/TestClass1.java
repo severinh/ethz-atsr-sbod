@@ -1,16 +1,12 @@
 import org.junit.Test;
 
+/**
+ * Various tests from the project template.
+ */
 public class TestClass1 extends AbstractTest {
 
-	// This is a program the tool will try to prove.
-	// Every method that has name starting with test must be analyzed and
-	// reported.
-
-	// No method will get parameters other than objects. The global pointer
-	// analysis will take care of the objects.
-	// The interval analysis needs to be done only on local variables.
 	public static void main(String[] args) {
-		// Call test1 so that the pointer analysis can work.
+		// Call test1 so that the pointer analysis can work
 		test1();
 
 		try {
@@ -52,9 +48,8 @@ public class TestClass1 extends AbstractTest {
 	public static void test3(int[] code) {
 		int[] revcode = new int[7];
 		for (int i = 0; i < 7; ++i) {
-			// For this code, the analysis may be imprecise.
-			// We may not be able to tell if the contents of an array fits into
-			// bounds.
+			// For this code, the analysis may be imprecise. We may not be able
+			// to tell if the contents of an array fits into bounds.
 			revcode[code[i]] = i;
 		}
 	}

@@ -11,15 +11,16 @@ public class IntervalPerVar {
 
 	@Override
 	public String toString() {
-		StringBuilder b = new StringBuilder();
+		StringBuilder builder = new StringBuilder();
 		for (Map.Entry<String, Interval> entry : values.entrySet()) {
-			if (b.length() != 0)
-				b.append(", ");
-			b.append(entry.getKey());
-			b.append("=");
-			b.append(entry.getValue().toString());
+			if (builder.length() != 0) {
+				builder.append(", ");
+			}
+			builder.append(entry.getKey());
+			builder.append("=");
+			builder.append(entry.getValue().toString());
 		}
-		return b.toString();
+		return builder.toString();
 	}
 
 	// This does deep copy of values as opposed to shallow copy, but feel free
