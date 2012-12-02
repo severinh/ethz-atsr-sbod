@@ -31,7 +31,7 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 	boolean run() {
 		doAnalysis();
 
-		IntervalPerVar arraySizeIntervals = getArraySizeIntervals();
+		IntervalPerVar arraySizeIntervals = collectArraySizeIntervals();
 		boolean isSafe = true;
 
 		for (Unit unit : graph) {
@@ -60,7 +60,7 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 		return isSafe;
 	}
 
-	protected IntervalPerVar getArraySizeIntervals() {
+	protected IntervalPerVar collectArraySizeIntervals() {
 		IntervalPerVar result = new IntervalPerVar();
 		for (Unit unit : graph) {
 			Stmt stmt = (Stmt) unit;
@@ -100,7 +100,7 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 			if (arrayIndex instanceof IntConstant) {
 				int arrayIndexConstant = ((IntConstant) arrayIndex).value;
 				if (arrayIndexConstant < 0
-						|| arrayIndexConstant >= arraySizeInterval.lower) {
+						|| arrayIndexConstant >= arraySizeInterval.getLower()) {
 					return false;
 				}
 			}

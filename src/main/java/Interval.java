@@ -1,16 +1,25 @@
 public class Interval {
 
 	// TODO: Do you need to handle infinity or empty interval?
-	int lower;
-	int upper;
+	private int lower;
+	private int upper;
 
 	public Interval(int startValue) {
-		lower = upper = startValue;
+		lower = startValue;
+		upper = startValue;
 	}
 
 	public Interval(int l, int u) {
 		lower = l;
 		upper = u;
+	}
+
+	public int getLower() {
+		return lower;
+	}
+
+	public int getUpper() {
+		return upper;
 	}
 
 	@Override
@@ -23,9 +32,10 @@ public class Interval {
 		upper = other.upper;
 	}
 
-	public static Interval plus(Interval i1, Interval i2) {
+	public static Interval plus(Interval interval, Interval otherInterval) {
 		// TODO: Handle overflow.
-		return new Interval(i1.lower + i2.lower, i1.upper + i2.upper);
+		return new Interval(interval.getLower() + otherInterval.getLower(),
+				interval.getUpper() + otherInterval.getUpper());
 	}
 
 	@Override
