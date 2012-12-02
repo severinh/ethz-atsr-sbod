@@ -6,13 +6,19 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 
 import soot.EntryPoints;
+import soot.Local;
+import soot.PointsToSet;
+import soot.RefLikeType;
 import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
+import soot.jimple.JimpleBody;
 import soot.jimple.spark.SparkTransformer;
 import soot.toolkits.graph.BriefUnitGraph;
 
 public class BufferOverflowDetector {
+
+	public static final boolean USE_POINTS_TO_ANALYSIS = false;
 
 	public static Logger LOG = Logger.getLogger(BufferOverflowDetector.class
 			.getName());
@@ -42,19 +48,25 @@ public class BufferOverflowDetector {
 				analysisResults.add(result);
 			}
 
-			/*
-			 * // The pointer analysis is slow. Disable it while you work on the
-			 * intervals. setSparkPointsToAnalysis(); soot.PointsToAnalysis pta
-			 * = Scene.v().getPointsToAnalysis(); for (SootMethod method :
-			 * c.getMethods()) { if (!method.getName().startsWith("test"))
-			 * continue; JimpleBody body =
-			 * (JimpleBody)method.retrieveActiveBody(); for (Local local :
-			 * body.getLocals()) { if (local.getType() instanceof RefLikeType) {
-			 * PointsToSet points_to = pta.reachingObjects(local); // TODO:
-			 * Decide how to use the points_to set and check if a method is
-			 * safe. System.out.println(local.getName() + " points to " +
-			 * points_to); } } }
-			 */
+			if (USE_POINTS_TO_ANALYSIS) {
+				setSparkPointsToAnalysis();
+				soot.PointsToAnalysis pta = Scene.v().getPointsToAnalysis();
+				for (SootMethod method : c.getMethods()) {
+					if (!method.getName().startsWith("test")) {
+						continue;
+					}
+					JimpleBody body = (JimpleBody) method.retrieveActiveBody();
+					for (Local local : body.getLocals()) {
+						if (local.getType() instanceof RefLikeType) {
+							PointsToSet points_to = pta.reachingObjects(local);
+							// TODO: Decide how to use the points_to set and
+							// check if a method is safe.
+							System.out.println(local.getName() + " points to "
+									+ points_to);
+						}
+					}
+				}
+			}
 
 			for (AnalysisResult result : analysisResults) {
 				if (result.getMethodName().startsWith("test")) {
