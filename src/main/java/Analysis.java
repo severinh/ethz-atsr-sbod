@@ -8,12 +8,16 @@ import soot.jimple.AddExpr;
 import soot.jimple.BinopExpr;
 import soot.jimple.ConditionExpr;
 import soot.jimple.DefinitionStmt;
+import soot.jimple.EqExpr;
+import soot.jimple.GeExpr;
+import soot.jimple.GtExpr;
 import soot.jimple.IfStmt;
 import soot.jimple.IntConstant;
 import soot.jimple.LeExpr;
 import soot.jimple.LengthExpr;
 import soot.jimple.LtExpr;
 import soot.jimple.MulExpr;
+import soot.jimple.NeExpr;
 import soot.jimple.NegExpr;
 import soot.jimple.NewArrayExpr;
 import soot.jimple.StaticFieldRef;
@@ -210,6 +214,38 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 							leftInterval);
 					rightFallInterval = Interval
 							.lt(rightInterval, leftInterval);
+				} else if (condition instanceof EqExpr) {
+					leftBranchInterval = Interval.eq(leftInterval,
+							rightInterval);
+					leftFallInterval = Interval.ne(leftInterval, rightInterval);
+					rightBranchInterval = Interval.eq(rightInterval,
+							leftInterval);
+					rightFallInterval = Interval
+							.ne(rightInterval, leftInterval);
+				} else if (condition instanceof NeExpr) {
+					leftBranchInterval = Interval.ne(leftInterval,
+							rightInterval);
+					leftFallInterval = Interval.eq(leftInterval, rightInterval);
+					rightBranchInterval = Interval.ne(rightInterval,
+							leftInterval);
+					rightFallInterval = Interval
+							.eq(rightInterval, leftInterval);
+				} else if (condition instanceof GeExpr) {
+					leftBranchInterval = Interval.ge(leftInterval,
+							rightInterval);
+					leftFallInterval = Interval.lt(leftInterval, rightInterval);
+					rightBranchInterval = Interval.le(rightInterval,
+							leftInterval);
+					rightFallInterval = Interval
+							.gt(rightInterval, leftInterval);
+				} else if (condition instanceof GtExpr) {
+					leftBranchInterval = Interval.gt(leftInterval,
+							rightInterval);
+					leftFallInterval = Interval.le(leftInterval, rightInterval);
+					rightBranchInterval = Interval.lt(rightInterval,
+							leftInterval);
+					rightFallInterval = Interval
+							.ge(rightInterval, leftInterval);
 				} else {
 					unhandled("condition");
 				}

@@ -132,6 +132,34 @@ public class Interval {
 	}
 
 	/**
+	 * Returns the constrained left-hand side interval of an non-equality
+	 * comparison of two intervals under the assumption that the condition
+	 * holds, i.e., the branch is taken.
+	 * 
+	 * Calling this method is only useful if the left-hand side of the condition
+	 * is actually a variable such that the corresponding interval can be
+	 * constrained inside of the branch.
+	 * 
+	 * @param leftInterval
+	 *            the interval associated with the left-hand side
+	 * @param rightInterval
+	 *            the interval associated with the right-hand side
+	 * @return the constrained left-hand side interval
+	 */
+	public static Interval ne(Interval leftInterval, Interval rightInterval) {
+		if (rightInterval.getUpper() - rightInterval.getLower() == 1) {
+			if (leftInterval.getLower() == rightInterval.getLower()) {
+				return new Interval(leftInterval.getLower() + 1,
+						leftInterval.getUpper());
+			} else if (leftInterval.getUpper() == rightInterval.getUpper()) {
+				return new Interval(leftInterval.getLower(),
+						leftInterval.getUpper() - 1);
+			}
+		}
+		return leftInterval;
+	}
+
+	/**
 	 * Returns the constrained left-hand side interval of a greater-or-equal
 	 * comparison of two intervals under the assumption that the condition
 	 * holds, i.e., the branch is taken.
