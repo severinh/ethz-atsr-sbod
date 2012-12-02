@@ -59,6 +59,48 @@ public class Interval {
 		return result;
 	}
 
+	public static Interval join(Interval interval, Interval otherInterval) {
+		int lower = Math.max(interval.getLower(), otherInterval.getLower());
+		int upper = Math.min(interval.getUpper(), otherInterval.getUpper());
+		Interval result = new Interval(lower, upper);
+		return result;
+	}
+
+	public static Interval lt(Interval leftInterval, Interval rightInterval) {
+		int lower = leftInterval.getLower();
+		int upper = Math.min(leftInterval.getUpper(),
+				rightInterval.getUpper() - 1);
+		Interval result = new Interval(lower, upper);
+		return result;
+	}
+
+	public static Interval le(Interval leftInterval, Interval rightInterval) {
+		int lower = leftInterval.getLower();
+		int upper = Math.min(leftInterval.getUpper(), rightInterval.getUpper());
+		Interval result = new Interval(lower, upper);
+		return result;
+	}
+
+	public static Interval eq(Interval leftInterval, Interval rightInterval) {
+		Interval result = join(leftInterval, rightInterval);
+		return result;
+	}
+
+	public static Interval ge(Interval leftInterval, Interval rightInterval) {
+		int lower = Math.max(leftInterval.getLower(), rightInterval.getLower());
+		int upper = leftInterval.getUpper();
+		Interval result = new Interval(lower, upper);
+		return result;
+	}
+
+	public static Interval gt(Interval leftInterval, Interval rightInterval) {
+		int lower = Math.max(leftInterval.getLower(),
+				rightInterval.getLower() + 1);
+		int upper = leftInterval.getUpper();
+		Interval result = new Interval(lower, upper);
+		return result;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
