@@ -18,4 +18,40 @@ public class LoopTests extends AbstractTest {
 		assertSafe("testSafeLoop");
 	}
 
+	public static void testUnsafeLoopLower() {
+		int[] array = new int[8];
+		for (int i = -1; i < 8; i++) {
+			array[i] = i;
+		}
+	}
+
+	@Test
+	public void _testUnsafeLoopLower() {
+		assertMaybeUnsafe("testUnsafeLoopLower");
+	}
+
+	public static void testUnsafeLoopUpperLeq() {
+		int[] array = new int[8];
+		for (int i = 0; i <= 8; i++) {
+			array[i] = i;
+		}
+	}
+
+	@Test
+	public void _testUnsafeLoopUpperLeq() {
+		assertMaybeUnsafe("testUnsafeLoopUpperLeq");
+	}
+
+	public static void testUnsafeLoopUpperLt() {
+		int[] array = new int[8];
+		for (int i = 0; i < 9; i++) {
+			array[i] = i;
+		}
+	}
+
+	@Test
+	public void _testUnsafeLoopUpperLt() {
+		assertMaybeUnsafe("testUnsafeLoopUpperLt");
+	}
+
 }
