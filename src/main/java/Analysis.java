@@ -74,6 +74,7 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 				DefinitionStmt defStmt = (DefinitionStmt) stmt;
 				Value left = defStmt.getLeftOp();
 				Value right = defStmt.getRightOp();
+				IntervalPerVar intervalPerVar = getFlowBefore(unit);
 
 				if (left instanceof JimpleLocal
 						&& right instanceof JNewArrayExpr) {
@@ -81,13 +82,9 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 					String varName = leftLocal.getName();
 					JNewArrayExpr newArrayExpr = (JNewArrayExpr) right;
 					Value size = newArrayExpr.getSize();
-					if (size instanceof IntConstant) {
-						IntConstant constantSize = (IntConstant) size;
-						result.putIntervalForVar(varName, new Interval(
-								constantSize.value, constantSize.value));
-					} else {
-						unhandled("non-constant size of new array expression");
-					}
+					Interval arraySizeInterval = tryGetIntervalForValue(
+							intervalPerVar, size);
+					result.putIntervalForVar(varName, arraySizeInterval);
 				}
 			}
 		}
