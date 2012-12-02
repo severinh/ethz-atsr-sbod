@@ -150,14 +150,10 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 			if (left instanceof JimpleLocal) {
 				String varName = ((JimpleLocal) left).getName();
 
-				if (right instanceof IntConstant) {
-					IntConstant intConstant = ((IntConstant) right);
-					fallState.putIntervalForVar(varName, new Interval(
-							intConstant.value, intConstant.value));
-				} else if (right instanceof JimpleLocal) {
-					JimpleLocal local = ((JimpleLocal) right);
-					fallState.putIntervalForVar(varName,
-							current.getIntervalForVar(local.getName()));
+				if (right instanceof IntConstant
+						|| right instanceof JimpleLocal) {
+					Interval interval = tryGetIntervalForValue(current, right);
+					fallState.putIntervalForVar(varName, interval);
 				} else if (right instanceof BinopExpr) {
 					Value firstValue = ((BinopExpr) right).getOp1();
 					Value secondValue = ((BinopExpr) right).getOp2();
