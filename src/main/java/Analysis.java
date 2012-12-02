@@ -27,8 +27,10 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 		LOG.debug(g.toString());
 	}
 
-	void run() {
+	boolean run() {
 		doAnalysis();
+		// TODO: Always reports the method as potentially unsafe
+		return false;
 	}
 
 	static void unhandled(String what) {

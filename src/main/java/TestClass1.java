@@ -1,5 +1,3 @@
-
-
 public class TestClass1 {
 	// This is a program the tool will try to prove.
 	// Every method that has name starting with test must be analyzed and

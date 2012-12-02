@@ -1,4 +1,6 @@
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
@@ -15,47 +17,14 @@ public class BufferOverflowDetector {
 	public static Logger LOG = Logger.getLogger(BufferOverflowDetector.class
 			.getName());
 
-	/**
-	 * Report a method as safe.
-	 * 
-	 * @param className
-	 *            name of the class
-	 * @param methodName
-	 *            name of the safe method
-	 */
-	public static void reportMethodIsSafe(String className, String methodName) {
-		System.out.printf("***$$$***(:=:) %s.%s is SAFE\n", className,
-				methodName);
-	}
-
-	/**
-	 * Report a method as potentially unsafe.
-	 * 
-	 * @param className
-	 *            name of the class
-	 * @param methodName
-	 *            name of the potentially unsafe method
-	 */
-	public static void reportMethodMaybeUnsafe(String className,
-			String methodName) {
-		System.out.printf("***$$$***):=:( %s.%s is UNSAFE ???\n", className,
-				methodName);
-	}
-
 	public static void main(String[] args) {
-		soot.options.Options.v().set_allow_phantom_refs(true);
-		soot.options.Options
-				.v()
-				.set_soot_classpath(
-						soot.options.Options.v().soot_classpath()
-								+ ":/home/severinh/Documents/ETH/9/ATSR/sbod/target/classes");
 		for (String analyzedClass : args) {
 			LOG.info("Analyzing " + analyzedClass + "...");
 			SootClass c = loadClass(analyzedClass, true);
 			soot.Scene.v().loadNecessaryClasses();
 			soot.Scene.v().setEntryPoints(EntryPoints.v().all());
 
-			HashMap<String, Analysis> perMethodIntervalAnalysis = new HashMap<String, Analysis>();
+			List<AnalysisResult> analysisResults = new ArrayList<AnalysisResult>();
 
 			for (SootMethod method : c.getMethods()) {
 				if (!method.getName().startsWith("test"))
@@ -67,8 +36,10 @@ public class BufferOverflowDetector {
 				LOG.info(String.format(
 						"Running intervals analysis on %s.%s...",
 						analyzedClass, method.getName()));
-				analysis.run();
-				perMethodIntervalAnalysis.put(method.getName(), analysis);
+				boolean isSafe = analysis.run();
+				AnalysisResult result = new AnalysisResult(c.getName(),
+						method.getName(), isSafe);
+				analysisResults.add(result);
 			}
 
 			/*
@@ -85,13 +56,10 @@ public class BufferOverflowDetector {
 			 * points_to); } } }
 			 */
 
-			// We didn't finish doing any work, so we just report we can't prove
-			// anything:
-			for (SootMethod method : c.getMethods()) {
-				if (!method.getName().startsWith("test")) {
-					continue;
+			for (AnalysisResult result : analysisResults) {
+				if (result.getMethodName().startsWith("test")) {
+					System.out.println(result.toCanonicalString());
 				}
-				reportMethodMaybeUnsafe(analyzedClass, method.getName());
 			}
 		}
 	}
@@ -102,6 +70,12 @@ public class BufferOverflowDetector {
 		soot.options.Options.v().set_keep_line_number(true);
 		soot.options.Options.v().set_whole_program(true);
 		soot.options.Options.v().setPhaseOption("cg", "verbose:true");
+		soot.options.Options.v().set_allow_phantom_refs(true);
+		String existingClasspath = soot.options.Options.v().soot_classpath();
+		String testClasspath = "/home/severinh/Documents/ETH/9/ATSR/sbod/target/classes";
+		String newClasspath = existingClasspath + ":" + testClasspath;
+		soot.options.Options.v().set_soot_classpath(newClasspath);
+		setupLogging();
 	}
 
 	private static SootClass loadClass(String name, boolean isMainClass) {
@@ -152,13 +126,14 @@ public class BufferOverflowDetector {
 		LOG.debug("[spark] Pointer analysis Done!");
 	}
 
-	public static void setup() {
+	public static void setupLogging() {
 		Logger root = Logger.getRootLogger();
 		if (root.getAllAppenders().hasMoreElements()) {
 			// Logger is already initialized
 			return;
 		}
-		DOMConfigurator.configure(BufferOverflowDetector.class.getResource("/log4j.xml"));
+		DOMConfigurator.configure(BufferOverflowDetector.class
+				.getResource("/log4j.xml"));
 	}
 
 }
