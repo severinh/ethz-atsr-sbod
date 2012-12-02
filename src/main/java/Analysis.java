@@ -8,9 +8,12 @@ import soot.jimple.AddExpr;
 import soot.jimple.BinopExpr;
 import soot.jimple.DefinitionStmt;
 import soot.jimple.IntConstant;
+import soot.jimple.MulExpr;
+import soot.jimple.NegExpr;
 import soot.jimple.NewArrayExpr;
 import soot.jimple.StaticFieldRef;
 import soot.jimple.Stmt;
+import soot.jimple.SubExpr;
 import soot.jimple.internal.JArrayRef;
 import soot.jimple.internal.JInstanceFieldRef;
 import soot.jimple.internal.JNewArrayExpr;
@@ -40,17 +43,20 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 				DefinitionStmt defStmt = (DefinitionStmt) stmt;
 				Value left = defStmt.getLeftOp();
 				Value right = defStmt.getRightOp();
+				IntervalPerVar intervalPerVar = getFlowBefore(unit);
 
 				if (left instanceof JArrayRef) {
 					JArrayRef arrayRef = (JArrayRef) left;
-					if (!isSafeArrayRef(arrayRef, arraySizeIntervals)) {
+					if (!isSafeArrayRef(arrayRef, arraySizeIntervals,
+							intervalPerVar)) {
 						isSafe = false;
 					}
 				}
 
 				if (right instanceof JArrayRef) {
 					JArrayRef arrayRef = (JArrayRef) right;
-					if (!isSafeArrayRef(arrayRef, arraySizeIntervals)) {
+					if (!isSafeArrayRef(arrayRef, arraySizeIntervals,
+							intervalPerVar)) {
 						isSafe = false;
 					}
 				}
@@ -89,7 +95,7 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 	}
 
 	protected boolean isSafeArrayRef(JArrayRef arrayRef,
-			IntervalPerVar arraySizeIntervals) {
+			IntervalPerVar arraySizeIntervals, IntervalPerVar intervalPerVar) {
 		Value arrayBase = arrayRef.getBase();
 		Value arrayIndex = arrayRef.getIndex();
 		if (arrayBase instanceof JimpleLocal) {
@@ -97,12 +103,14 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 			String arrayVarName = localArrayBase.getName();
 			Interval arraySizeInterval = arraySizeIntervals
 					.getIntervalForVar(arrayVarName);
-			if (arrayIndex instanceof IntConstant) {
-				int arrayIndexConstant = ((IntConstant) arrayIndex).value;
-				if (arrayIndexConstant < 0
-						|| arrayIndexConstant >= arraySizeInterval.getLower()) {
-					return false;
-				}
+			Interval indexInterval = tryGetIntervalForValue(intervalPerVar,
+					arrayIndex);
+			if (indexInterval == null) {
+				System.out.println("notgoogd");
+			}
+			if (indexInterval.getLower() < 0
+					|| indexInterval.getUpper() >= arraySizeInterval.getLower()) {
+				return false;
 			}
 		} else {
 			unhandled("non-local array reference");
@@ -145,8 +153,6 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 				unhandled("assignment to a non-local array variable is not handled.");
 			}
 
-			// TODO: Handle other cases. For example:
-
 			if (left instanceof JimpleLocal) {
 				String varName = ((JimpleLocal) left).getName();
 
@@ -172,8 +178,22 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 						if (right instanceof AddExpr) {
 							fallState.putIntervalForVar(varName, Interval.plus(
 									firstInterval, secondInterval));
+						} else if (right instanceof SubExpr) {
+							fallState
+									.putIntervalForVar(varName, Interval.sub(
+											firstInterval, secondInterval));
+						} else if (right instanceof MulExpr) {
+							fallState
+									.putIntervalForVar(varName, Interval.mul(
+											firstInterval, secondInterval));
 						}
 					}
+				} else if (right instanceof NegExpr) {
+					NegExpr negExpr = (NegExpr) right;
+					Value value = negExpr.getOp();
+					Interval interval = tryGetIntervalForValue(current, value);
+					Interval newInterval = Interval.neg(interval);
+					fallState.putIntervalForVar(varName, newInterval);
 				} else if (right instanceof NewArrayExpr) {
 					// Do nothing
 					// The array size is relevant at the end of the analysis

@@ -10,6 +10,7 @@ public class Interval {
 	}
 
 	public Interval(int l, int u) {
+		// TODO: What if l > u?
 		lower = l;
 		upper = u;
 	}
@@ -36,6 +37,24 @@ public class Interval {
 		// TODO: Handle overflow.
 		return new Interval(interval.getLower() + otherInterval.getLower(),
 				interval.getUpper() + otherInterval.getUpper());
+	}
+
+	public static Interval sub(Interval interval, Interval otherInterval) {
+		// TODO: Handle overflow.
+		return new Interval(interval.getLower() - otherInterval.getLower(),
+				interval.getUpper() - otherInterval.getUpper());
+	}
+
+	public static Interval mul(Interval interval, Interval otherInterval) {
+		// TODO: Handle overflow.
+		// TODO: Not correct yet...
+		return new Interval(interval.getLower() * otherInterval.getLower(),
+				interval.getUpper() * otherInterval.getUpper());
+	}
+
+	public static Interval neg(Interval interval) {
+		// TODO: Handle overflow
+		return new Interval(-interval.getUpper(), -interval.getLower());
 	}
 
 	@Override

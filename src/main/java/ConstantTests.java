@@ -4,6 +4,10 @@ public class ConstantTests extends AbstractTest {
 
 	public static void main(String[] args) {
 		testSafeAccesses();
+		testUnsafeWrites1();
+		testUnsafeWrites2();
+		testUnsafeReads1();
+		testUnsafeReads2();
 	}
 
 	public static void testSafeAccesses() {
