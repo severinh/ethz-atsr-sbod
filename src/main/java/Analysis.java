@@ -10,6 +10,7 @@ import soot.jimple.ConditionExpr;
 import soot.jimple.DefinitionStmt;
 import soot.jimple.IfStmt;
 import soot.jimple.IntConstant;
+import soot.jimple.LeExpr;
 import soot.jimple.LtExpr;
 import soot.jimple.MulExpr;
 import soot.jimple.NegExpr;
@@ -225,6 +226,19 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 						branchState.putIntervalForVar(varName, branchInterval);
 						int fallLower = Math.max(leftInterval.getLower(),
 								rightInterval.getLower());
+						int fallUpper = leftInterval.getUpper();
+						Interval fallInterval = new Interval(fallLower,
+								fallUpper);
+						fallState.putIntervalForVar(varName, fallInterval);
+					} else if (condition instanceof LeExpr) {
+						int branchLower = leftInterval.getLower();
+						int branchUpper = Math.min(leftInterval.getUpper(),
+								rightInterval.getUpper());
+						Interval branchInterval = new Interval(branchLower,
+								branchUpper);
+						branchState.putIntervalForVar(varName, branchInterval);
+						int fallLower = Math.max(leftInterval.getLower(),
+								rightInterval.getLower() + 1);
 						int fallUpper = leftInterval.getUpper();
 						Interval fallInterval = new Interval(fallLower,
 								fallUpper);
