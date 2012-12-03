@@ -99,10 +99,16 @@ public class Interval {
 		if (interval.isBottom() || otherInterval.isBottom()) {
 			return BOTTOM;
 		}
+		
+		int a = interval.getLower();
+		int b = interval.getUpper();
+		int c = otherInterval.getLower();
+		int d = otherInterval.getUpper();
+		int e = Math.min(a * c, Math.min(a * d, Math.min(b * c, b * d)));
+		int f = Math.max(a * c, Math.max(a * d, Math.max(b * c, b * d)));
+		
 		// TODO: Handle overflow.
-		// TODO: Not correct yet...
-		return Interval.of(interval.getLower() * otherInterval.getLower(),
-				interval.getUpper() * otherInterval.getUpper());
+		return Interval.of(e, f);
 	}
 
 	public static Interval neg(Interval interval) {

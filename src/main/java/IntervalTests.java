@@ -163,6 +163,42 @@ public class IntervalTests {
 	}
 
 	@Test
+	public void testMul() {
+		// [a, b] * [c, d] = [e, f]
+		// [2, 4] * [3, 5] = [6, 20] = [a * c, b * d]
+		// [-2, 4] * [3, 5] = [-10, 20] = [a * d, b * d]
+		// [-4, -2] * [3, 5] = [-20, -6] = [a * d, b * c]
+		// [-2, 4] * [-3, 5] = [-5, 20] = []
+
+		Interval leftInterval;
+		Interval rightInterval;
+
+		leftInterval = Interval.of(2, 4);
+		rightInterval = Interval.of(3, 5);
+		assertInterval(6, 20, Interval.mul(leftInterval, rightInterval));
+
+		leftInterval = Interval.of(-2, 4);
+		rightInterval = Interval.of(3, 5);
+		assertInterval(-10, 20, Interval.mul(leftInterval, rightInterval));
+
+		leftInterval = Interval.of(-4, 2);
+		rightInterval = Interval.of(3, 5);
+		assertInterval(-20, 10, Interval.mul(leftInterval, rightInterval));
+
+		leftInterval = Interval.of(-2, 4);
+		rightInterval = Interval.of(-3, 5);
+		assertInterval(-12, 20, Interval.mul(leftInterval, rightInterval));
+
+		leftInterval = Interval.of(-2, 4);
+		rightInterval = Interval.of(-5, -3);
+		assertInterval(-20, 10, Interval.mul(leftInterval, rightInterval));
+
+		leftInterval = Interval.of(-4, -2);
+		rightInterval = Interval.of(-5, -3);
+		assertInterval(6, 20, Interval.mul(leftInterval, rightInterval));
+	}
+
+	@Test
 	public void testLt() {
 		Interval leftInterval;
 		Interval rightInterval;
