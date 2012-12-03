@@ -19,7 +19,7 @@ public class AbstractTest {
 	 *            name of the method in the subclass
 	 */
 	protected void assertSafe(String methodName) {
-		AnalysisResult result = detector.analyzeMethod(methodName);
+		AnalysisResult result = detector.getAnalysisResult(methodName);
 		assertTrue("Method " + methodName
 				+ " is safe, but was not detected as such", result.isSafe());
 	}
@@ -32,7 +32,7 @@ public class AbstractTest {
 	 *            name of the method in the subclass
 	 */
 	protected void assertMaybeUnsafe(String methodName) {
-		AnalysisResult result = detector.analyzeMethod(methodName);
+		AnalysisResult result = detector.getAnalysisResult(methodName);
 		assertFalse("Method " + methodName
 				+ " is potentially unsafe, but was not detected as such",
 				result.isSafe());

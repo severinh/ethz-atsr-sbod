@@ -1,10 +1,12 @@
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 
+import soot.Body;
 import soot.EntryPoints;
 import soot.Local;
 import soot.PointsToSet;
@@ -15,6 +17,7 @@ import soot.SootMethod;
 import soot.jimple.JimpleBody;
 import soot.jimple.spark.SparkTransformer;
 import soot.toolkits.graph.BriefUnitGraph;
+import soot.toolkits.graph.UnitGraph;
 
 public class BufferOverflowDetector {
 
@@ -24,33 +27,37 @@ public class BufferOverflowDetector {
 
 	private final String className;
 	private final SootClass sootClass;
+	private final Map<String, Analysis> methodAnalyses;
 
 	public BufferOverflowDetector(String className) {
 		this.className = className;
 		this.sootClass = loadClass(className, true);
+		this.methodAnalyses = new HashMap<String, Analysis>();
 
 		soot.Scene.v().loadNecessaryClasses();
 		soot.Scene.v().setEntryPoints(EntryPoints.v().all());
+
+		analyzeClass();
 	}
 
-	public List<AnalysisResult> analyzeClass() {
-		LOG.info("Analyzing " + className + "...");
-		List<AnalysisResult> results = new ArrayList<AnalysisResult>();
-
+	private List<SootMethod> getTestMethods() {
+		List<SootMethod> testMethods = new ArrayList<SootMethod>();
 		for (SootMethod method : sootClass.getMethods()) {
 			if (method.getName().startsWith("test")) {
-				AnalysisResult result = analyzeMethod(method.getName());
-				results.add(result);
+				testMethods.add(method);
 			}
 		}
+		return testMethods;
+	}
+
+	private void analyzeClass() {
+		LOG.info("Analyzing " + className + "...");
+		List<SootMethod> testMethods = getTestMethods();
 
 		if (USE_POINTS_TO_ANALYSIS) {
 			setSparkPointsToAnalysis();
 			soot.PointsToAnalysis pta = Scene.v().getPointsToAnalysis();
-			for (SootMethod method : sootClass.getMethods()) {
-				if (!method.getName().startsWith("test")) {
-					continue;
-				}
+			for (SootMethod method : testMethods) {
 				JimpleBody body = (JimpleBody) method.retrieveActiveBody();
 				for (Local local : body.getLocals()) {
 					if (local.getType() instanceof RefLikeType) {
@@ -63,30 +70,43 @@ public class BufferOverflowDetector {
 			}
 		}
 
-		return results;
+		for (SootMethod method : testMethods) {
+			String methodName = method.getName();
+
+			LOG.info("Analyzing method " + methodName + "...");
+			Body body = method.retrieveActiveBody();
+			UnitGraph graph = new BriefUnitGraph(body);
+			Analysis analysis = new Analysis(graph);
+			analysis.run();
+
+			LOG.info(String.format("Running intervals analysis on %s.%s...",
+					className, methodName));
+
+			methodAnalyses.put(methodName, analysis);
+		}
 	}
 
-	public AnalysisResult analyzeMethod(String methodName) {
-		SootMethod method = sootClass.getMethodByName(methodName);
-
-		LOG.info("Analyzing method " + method.getName() + "...");
-		Analysis analysis = new Analysis(new BriefUnitGraph(
-				method.retrieveActiveBody()));
-		LOG.info(String.format("Running intervals analysis on %s.%s...",
-				className, method.getName()));
-		boolean isSafe = analysis.run();
+	public AnalysisResult getAnalysisResult(String methodName) {
+		Analysis analysis = methodAnalyses.get(methodName);
+		boolean isSafe = analysis.isSafe();
 		AnalysisResult result = new AnalysisResult(className, methodName,
 				isSafe);
-
 		return result;
+	}
+
+	public List<AnalysisResult> getAnalysisResults() {
+		List<AnalysisResult> results = new ArrayList<AnalysisResult>();
+		for (SootMethod method : getTestMethods()) {
+			results.add(getAnalysisResult(method.getName()));
+		}
+		return results;
 	}
 
 	public static void main(String[] args) {
 		for (String className : args) {
 			BufferOverflowDetector detector = new BufferOverflowDetector(
 					className);
-			List<AnalysisResult> results = detector.analyzeClass();
-			for (AnalysisResult result : results) {
+			for (AnalysisResult result : detector.getAnalysisResults()) {
 				if (result.getMethodName().startsWith("test")) {
 					System.out.println(result.toCanonicalString());
 				}

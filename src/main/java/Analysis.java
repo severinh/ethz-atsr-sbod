@@ -34,9 +34,11 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 		LOG.debug(graph.toString());
 	}
 
-	boolean run() {
+	void run() {
 		doAnalysis();
+	}
 
+	boolean isSafe() {
 		boolean isSafe = true;
 
 		for (Unit unit : graph) {
