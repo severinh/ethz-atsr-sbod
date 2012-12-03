@@ -16,12 +16,13 @@ import soot.SootClass;
 import soot.SootMethod;
 import soot.jimple.JimpleBody;
 import soot.jimple.spark.SparkTransformer;
+import soot.options.Options;
 import soot.toolkits.graph.BriefUnitGraph;
 import soot.toolkits.graph.UnitGraph;
 
 public class BufferOverflowDetector {
 
-	private static final boolean USE_POINTS_TO_ANALYSIS = false;
+	private static final boolean USE_POINTS_TO_ANALYSIS = true;
 	private static final Logger LOG = Logger
 			.getLogger(BufferOverflowDetector.class.getName());
 
@@ -54,22 +55,6 @@ public class BufferOverflowDetector {
 		LOG.info("Analyzing " + className + "...");
 		List<SootMethod> testMethods = getTestMethods();
 
-		if (USE_POINTS_TO_ANALYSIS) {
-			setSparkPointsToAnalysis();
-			soot.PointsToAnalysis pta = Scene.v().getPointsToAnalysis();
-			for (SootMethod method : testMethods) {
-				JimpleBody body = (JimpleBody) method.retrieveActiveBody();
-				for (Local local : body.getLocals()) {
-					if (local.getType() instanceof RefLikeType) {
-						PointsToSet points_to = pta.reachingObjects(local);
-						// TODO: Decide how to use the points_to set and
-						// check if a method is safe.
-						LOG.info(local.getName() + " points to " + points_to);
-					}
-				}
-			}
-		}
-
 		for (SootMethod method : testMethods) {
 			String methodName = method.getName();
 
@@ -79,16 +64,36 @@ public class BufferOverflowDetector {
 			Analysis analysis = new Analysis(graph);
 			analysis.run();
 
-			LOG.info(String.format("Running intervals analysis on %s.%s...",
-					className, methodName));
-
 			methodAnalyses.put(methodName, analysis);
+		}
+
+		if (USE_POINTS_TO_ANALYSIS) {
+			setSparkPointsToAnalysis();
 		}
 	}
 
 	public AnalysisResult getAnalysisResult(String methodName) {
 		Analysis analysis = methodAnalyses.get(methodName);
-		boolean isSafe = analysis.isSafe();
+		IntervalPerVar context = new IntervalPerVar();
+
+		if (USE_POINTS_TO_ANALYSIS) {
+			soot.PointsToAnalysis pta = Scene.v().getPointsToAnalysis();
+			SootMethod method = sootClass.getMethodByName(methodName);
+			JimpleBody body = (JimpleBody) method.retrieveActiveBody();
+
+			for (Local local : body.getLocals()) {
+				if (local.getType() instanceof RefLikeType) {
+					PointsToSet pointsToSet = pta.reachingObjects(local);
+					System.out.println("PTA ::::::: "
+							+ pointsToSet.getClass().getName());
+					// TODO: Decide how to use the points_to set and
+					// check if a method is safe.
+					LOG.info(local.getName() + " points to " + pointsToSet);
+				}
+			}
+		}
+
+		boolean isSafe = analysis.isSafe(context);
 		AnalysisResult result = new AnalysisResult(className, methodName,
 				isSafe);
 		return result;
@@ -107,24 +112,18 @@ public class BufferOverflowDetector {
 			BufferOverflowDetector detector = new BufferOverflowDetector(
 					className);
 			for (AnalysisResult result : detector.getAnalysisResults()) {
-				if (result.getMethodName().startsWith("test")) {
-					System.out.println(result.toCanonicalString());
-				}
+				System.out.println(result.toCanonicalString());
 			}
 		}
 	}
 
-	// Magic for the soot pointer analysis. We may suggest other magic. Do not
-	// change.
 	static {
 		soot.options.Options.v().set_keep_line_number(true);
 		soot.options.Options.v().set_whole_program(true);
+		soot.options.Options.v().set_app(true);
 		soot.options.Options.v().setPhaseOption("cg", "verbose:true");
 		soot.options.Options.v().set_allow_phantom_refs(true);
-		String existingClasspath = soot.options.Options.v().soot_classpath();
-		String testClasspath = "/home/severinh/Documents/ETH/9/ATSR/sbod/target/classes";
-		String newClasspath = existingClasspath + ":" + testClasspath;
-		soot.options.Options.v().set_soot_classpath(newClasspath);
+		soot.options.Options.v().set_output_format(Options.output_format_none);
 		setupLogging();
 	}
 
@@ -142,7 +141,7 @@ public class BufferOverflowDetector {
 
 		HashMap<String, String> flags = new HashMap<String, String>();
 		flags.put("enabled", "true");
-		flags.put("verbose", "true");
+		// flags.put("verbose", "true");
 		flags.put("ignore-types", "false");
 		flags.put("force-gc", "false");
 		flags.put("pre-jimplify", "false");

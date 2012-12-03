@@ -1,10 +1,12 @@
 #!/bin/bash
 
-PACKAGE=ch.ethz.atsr.sbod
+BIN_DIR=target/classes
 MAIN_CLASS=BufferOverflowDetector
-TEST_CLASS=TestClass1
+TEST_CLASSES=TestClass1
 
-mvn -q exec:java \
-    -Dexec.mainClass="${MAIN_CLASS}" \
-    -Dexec.arguments="${TEST_CLASS}" \
-    -Dexec.classpathScope="test"
+export CLASSPATH=$(pwd)/$BIN_DIR
+export CLASSPATH=$CLASSPATH:$(pwd)/lib/junit-4.11.jar
+export CLASSPATH=$CLASSPATH:$(pwd)/lib/log4j-1.2.17.jar
+export CLASSPATH=$CLASSPATH:$(pwd)/lib/soot-2.5.0.jar
+
+java -server $MAIN_CLASS $TEST_CLASSES

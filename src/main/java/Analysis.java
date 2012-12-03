@@ -2,6 +2,8 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import soot.ArrayType;
+import soot.Type;
 import soot.Unit;
 import soot.Value;
 import soot.jimple.AddExpr;
@@ -10,10 +12,13 @@ import soot.jimple.ConditionExpr;
 import soot.jimple.DefinitionStmt;
 import soot.jimple.IfStmt;
 import soot.jimple.IntConstant;
+import soot.jimple.InvokeExpr;
 import soot.jimple.LengthExpr;
 import soot.jimple.MulExpr;
 import soot.jimple.NegExpr;
 import soot.jimple.NewArrayExpr;
+import soot.jimple.NewExpr;
+import soot.jimple.ParameterRef;
 import soot.jimple.StaticFieldRef;
 import soot.jimple.Stmt;
 import soot.jimple.SubExpr;
@@ -38,7 +43,7 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 		doAnalysis();
 	}
 
-	boolean isSafe() {
+	boolean isSafe(IntervalPerVar context) {
 		boolean isSafe = true;
 
 		for (Unit unit : graph) {
@@ -48,9 +53,11 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 				Value left = defStmt.getLeftOp();
 				Value right = defStmt.getRightOp();
 				IntervalPerVar intervalPerVar = getFlowBefore(unit);
+				IntervalPerVar merged = new IntervalPerVar();
+				merged.mergeFrom(intervalPerVar, context);
 
-				isSafe &= intervalPerVar.isSafe(left);
-				isSafe &= intervalPerVar.isSafe(right);
+				isSafe &= merged.isSafe(left);
+				isSafe &= merged.isSafe(right);
 			}
 		}
 
@@ -137,6 +144,18 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 					// Do nothing
 				} else if (right instanceof JArrayRef) {
 					// Do nothing
+				} else if (right instanceof NewExpr) {
+					// Do nothing
+				} else if (right instanceof InvokeExpr) {
+					// Do nothing
+				} else if (right instanceof ParameterRef) {
+					ParameterRef parameterRef = (ParameterRef) right;
+					Type parameterType = parameterRef.getType();
+					if (parameterType instanceof ArrayType) {
+						// Do nothing
+					} else {
+						unhandled("right-hand side of assignment");
+					}
 				} else {
 					unhandled("right-hand side of assignment");
 				}
