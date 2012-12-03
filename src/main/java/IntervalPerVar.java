@@ -3,6 +3,12 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import soot.Value;
+import soot.jimple.IntConstant;
+import soot.jimple.LengthExpr;
+import soot.jimple.internal.JArrayRef;
+import soot.jimple.internal.JimpleLocal;
+
 public class IntervalPerVar {
 
 	private final HashMap<String, Interval> values;
@@ -60,6 +66,38 @@ public class IntervalPerVar {
 
 	Interval getIntervalForVar(String var) {
 		return values.get(var);
+	}
+
+	Interval tryGetIntervalForValue(Value value) {
+		if (value instanceof IntConstant) {
+			IntConstant constant = ((IntConstant) value);
+			return Interval.of(constant.value);
+		} else if (value instanceof JimpleLocal) {
+			JimpleLocal local = ((JimpleLocal) value);
+			return getIntervalForVar(local.getName());
+		} else if (value instanceof LengthExpr) {
+			LengthExpr lengthExpr = (LengthExpr) value;
+			Value array = lengthExpr.getOp();
+			return tryGetIntervalForValue(array);
+		} else {
+			throw new IllegalStateException("Cannot handle value of type "
+					+ value.getClass().getName());
+		}
+	}
+
+	protected boolean isSafeArrayRef(JArrayRef arrayRef) {
+		Value arrayBase = arrayRef.getBase();
+		Value arrayIndex = arrayRef.getIndex();
+		if (arrayBase instanceof JimpleLocal) {
+			JimpleLocal localArrayBase = (JimpleLocal) arrayBase;
+			Interval arraySizeInterval = tryGetIntervalForValue(localArrayBase);
+			Interval indexInterval = tryGetIntervalForValue(arrayIndex);
+			return 0 <= indexInterval.getLower()
+					&& indexInterval.getUpper() < arraySizeInterval.getLower();
+		} else {
+			throw new IllegalStateException(
+					"Cannot handle non-local array reference");
+		}
 	}
 
 	@Override

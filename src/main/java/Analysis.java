@@ -49,14 +49,14 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 
 				if (left instanceof JArrayRef) {
 					JArrayRef arrayRef = (JArrayRef) left;
-					if (!isSafeArrayRef(arrayRef, intervalPerVar)) {
+					if (!intervalPerVar.isSafeArrayRef(arrayRef)) {
 						isSafe = false;
 					}
 				}
 
 				if (right instanceof JArrayRef) {
 					JArrayRef arrayRef = (JArrayRef) right;
-					if (!isSafeArrayRef(arrayRef, intervalPerVar)) {
+					if (!intervalPerVar.isSafeArrayRef(arrayRef)) {
 						isSafe = false;
 					}
 				}
@@ -64,26 +64,6 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 		}
 
 		return isSafe;
-	}
-
-	protected boolean isSafeArrayRef(JArrayRef arrayRef,
-			IntervalPerVar intervalPerVar) {
-		Value arrayBase = arrayRef.getBase();
-		Value arrayIndex = arrayRef.getIndex();
-		if (arrayBase instanceof JimpleLocal) {
-			JimpleLocal localArrayBase = (JimpleLocal) arrayBase;
-			Interval arraySizeInterval = tryGetIntervalForValue(intervalPerVar,
-					localArrayBase);
-			Interval indexInterval = tryGetIntervalForValue(intervalPerVar,
-					arrayIndex);
-			if (indexInterval.getLower() < 0
-					|| indexInterval.getUpper() >= arraySizeInterval.getLower()) {
-				return false;
-			}
-		} else {
-			unhandled("non-local array reference");
-		}
-		return true;
 	}
 
 	static void unhandled(String what) {
@@ -126,16 +106,16 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 				if (right instanceof IntConstant
 						|| right instanceof JimpleLocal
 						|| right instanceof LengthExpr) {
-					Interval interval = tryGetIntervalForValue(current, right);
+					Interval interval = current.tryGetIntervalForValue(right);
 					fallState.putIntervalForVar(varName, interval);
 				} else if (right instanceof BinopExpr) {
 					Value firstValue = ((BinopExpr) right).getOp1();
 					Value secondValue = ((BinopExpr) right).getOp2();
 
-					Interval firstInterval = tryGetIntervalForValue(current,
-							firstValue);
-					Interval secondInterval = tryGetIntervalForValue(current,
-							secondValue);
+					Interval firstInterval = current
+							.tryGetIntervalForValue(firstValue);
+					Interval secondInterval = current
+							.tryGetIntervalForValue(secondValue);
 
 					if (firstInterval != null && secondInterval != null) {
 						if (right instanceof AddExpr) {
@@ -154,13 +134,13 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 				} else if (right instanceof NegExpr) {
 					NegExpr negExpr = (NegExpr) right;
 					Value value = negExpr.getOp();
-					Interval interval = tryGetIntervalForValue(current, value);
+					Interval interval = current.tryGetIntervalForValue(value);
 					Interval newInterval = Interval.neg(interval);
 					fallState.putIntervalForVar(varName, newInterval);
 				} else if (right instanceof NewArrayExpr) {
 					JNewArrayExpr newArrayExpr = (JNewArrayExpr) right;
 					Value size = newArrayExpr.getSize();
-					Interval interval = tryGetIntervalForValue(current, size);
+					Interval interval = current.tryGetIntervalForValue(size);
 					fallState.putIntervalForVar(varName, interval);
 				} else if (right instanceof StaticFieldRef) {
 					// Do nothing
@@ -187,8 +167,8 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 
 				Value left = conditionExpr.getOp1();
 				Value right = conditionExpr.getOp2();
-				Interval leftInterval = tryGetIntervalForValue(current, left);
-				Interval rightInterval = tryGetIntervalForValue(current, right);
+				Interval leftInterval = current.tryGetIntervalForValue(left);
+				Interval rightInterval = current.tryGetIntervalForValue(right);
 
 				if (left instanceof JimpleLocal) {
 					JimpleLocal leftLocal = (JimpleLocal) left;
@@ -228,23 +208,6 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 				fnext.copyFrom(branchState);
 			}
 		}
-	}
-
-	Interval tryGetIntervalForValue(IntervalPerVar currentState, Value value) {
-		if (value instanceof IntConstant) {
-			IntConstant constant = ((IntConstant) value);
-			return Interval.of(constant.value);
-		} else if (value instanceof JimpleLocal) {
-			JimpleLocal local = ((JimpleLocal) value);
-			return currentState.getIntervalForVar(local.getName());
-		} else if (value instanceof LengthExpr) {
-			LengthExpr lengthExpr = (LengthExpr) value;
-			Value array = lengthExpr.getOp();
-			return tryGetIntervalForValue(currentState, array);
-		} else {
-			unhandled("value " + value.getClass().getName());
-		}
-		return null;
 	}
 
 	@Override
