@@ -22,7 +22,7 @@ import soot.toolkits.graph.UnitGraph;
 
 public class BufferOverflowDetector {
 
-	private static final boolean USE_POINTS_TO_ANALYSIS = true;
+	private static final boolean USE_POINTS_TO_ANALYSIS = false;
 	private static final Logger LOG = Logger
 			.getLogger(BufferOverflowDetector.class.getName());
 
