@@ -249,6 +249,51 @@ public class IntervalTests {
 		assertTrue(Interval.eq(Interval.BOTTOM, leftInterval).isBottom());
 	}
 
+	@Test
+	public void testNe() {
+		Interval leftInterval;
+		Interval rightInterval;
+
+		leftInterval = Interval.of(2, 4);
+		rightInterval = Interval.of(2, 4);
+		assertInterval(2, 4, Interval.ne(leftInterval, rightInterval));
+
+		assertTrue(Interval.ne(leftInterval, Interval.BOTTOM).isBottom());
+		assertTrue(Interval.ne(Interval.BOTTOM, leftInterval).isBottom());
+
+		leftInterval = Interval.of(2, 2);
+		rightInterval = Interval.of(2, 2);
+		assertTrue(Interval.ne(leftInterval, rightInterval).isBottom());
+
+		leftInterval = Interval.of(2, 4);
+		rightInterval = Interval.of(1, 1);
+		assertInterval(2, 4, Interval.ne(leftInterval, rightInterval));
+
+		leftInterval = Interval.of(2, 4);
+		rightInterval = Interval.of(2, 2);
+		assertInterval(3, 4, Interval.ne(leftInterval, rightInterval));
+
+		leftInterval = Interval.of(2, 4);
+		rightInterval = Interval.of(3, 3);
+		assertInterval(2, 4, Interval.ne(leftInterval, rightInterval));
+		rightInterval = Interval.of(4, 4);
+		leftInterval = Interval.of(2, 4);
+
+		assertInterval(2, 3, Interval.ne(leftInterval, rightInterval));
+
+		leftInterval = Interval.of(2, 4);
+		rightInterval = Interval.of(5, 5);
+		assertInterval(2, 4, Interval.ne(leftInterval, rightInterval));
+
+		leftInterval = Interval.of(4, 4);
+		rightInterval = Interval.of(2, 4);
+		assertTrue(Interval.ne(leftInterval, rightInterval).isBottom());
+
+		leftInterval = Interval.of(5, 5);
+		rightInterval = Interval.of(2, 4);
+		assertInterval(5, 5, Interval.ne(leftInterval, rightInterval));
+	}
+
 	protected void assertInterval(int expectedLower, int expectedUpper,
 			Interval interval) {
 		assertEquals(expectedLower, interval.getLower());

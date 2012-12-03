@@ -40,6 +40,14 @@ public class Interval {
 		return equals(TOP);
 	}
 
+	public boolean contains(int value) {
+		if (isBottom()) {
+			return false;
+		} else {
+			return getLower() <= value && value <= getUpper();
+		}
+	}
+
 	@Override
 	public String toString() {
 		return String.format("[%d,%d]", getLower(), getUpper());
@@ -228,9 +236,15 @@ public class Interval {
 		if (leftInterval.isBottom() || rightInterval.isBottom()) {
 			return BOTTOM;
 		}
+
+		if (leftInterval.getLower() == leftInterval.getUpper()
+				&& rightInterval.contains(leftInterval.getLower())) {
+			return BOTTOM;
+		}
+
 		// Constrain the left interval only if the right interval contains
 		// exactly one value
-		if (rightInterval.getUpper() - rightInterval.getLower() == 1) {
+		if (rightInterval.getLower() == rightInterval.getUpper()) {
 			// Constrain the left interval only if the right value marks the
 			// start or end of the left interval
 			if (leftInterval.getLower() == rightInterval.getLower()) {
