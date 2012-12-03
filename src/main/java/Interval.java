@@ -302,6 +302,9 @@ public class Interval {
 		if (leftInterval.isBottom() || rightInterval.isBottom()) {
 			return BOTTOM;
 		}
+		if (rightInterval.getUpper() == Integer.MAX_VALUE) {
+			return BOTTOM;
+		}
 		int lower = Math.max(leftInterval.getLower(),
 				rightInterval.getLower() + 1);
 		int upper = leftInterval.getUpper();
