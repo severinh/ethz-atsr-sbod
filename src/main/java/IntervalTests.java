@@ -192,6 +192,37 @@ public class IntervalTests {
 		assertTrue(Interval.lt(leftInterval, rightInterval).isBottom());
 	}
 
+	@Test
+	public void testLe() {
+		Interval leftInterval;
+		Interval rightInterval;
+
+		leftInterval = Interval.of(2, 4);
+		rightInterval = Interval.of(6, 8);
+		assertInterval(2, 4, Interval.le(leftInterval, rightInterval));
+
+		leftInterval = Interval.of(2, 4);
+		rightInterval = Interval.of(4, 6);
+		assertInterval(2, 4, Interval.le(leftInterval, rightInterval));
+
+		leftInterval = Interval.of(2, 4);
+		rightInterval = Interval.of(3, 5);
+		assertInterval(2, 4, Interval.le(leftInterval, rightInterval));
+
+		leftInterval = Interval.of(2, 4);
+		rightInterval = Interval.of(1, 3);
+		assertInterval(2, 3, Interval.le(leftInterval, rightInterval));
+
+		leftInterval = Interval.of(2, 4);
+		rightInterval = Interval.of(0, 2);
+		assertInterval(2, Interval.le(leftInterval, rightInterval));
+
+		leftInterval = Interval.of(Integer.MIN_VALUE);
+		rightInterval = Interval.of(Integer.MIN_VALUE);
+		assertInterval(Integer.MIN_VALUE,
+				Interval.le(leftInterval, rightInterval));
+	}
+
 	protected void assertInterval(int expectedLower, int expectedUpper,
 			Interval interval) {
 		assertEquals(expectedLower, interval.getLower());
