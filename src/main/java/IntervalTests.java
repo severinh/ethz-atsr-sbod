@@ -201,6 +201,9 @@ public class IntervalTests {
 		rightInterval = Interval.of(6, 8);
 		assertInterval(2, 4, Interval.le(leftInterval, rightInterval));
 
+		assertTrue(Interval.lt(leftInterval, Interval.BOTTOM).isBottom());
+		assertTrue(Interval.lt(Interval.BOTTOM, leftInterval).isBottom());
+
 		leftInterval = Interval.of(2, 4);
 		rightInterval = Interval.of(4, 6);
 		assertInterval(2, 4, Interval.le(leftInterval, rightInterval));
@@ -241,6 +244,9 @@ public class IntervalTests {
 		rightInterval = Interval.of(5, 7);
 		assertTrue(Interval.eq(leftInterval, rightInterval).isBottom());
 		assertTrue(Interval.eq(rightInterval, leftInterval).isBottom());
+
+		assertTrue(Interval.eq(leftInterval, Interval.BOTTOM).isBottom());
+		assertTrue(Interval.eq(Interval.BOTTOM, leftInterval).isBottom());
 	}
 
 	protected void assertInterval(int expectedLower, int expectedUpper,
