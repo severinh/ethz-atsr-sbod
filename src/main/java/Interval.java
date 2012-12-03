@@ -33,7 +33,7 @@ public class Interval {
 	}
 
 	public boolean isBottom() {
-		return getLower() > getUpper();
+		return equals(BOTTOM);
 	}
 
 	public boolean isTop() {
@@ -120,7 +120,7 @@ public class Interval {
 		} else {
 			int lower = Math.min(interval.getLower(), otherInterval.getLower());
 			int upper = Math.max(interval.getUpper(), otherInterval.getUpper());
-			Interval result = new Interval(lower, upper);
+			Interval result = Interval.of(lower, upper);
 			return result;
 		}
 	}
@@ -131,7 +131,7 @@ public class Interval {
 		}
 		int lower = Math.max(interval.getLower(), otherInterval.getLower());
 		int upper = Math.min(interval.getUpper(), otherInterval.getUpper());
-		Interval result = new Interval(lower, upper);
+		Interval result = Interval.of(lower, upper);
 		return result;
 	}
 
@@ -160,7 +160,7 @@ public class Interval {
 		int lower = leftInterval.getLower();
 		int upper = Math.min(leftInterval.getUpper(),
 				rightInterval.getUpper() - 1);
-		Interval result = new Interval(lower, upper);
+		Interval result = Interval.of(lower, upper);
 		return result;
 	}
 
