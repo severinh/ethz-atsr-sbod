@@ -84,6 +84,59 @@ public class IntervalTests {
 	}
 
 	@Test
+	public void testSub() {
+		Interval interval;
+		Interval otherInterval;
+
+		interval = Interval.of(2, 4);
+		otherInterval = Interval.of(6, 8);
+		assertInterval(-6, -2, Interval.sub(interval, otherInterval));
+		assertInterval(2, 6, Interval.sub(otherInterval, interval));
+
+		assertTrue(Interval.sub(interval, Interval.BOTTOM).isBottom());
+		assertTrue(Interval.sub(Interval.BOTTOM, interval).isBottom());
+
+		interval = Interval.of(Integer.MIN_VALUE);
+		otherInterval = Interval.of(1, 2);
+		assertInterval(Integer.MAX_VALUE - 1, Integer.MAX_VALUE,
+				Interval.sub(interval, otherInterval));
+		assertInterval(Integer.MIN_VALUE + 1, Integer.MIN_VALUE + 2,
+				Interval.sub(otherInterval, interval));
+
+		interval = Interval.of(Integer.MIN_VALUE);
+		otherInterval = Interval.of(-1, 1);
+		assertTrue(Interval.sub(interval, otherInterval).isTop());
+		assertTrue(Interval.sub(otherInterval, interval).isTop());
+
+		interval = Interval.of(Integer.MIN_VALUE, Integer.MIN_VALUE + 1);
+		otherInterval = Interval.of(1);
+		assertTrue(Interval.sub(interval, otherInterval).isTop());
+		assertInterval(Integer.MIN_VALUE, Integer.MIN_VALUE + 1,
+				Interval.sub(otherInterval, interval));
+
+		interval = Interval.of(Integer.MAX_VALUE);
+		otherInterval = Interval.of(-2, -1);
+		assertInterval(Integer.MIN_VALUE, Integer.MIN_VALUE + 1,
+				Interval.sub(interval, otherInterval));
+		assertTrue(Interval.sub(otherInterval, interval).isTop());
+
+		interval = Interval.of(Integer.MAX_VALUE);
+		otherInterval = Interval.of(-1, 1);
+		assertTrue(Interval.sub(interval, otherInterval).isTop());
+		assertInterval(Integer.MIN_VALUE, Integer.MIN_VALUE + 2,
+				Interval.sub(otherInterval, interval));
+
+		interval = Interval.of(Integer.MAX_VALUE + 1, Integer.MAX_VALUE);
+		otherInterval = Interval.of(-1);
+		assertTrue(Interval.sub(interval, otherInterval).isTop());
+		assertTrue(Interval.sub(otherInterval, interval).isTop());
+
+		interval = Interval.of(Integer.MAX_VALUE);
+		otherInterval = Interval.of(Integer.MIN_VALUE);
+		assertInterval(-1, Interval.sub(interval, otherInterval));
+	}
+
+	@Test
 	public void testLt() {
 		Interval leftInterval;
 		Interval rightInterval;

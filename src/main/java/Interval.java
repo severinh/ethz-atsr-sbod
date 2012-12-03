@@ -74,11 +74,11 @@ public class Interval {
 		int otherLower = otherInterval.getLower();
 		int upper = interval.getUpper();
 		int otherUpper = otherInterval.getUpper();
-		if (isOverflowSubtraction(lower, otherLower) != isOverflowSubtraction(
-				upper, otherUpper)) {
+		if (isOverflowSubtraction(lower, otherUpper) != isOverflowSubtraction(
+				upper, otherLower)) {
 			return TOP;
 		} else {
-			return new Interval(lower - otherLower, upper - otherUpper);
+			return new Interval(lower - otherUpper, upper - otherLower);
 		}
 	}
 
