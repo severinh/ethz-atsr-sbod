@@ -100,6 +100,14 @@ public class IntervalPerVar {
 		}
 	}
 
+	protected boolean isSafe(Value value) {
+		if (value instanceof JArrayRef) {
+			JArrayRef arrayRef = (JArrayRef) value;
+			return isSafeArrayRef(arrayRef);
+		}
+		return true;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

@@ -47,19 +47,8 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 				Value right = defStmt.getRightOp();
 				IntervalPerVar intervalPerVar = getFlowBefore(unit);
 
-				if (left instanceof JArrayRef) {
-					JArrayRef arrayRef = (JArrayRef) left;
-					if (!intervalPerVar.isSafeArrayRef(arrayRef)) {
-						isSafe = false;
-					}
-				}
-
-				if (right instanceof JArrayRef) {
-					JArrayRef arrayRef = (JArrayRef) right;
-					if (!intervalPerVar.isSafeArrayRef(arrayRef)) {
-						isSafe = false;
-					}
-				}
+				isSafe &= intervalPerVar.isSafe(left);
+				isSafe &= intervalPerVar.isSafe(right);
 			}
 		}
 
