@@ -186,6 +186,10 @@ public class IntervalTests {
 		leftInterval = Interval.of(2, 4);
 		rightInterval = Interval.of(0, 2);
 		assertTrue(Interval.lt(leftInterval, rightInterval).isBottom());
+
+		leftInterval = Interval.of(2, 4);
+		rightInterval = Interval.of(Integer.MIN_VALUE);
+		assertTrue(Interval.lt(leftInterval, rightInterval).isBottom());
 	}
 
 	protected void assertInterval(int expectedLower, int expectedUpper,

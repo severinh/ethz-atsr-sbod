@@ -154,6 +154,9 @@ public class Interval {
 		if (leftInterval.isBottom() || rightInterval.isBottom()) {
 			return BOTTOM;
 		}
+		if (rightInterval.getUpper() == Integer.MIN_VALUE) {
+			return BOTTOM;
+		}
 		int lower = leftInterval.getLower();
 		int upper = Math.min(leftInterval.getUpper(),
 				rightInterval.getUpper() - 1);
