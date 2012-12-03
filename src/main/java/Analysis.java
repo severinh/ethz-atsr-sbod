@@ -43,9 +43,14 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 		doAnalysis();
 	}
 
-	boolean isSafe(IntervalPerVar context) {
-		boolean isSafe = true;
-
+	/**
+	 * Returns the first potentially unsafe statement in the method, or
+	 * <code>null</code> if there is no unsafe statement.
+	 * 
+	 * @param context
+	 * @return the first unsafe statement or <code>null</code> if there is none
+	 */
+	Stmt getFirstUnsafeStatement(IntervalPerVar context) {
 		for (Unit unit : graph) {
 			Stmt stmt = (Stmt) unit;
 			if (stmt instanceof DefinitionStmt) {
@@ -56,12 +61,12 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 				IntervalPerVar merged = new IntervalPerVar();
 				merged.mergeFrom(intervalPerVar, context);
 
-				isSafe &= merged.isSafe(left);
-				isSafe &= merged.isSafe(right);
+				if (!merged.isSafe(left) || !merged.isSafe(right)) {
+					return stmt;
+				}
 			}
 		}
-
-		return isSafe;
+		return null;
 	}
 
 	static void unhandled(String what) {

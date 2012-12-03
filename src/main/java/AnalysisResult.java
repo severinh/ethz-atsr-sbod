@@ -1,14 +1,17 @@
+import soot.jimple.Stmt;
+
 public class AnalysisResult {
 
 	private final String className;
 	private final String methodName;
-	private final boolean isSafe;
+	private final Stmt unsafeStatement;
 
-	public AnalysisResult(String className, String methodName, boolean isSafe) {
+	public AnalysisResult(String className, String methodName,
+			Stmt unsafeStatement) {
 		super();
 		this.className = className;
 		this.methodName = methodName;
-		this.isSafe = isSafe;
+		this.unsafeStatement = unsafeStatement;
 	}
 
 	public String getClassName() {
@@ -20,7 +23,11 @@ public class AnalysisResult {
 	}
 
 	public boolean isSafe() {
-		return isSafe;
+		return getUnsafeStmt() == null;
+	}
+
+	public Stmt getUnsafeStmt() {
+		return unsafeStatement;
 	}
 
 	public String toCanonicalString() {

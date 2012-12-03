@@ -8,7 +8,7 @@ import soot.jimple.NeExpr;
 
 public enum ConditionExprEnum {
 
-	LT, LE, EQ, NE, GE(), GT;
+	LT, LE, EQ, NE, GE, GT;
 
 	static {
 		LT.negation = GE;

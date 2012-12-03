@@ -1,3 +1,6 @@
+/**
+ * Represents an immutable element of the interval domain.
+ */
 public class Interval {
 
 	public static final Interval TOP = new Interval(Integer.MIN_VALUE,
@@ -7,6 +10,15 @@ public class Interval {
 	private final int lower;
 	private final int upper;
 
+	/**
+	 * The constructor is deliberately private, such that clients are forced to
+	 * use the two static constructor methods.
+	 * 
+	 * @param lower
+	 *            the lower boundary of the interval
+	 * @param upper
+	 *            the upper boundary of the interval
+	 */
 	private Interval(int lower, int upper) {
 		this.lower = lower;
 		this.upper = upper;

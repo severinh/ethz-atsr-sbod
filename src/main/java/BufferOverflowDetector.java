@@ -15,6 +15,7 @@ import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.jimple.JimpleBody;
+import soot.jimple.Stmt;
 import soot.jimple.spark.SparkTransformer;
 import soot.options.Options;
 import soot.toolkits.graph.BriefUnitGraph;
@@ -93,9 +94,9 @@ public class BufferOverflowDetector {
 			}
 		}
 
-		boolean isSafe = analysis.isSafe(context);
+		Stmt firstUnsafeStatement = analysis.getFirstUnsafeStatement(context);
 		AnalysisResult result = new AnalysisResult(className, methodName,
-				isSafe);
+				firstUnsafeStatement);
 		return result;
 	}
 
