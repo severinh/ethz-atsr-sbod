@@ -3,6 +3,8 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import soot.ArrayType;
+import soot.IntType;
+import soot.SootMethod;
 import soot.Type;
 import soot.Unit;
 import soot.Value;
@@ -10,6 +12,7 @@ import soot.jimple.AddExpr;
 import soot.jimple.BinopExpr;
 import soot.jimple.ConditionExpr;
 import soot.jimple.DefinitionStmt;
+import soot.jimple.DivExpr;
 import soot.jimple.IfStmt;
 import soot.jimple.IntConstant;
 import soot.jimple.InvokeExpr;
@@ -19,6 +22,7 @@ import soot.jimple.NegExpr;
 import soot.jimple.NewArrayExpr;
 import soot.jimple.NewExpr;
 import soot.jimple.ParameterRef;
+import soot.jimple.RemExpr;
 import soot.jimple.StaticFieldRef;
 import soot.jimple.Stmt;
 import soot.jimple.SubExpr;
@@ -131,6 +135,10 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 							fallState
 									.putIntervalForVar(varName, Interval.mul(
 											firstInterval, secondInterval));
+						} else if (right instanceof RemExpr) {
+							unhandled("modulo expression");
+						} else if (right instanceof DivExpr) {
+							unhandled("division expression");
 						}
 					}
 				} else if (right instanceof NegExpr) {
@@ -151,7 +159,13 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 				} else if (right instanceof NewExpr) {
 					// Do nothing
 				} else if (right instanceof InvokeExpr) {
-					// Do nothing
+					// When calling a method that returns an integer, assume
+					// that the return value could be anything
+					InvokeExpr invokeExpr = (InvokeExpr) right;
+					SootMethod method = invokeExpr.getMethod();
+					if (method.getReturnType() instanceof IntType) {
+						fallState.putIntervalForVar(varName, Interval.TOP);
+					}
 				} else if (right instanceof ParameterRef) {
 					ParameterRef parameterRef = (ParameterRef) right;
 					Type parameterType = parameterRef.getType();

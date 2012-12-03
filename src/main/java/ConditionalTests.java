@@ -63,7 +63,8 @@ public class ConditionalTests extends AbstractTest {
 
 	public static void testUnsafe() {
 		int[] array = new int[2];
-		boolean flag = array.hashCode() % 2 == 0;
+		// Flag could be either false or true
+		boolean flag = array.hashCode() == 123;
 		int index = 0;
 		if (flag) {
 			index = 1;
@@ -75,7 +76,7 @@ public class ConditionalTests extends AbstractTest {
 
 	@Test
 	public void _testUnsafe() {
-		assertSafe("testUnsafe");
+		assertMaybeUnsafe("testUnsafe");
 	}
 
 }
