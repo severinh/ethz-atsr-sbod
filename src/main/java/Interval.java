@@ -101,8 +101,13 @@ public class Interval {
 		if (interval.isBottom()) {
 			return BOTTOM;
 		}
-		// TODO: Handle overflow
-		return new Interval(-interval.getUpper(), -interval.getLower());
+
+		if (interval.getLower() == Integer.MIN_VALUE
+				&& interval.getUpper() > Integer.MIN_VALUE) {
+			return TOP;
+		} else {
+			return new Interval(-interval.getUpper(), -interval.getLower());
+		}
 	}
 
 	public static Interval meet(Interval interval, Interval otherInterval) {

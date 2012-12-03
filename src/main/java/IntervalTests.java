@@ -137,6 +137,32 @@ public class IntervalTests {
 	}
 
 	@Test
+	public void testNeg() {
+		Interval interval;
+
+		interval = Interval.of(2, 4);
+		assertInterval(-4, -2, Interval.neg(interval));
+
+		interval = Interval.of(-2, 4);
+		assertInterval(-4, 2, Interval.neg(interval));
+
+		interval = Interval.of(-4, -2);
+		assertInterval(2, 4, Interval.neg(interval));
+
+		interval = Interval.of(Integer.MAX_VALUE);
+		assertInterval(Integer.MIN_VALUE + 1, Interval.neg(interval));
+
+		interval = Interval.of(Integer.MIN_VALUE + 1);
+		assertInterval(Integer.MAX_VALUE, Interval.neg(interval));
+
+		interval = Interval.of(Integer.MIN_VALUE);
+		assertInterval(Integer.MIN_VALUE, Interval.neg(interval));
+
+		interval = Interval.of(Integer.MIN_VALUE, Integer.MIN_VALUE + 1);
+		assertTrue(Interval.neg(interval).isTop());
+	}
+
+	@Test
 	public void testLt() {
 		Interval leftInterval;
 		Interval rightInterval;
