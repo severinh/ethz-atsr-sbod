@@ -70,9 +70,21 @@ public class Interval {
 		if (interval.isBottom() || otherInterval.isBottom()) {
 			return BOTTOM;
 		}
-		// TODO: Handle overflow.
-		return new Interval(interval.getLower() - otherInterval.getLower(),
-				interval.getUpper() - otherInterval.getUpper());
+		int lower = interval.getLower();
+		int otherLower = otherInterval.getLower();
+		int upper = interval.getUpper();
+		int otherUpper = otherInterval.getUpper();
+		if (isOverflowSubtraction(lower, otherLower) != isOverflowSubtraction(
+				upper, otherUpper)) {
+			return TOP;
+		} else {
+			return new Interval(lower - otherLower, upper - otherUpper);
+		}
+	}
+
+	private static boolean isOverflowSubtraction(int a, int b) {
+		long result = ((long) a) - b;
+		return result > Integer.MAX_VALUE || result < Integer.MIN_VALUE;
 	}
 
 	public static Interval mul(Interval interval, Interval otherInterval) {
