@@ -49,9 +49,21 @@ public class Interval {
 		if (interval.isBottom() || otherInterval.isBottom()) {
 			return BOTTOM;
 		}
-		// TODO: Handle overflow.
-		return new Interval(interval.getLower() + otherInterval.getLower(),
-				interval.getUpper() + otherInterval.getUpper());
+		int lower = interval.getLower();
+		int otherLower = otherInterval.getLower();
+		int upper = interval.getUpper();
+		int otherUpper = otherInterval.getUpper();
+		if (isOverflowAddition(lower, otherLower) != isOverflowAddition(upper,
+				otherUpper)) {
+			return TOP;
+		} else {
+			return new Interval(lower + otherLower, upper + otherUpper);
+		}
+	}
+
+	private static boolean isOverflowAddition(int a, int b) {
+		long result = ((long) a) + b;
+		return result > Integer.MAX_VALUE || result < Integer.MIN_VALUE;
 	}
 
 	public static Interval sub(Interval interval, Interval otherInterval) {
@@ -294,17 +306,22 @@ public class Interval {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (getClass() != obj.getClass()) {
 			return false;
+		}
 		Interval other = (Interval) obj;
-		if (lower != other.lower)
+		if (lower != other.lower) {
 			return false;
-		if (upper != other.upper)
+		}
+		if (upper != other.upper) {
 			return false;
+		}
 		return true;
 	}
 

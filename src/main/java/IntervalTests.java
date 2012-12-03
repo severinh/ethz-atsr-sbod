@@ -32,6 +32,58 @@ public class IntervalTests {
 	}
 
 	@Test
+	public void testPlus() {
+		Interval interval;
+		Interval otherInterval;
+
+		interval = Interval.of(2, 4);
+		otherInterval = Interval.of(6, 8);
+		assertInterval(8, 12, Interval.plus(interval, otherInterval));
+		assertInterval(8, 12, Interval.plus(otherInterval, interval));
+
+		assertTrue(Interval.plus(interval, Interval.BOTTOM).isBottom());
+		assertTrue(Interval.plus(Interval.BOTTOM, interval).isBottom());
+
+		interval = Interval.of(Integer.MAX_VALUE);
+		otherInterval = Interval.of(1, 2);
+		assertInterval(Integer.MIN_VALUE, Integer.MIN_VALUE + 1,
+				Interval.plus(interval, otherInterval));
+		assertInterval(Integer.MIN_VALUE, Integer.MIN_VALUE + 1,
+				Interval.plus(otherInterval, interval));
+
+		interval = Interval.of(Integer.MAX_VALUE);
+		otherInterval = Interval.of(-1, 1);
+		assertTrue(Interval.plus(interval, otherInterval).isTop());
+		assertTrue(Interval.plus(otherInterval, interval).isTop());
+
+		interval = Interval.of(Integer.MAX_VALUE - 1, Integer.MAX_VALUE);
+		otherInterval = Interval.of(1);
+		assertTrue(Interval.plus(interval, otherInterval).isTop());
+		assertTrue(Interval.plus(otherInterval, interval).isTop());
+
+		interval = Interval.of(Integer.MIN_VALUE);
+		otherInterval = Interval.of(-2, -1);
+		assertInterval(Integer.MAX_VALUE - 1, Integer.MAX_VALUE,
+				Interval.plus(interval, otherInterval));
+		assertInterval(Integer.MAX_VALUE - 1, Integer.MAX_VALUE,
+				Interval.plus(otherInterval, interval));
+
+		interval = Interval.of(Integer.MIN_VALUE);
+		otherInterval = Interval.of(-1, 1);
+		assertTrue(Interval.plus(interval, otherInterval).isTop());
+		assertTrue(Interval.plus(otherInterval, interval).isTop());
+
+		interval = Interval.of(Integer.MIN_VALUE, Integer.MIN_VALUE + 1);
+		otherInterval = Interval.of(-1);
+		assertTrue(Interval.plus(interval, otherInterval).isTop());
+		assertTrue(Interval.plus(otherInterval, interval).isTop());
+
+		interval = Interval.of(Integer.MIN_VALUE);
+		otherInterval = Interval.of(Integer.MAX_VALUE);
+		assertInterval(-1, Interval.plus(interval, otherInterval));
+	}
+
+	@Test
 	public void testLt() {
 		Interval leftInterval;
 		Interval rightInterval;
@@ -61,6 +113,11 @@ public class IntervalTests {
 			Interval interval) {
 		assertEquals(expectedLower, interval.getLower());
 		assertEquals(expectedUpper, interval.getUpper());
+	}
+
+	protected void assertInterval(int expectedValue, Interval interval) {
+		assertEquals(expectedValue, interval.getLower());
+		assertEquals(expectedValue, interval.getUpper());
 	}
 
 }
