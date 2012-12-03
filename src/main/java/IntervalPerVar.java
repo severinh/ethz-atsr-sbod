@@ -91,7 +91,15 @@ public class IntervalPerVar {
 		if (arrayBase instanceof JimpleLocal) {
 			JimpleLocal localArrayBase = (JimpleLocal) arrayBase;
 			Interval arraySizeInterval = tryGetIntervalForValue(localArrayBase);
+			if (arraySizeInterval == null) {
+				throw new IllegalStateException(
+						"Unknown array size interval for array access");
+			}
 			Interval indexInterval = tryGetIntervalForValue(arrayIndex);
+			if (indexInterval == null) {
+				throw new IllegalStateException(
+						"Unknown index interval for array access");
+			}
 			return 0 <= indexInterval.getLower()
 					&& indexInterval.getUpper() < arraySizeInterval.getLower();
 		} else {
