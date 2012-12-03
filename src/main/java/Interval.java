@@ -24,6 +24,28 @@ public class Interval {
 		}
 	}
 
+	public static Interval of(long lower, long upper) {
+		if (lower > upper) {
+			return BOTTOM;
+		} else {
+			boolean isLowerOverflow = lower < Integer.MIN_VALUE
+					|| Integer.MAX_VALUE < lower;
+			boolean isUpperOverflow = upper < Integer.MIN_VALUE
+					|| Integer.MAX_VALUE < upper;
+			if (isLowerOverflow != isUpperOverflow) {
+				return TOP;
+			} else {
+				Interval interval = Interval.of((int) lower, (int) upper);
+				if (interval.isBottom()) {
+					throw new IllegalStateException(
+							"Interval.of is not correct yet: " + lower + " "
+									+ upper);
+				}
+				return interval;
+			}
+		}
+	}
+
 	public int getLower() {
 		return lower;
 	}
@@ -57,57 +79,35 @@ public class Interval {
 		if (interval.isBottom() || otherInterval.isBottom()) {
 			return BOTTOM;
 		}
-		int lower = interval.getLower();
-		int otherLower = otherInterval.getLower();
-		int upper = interval.getUpper();
-		int otherUpper = otherInterval.getUpper();
-		if (isOverflowAddition(lower, otherLower) != isOverflowAddition(upper,
-				otherUpper)) {
-			return TOP;
-		} else {
-			return Interval.of(lower + otherLower, upper + otherUpper);
-		}
-	}
-
-	private static boolean isOverflowAddition(int a, int b) {
-		long result = ((long) a) + b;
-		return result > Integer.MAX_VALUE || result < Integer.MIN_VALUE;
+		long lower = interval.getLower();
+		long otherLower = otherInterval.getLower();
+		long upper = interval.getUpper();
+		long otherUpper = otherInterval.getUpper();
+		return Interval.of(lower + otherLower, upper + otherUpper);
 	}
 
 	public static Interval sub(Interval interval, Interval otherInterval) {
 		if (interval.isBottom() || otherInterval.isBottom()) {
 			return BOTTOM;
 		}
-		int lower = interval.getLower();
-		int otherLower = otherInterval.getLower();
-		int upper = interval.getUpper();
-		int otherUpper = otherInterval.getUpper();
-		if (isOverflowSubtraction(lower, otherUpper) != isOverflowSubtraction(
-				upper, otherLower)) {
-			return TOP;
-		} else {
-			return Interval.of(lower - otherUpper, upper - otherLower);
-		}
-	}
-
-	private static boolean isOverflowSubtraction(int a, int b) {
-		long result = ((long) a) - b;
-		return result > Integer.MAX_VALUE || result < Integer.MIN_VALUE;
+		long lower = interval.getLower();
+		long otherLower = otherInterval.getLower();
+		long upper = interval.getUpper();
+		long otherUpper = otherInterval.getUpper();
+		return Interval.of(lower - otherUpper, upper - otherLower);
 	}
 
 	public static Interval mul(Interval interval, Interval otherInterval) {
 		if (interval.isBottom() || otherInterval.isBottom()) {
 			return BOTTOM;
 		}
-		
-		int a = interval.getLower();
-		int b = interval.getUpper();
-		int c = otherInterval.getLower();
-		int d = otherInterval.getUpper();
-		int e = Math.min(a * c, Math.min(a * d, Math.min(b * c, b * d)));
-		int f = Math.max(a * c, Math.max(a * d, Math.max(b * c, b * d)));
-		
-		// TODO: Handle overflow.
+
+		long a = interval.getLower();
+		long b = interval.getUpper();
+		long c = otherInterval.getLower();
+		long d = otherInterval.getUpper();
+		long e = Math.min(a * c, Math.min(a * d, Math.min(b * c, b * d)));
+		long f = Math.max(a * c, Math.max(a * d, Math.max(b * c, b * d)));
 		return Interval.of(e, f);
 	}
 

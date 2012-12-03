@@ -164,12 +164,6 @@ public class IntervalTests {
 
 	@Test
 	public void testMul() {
-		// [a, b] * [c, d] = [e, f]
-		// [2, 4] * [3, 5] = [6, 20] = [a * c, b * d]
-		// [-2, 4] * [3, 5] = [-10, 20] = [a * d, b * d]
-		// [-4, -2] * [3, 5] = [-20, -6] = [a * d, b * c]
-		// [-2, 4] * [-3, 5] = [-5, 20] = []
-
 		Interval leftInterval;
 		Interval rightInterval;
 
@@ -196,6 +190,29 @@ public class IntervalTests {
 		leftInterval = Interval.of(-4, -2);
 		rightInterval = Interval.of(-5, -3);
 		assertInterval(6, 20, Interval.mul(leftInterval, rightInterval));
+
+		leftInterval = Interval.of(Integer.MAX_VALUE);
+		rightInterval = Interval.of(2);
+		assertInterval(-2, Interval.mul(leftInterval, rightInterval));
+
+		leftInterval = Interval.of(Integer.MAX_VALUE);
+		rightInterval = Interval.of(-1);
+		assertInterval(Integer.MIN_VALUE + 1,
+				Interval.mul(leftInterval, rightInterval));
+
+		leftInterval = Interval.of(Integer.MAX_VALUE);
+		rightInterval = Interval.of(-1, 1);
+		assertInterval(Integer.MIN_VALUE + 1, Integer.MAX_VALUE,
+				Interval.mul(leftInterval, rightInterval));
+
+		leftInterval = Interval.of(Integer.MAX_VALUE);
+		rightInterval = Interval.of(1, 2);
+		assertTrue(Interval.mul(leftInterval, rightInterval).isTop());
+
+		leftInterval = Interval.of(Integer.MIN_VALUE);
+		rightInterval = Interval.of(-1);
+		assertInterval(Integer.MIN_VALUE,
+				Interval.mul(leftInterval, rightInterval));
 	}
 
 	@Test
