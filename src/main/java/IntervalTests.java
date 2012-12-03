@@ -328,6 +328,39 @@ public class IntervalTests {
 				Interval.ge(leftInterval, rightInterval));
 	}
 
+	@Test
+	public void testGt() {
+		Interval leftInterval;
+		Interval rightInterval;
+
+		leftInterval = Interval.of(6, 8);
+		rightInterval = Interval.of(2, 4);
+		assertInterval(6, 8, Interval.gt(leftInterval, rightInterval));
+
+		assertTrue(Interval.gt(leftInterval, Interval.BOTTOM).isBottom());
+		assertTrue(Interval.gt(Interval.BOTTOM, leftInterval).isBottom());
+
+		leftInterval = Interval.of(4, 6);
+		rightInterval = Interval.of(2, 4);
+		assertInterval(4, 6, Interval.gt(leftInterval, rightInterval));
+
+		leftInterval = Interval.of(3, 5);
+		rightInterval = Interval.of(2, 4);
+		assertInterval(3, 5, Interval.gt(leftInterval, rightInterval));
+
+		leftInterval = Interval.of(1, 3);
+		rightInterval = Interval.of(2, 4);
+		assertInterval(3, Interval.gt(leftInterval, rightInterval));
+
+		leftInterval = Interval.of(0, 2);
+		rightInterval = Interval.of(2, 4);
+		assertTrue(Interval.gt(leftInterval, rightInterval).isBottom());
+
+		leftInterval = Interval.of(Integer.MAX_VALUE);
+		rightInterval = Interval.of(Integer.MAX_VALUE);
+		assertTrue(Interval.gt(leftInterval, rightInterval).isBottom());
+	}
+
 	protected void assertInterval(int expectedLower, int expectedUpper,
 			Interval interval) {
 		assertEquals(expectedLower, interval.getLower());

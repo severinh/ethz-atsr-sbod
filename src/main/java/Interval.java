@@ -65,7 +65,7 @@ public class Interval {
 				otherUpper)) {
 			return TOP;
 		} else {
-			return new Interval(lower + otherLower, upper + otherUpper);
+			return Interval.of(lower + otherLower, upper + otherUpper);
 		}
 	}
 
@@ -86,7 +86,7 @@ public class Interval {
 				upper, otherLower)) {
 			return TOP;
 		} else {
-			return new Interval(lower - otherUpper, upper - otherLower);
+			return Interval.of(lower - otherUpper, upper - otherLower);
 		}
 	}
 
@@ -101,7 +101,7 @@ public class Interval {
 		}
 		// TODO: Handle overflow.
 		// TODO: Not correct yet...
-		return new Interval(interval.getLower() * otherInterval.getLower(),
+		return Interval.of(interval.getLower() * otherInterval.getLower(),
 				interval.getUpper() * otherInterval.getUpper());
 	}
 
@@ -114,7 +114,7 @@ public class Interval {
 				&& interval.getUpper() > Integer.MIN_VALUE) {
 			return TOP;
 		} else {
-			return new Interval(-interval.getUpper(), -interval.getLower());
+			return Interval.of(-interval.getUpper(), -interval.getLower());
 		}
 	}
 
@@ -193,7 +193,7 @@ public class Interval {
 		}
 		int lower = leftInterval.getLower();
 		int upper = Math.min(leftInterval.getUpper(), rightInterval.getUpper());
-		Interval result = new Interval(lower, upper);
+		Interval result = Interval.of(lower, upper);
 		return result;
 	}
 
@@ -248,10 +248,10 @@ public class Interval {
 			// Constrain the left interval only if the right value marks the
 			// start or end of the left interval
 			if (leftInterval.getLower() == rightInterval.getLower()) {
-				return new Interval(leftInterval.getLower() + 1,
+				return Interval.of(leftInterval.getLower() + 1,
 						leftInterval.getUpper());
 			} else if (leftInterval.getUpper() == rightInterval.getUpper()) {
-				return new Interval(leftInterval.getLower(),
+				return Interval.of(leftInterval.getLower(),
 						leftInterval.getUpper() - 1);
 			}
 		}
@@ -279,7 +279,7 @@ public class Interval {
 		}
 		int lower = Math.max(leftInterval.getLower(), rightInterval.getLower());
 		int upper = leftInterval.getUpper();
-		Interval result = new Interval(lower, upper);
+		Interval result = Interval.of(lower, upper);
 		return result;
 	}
 
@@ -308,7 +308,7 @@ public class Interval {
 		int lower = Math.max(leftInterval.getLower(),
 				rightInterval.getLower() + 1);
 		int upper = leftInterval.getUpper();
-		Interval result = new Interval(lower, upper);
+		Interval result = Interval.of(lower, upper);
 		return result;
 	}
 
