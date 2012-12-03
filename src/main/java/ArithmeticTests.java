@@ -1,10 +1,10 @@
 import org.junit.Test;
 
 /**
- * Holds tests where the array sizes and indices are simple arithmetic
- * expressions. There are no control flow branches in the test methods.
+ * Holds tests where the array sizes and indices are arithmetic expressions.
+ * There are no control flow branches in the test methods.
  */
-public class SimpleArithmeticTests extends AbstractTest {
+public class ArithmeticTests extends AbstractTest {
 
 	public static void main(String[] args) {
 		testSafeComputedIndices();
