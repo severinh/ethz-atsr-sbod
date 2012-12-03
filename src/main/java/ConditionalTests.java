@@ -41,6 +41,24 @@ public class ConditionalTests extends AbstractTest {
 		assertSafe("testSafeDeadCode2");
 	}
 
+	public static void testSafeDeadCode3() {
+		int[] array = new int[2];
+		int index = 0;
+		boolean flag = true;
+		boolean otherFlag = true;
+		if (flag && otherFlag) {
+			index = 1;
+		} else {
+			index = -1;
+		}
+		System.out.println(array[index]);
+	}
+
+	@Test
+	public void _testSafeDeadCode3() {
+		assertSafe("testSafeDeadCode3");
+	}
+
 	public static void testSafeDeadCodeNested() {
 		int[] array = new int[2];
 		int index = 0;
