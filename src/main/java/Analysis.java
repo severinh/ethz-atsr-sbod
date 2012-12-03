@@ -184,27 +184,41 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 				Interval leftInterval = current.tryGetIntervalForValue(left);
 				Interval rightInterval = current.tryGetIntervalForValue(right);
 
+				Interval leftBranchInterval = Interval.cond(leftInterval,
+						rightInterval, conditionExprEnum);
+				Interval leftFallInterval = Interval.cond(leftInterval,
+						rightInterval, conditionExprEnum.getNegation());
+				Interval rightBranchInterval = Interval.cond(rightInterval,
+						leftInterval, conditionExprEnum.getSwapped());
+				Interval rightFallInterval = Interval.cond(rightInterval,
+						leftInterval, conditionExprEnum.getSwapped()
+								.getNegation());
+
+				if (leftBranchInterval.isBottom()
+						&& rightBranchInterval.isBottom()) {
+					// If no values of the left and right intervals can satisfy
+					// the condition, mark the branch state as dead
+					branchState.setInDeadCode();
+				} else if (leftFallInterval.isBottom()
+						&& rightFallInterval.isBottom()) {
+					// If no values of the left and right intervals can satisfy
+					// the negation of the condition, mark the fall through
+					// state as dead
+					fallState.setInDeadCode();
+				}
+
 				if (left instanceof JimpleLocal) {
 					JimpleLocal leftLocal = (JimpleLocal) left;
 					String varName = leftLocal.getName();
-					Interval branchInterval = Interval.cond(leftInterval,
-							rightInterval, conditionExprEnum);
-					Interval fallInterval = Interval.cond(leftInterval,
-							rightInterval, conditionExprEnum.getNegation());
-					branchState.putIntervalForVar(varName, branchInterval);
-					fallState.putIntervalForVar(varName, fallInterval);
+					branchState.putIntervalForVar(varName, leftBranchInterval);
+					fallState.putIntervalForVar(varName, leftFallInterval);
 				}
 
 				if (right instanceof JimpleLocal) {
 					JimpleLocal rightLocal = (JimpleLocal) right;
 					String varName = rightLocal.getName();
-					Interval branchInterval = Interval.cond(rightInterval,
-							leftInterval, conditionExprEnum.getSwapped());
-					Interval fallInterval = Interval.cond(rightInterval,
-							leftInterval, conditionExprEnum.getSwapped()
-									.getNegation());
-					branchState.putIntervalForVar(varName, branchInterval);
-					fallState.putIntervalForVar(varName, fallInterval);
+					branchState.putIntervalForVar(varName, rightBranchInterval);
+					fallState.putIntervalForVar(varName, rightFallInterval);
 				}
 			} else {
 				unhandled("condition");

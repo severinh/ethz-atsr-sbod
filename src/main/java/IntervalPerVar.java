@@ -12,9 +12,28 @@ import soot.jimple.internal.JimpleLocal;
 public class IntervalPerVar {
 
 	private final HashMap<String, Interval> values;
+	private boolean isInDeadCode;
 
 	public IntervalPerVar() {
 		values = new HashMap<String, Interval>();
+		isInDeadCode = false;
+	}
+
+	/**
+	 * Returns whether the current state applies to code that will not be
+	 * executed given the current information (i.e. it is dead).
+	 * 
+	 * @return whether the associated code is dead
+	 */
+	public boolean isInDeadCode() {
+		return isInDeadCode;
+	}
+
+	/**
+	 * Marks the current state as being associated with dead code.
+	 */
+	public void setInDeadCode() {
+		isInDeadCode = true;
 	}
 
 	@Override
@@ -28,6 +47,9 @@ public class IntervalPerVar {
 			builder.append("=");
 			builder.append(entry.getValue().toString());
 		}
+		if (isInDeadCode()) {
+			builder.append(" (dead)");
+		}
 		return builder.toString();
 	}
 
@@ -36,26 +58,39 @@ public class IntervalPerVar {
 	public void copyFrom(IntervalPerVar other) {
 		values.clear();
 		values.putAll(other.values);
+		isInDeadCode = other.isInDeadCode;
 	}
 
 	public void mergeFrom(IntervalPerVar first, IntervalPerVar second) {
 		values.clear();
-
-		Set<String> varNames = new HashSet<String>();
-		varNames.addAll(first.values.keySet());
-		varNames.addAll(second.values.keySet());
-
-		for (String varName : varNames) {
-			Interval firstInterval = first.values.get(varName);
-			Interval secondInterval = second.values.get(varName);
-			if (firstInterval == null) {
-				values.put(varName, secondInterval);
-			} else if (secondInterval == null) {
-				values.put(varName, firstInterval);
+		// If both source states are associated with dead code, so is the result
+		if (first.isInDeadCode && second.isInDeadCode) {
+			isInDeadCode = true;
+		} else {
+			isInDeadCode = false;
+			// If one of the states is associated with dead code, ignore it
+			if (first.isInDeadCode) {
+				values.putAll(second.values);
+			} else if (second.isInDeadCode) {
+				values.putAll(first.values);
 			} else {
-				Interval mergedInterval = Interval.meet(secondInterval,
-						firstInterval);
-				values.put(varName, mergedInterval);
+				Set<String> varNames = new HashSet<String>();
+				varNames.addAll(first.values.keySet());
+				varNames.addAll(second.values.keySet());
+
+				for (String varName : varNames) {
+					Interval firstInterval = first.values.get(varName);
+					Interval secondInterval = second.values.get(varName);
+					if (firstInterval == null) {
+						values.put(varName, secondInterval);
+					} else if (secondInterval == null) {
+						values.put(varName, firstInterval);
+					} else {
+						Interval mergedInterval = Interval.meet(secondInterval,
+								firstInterval);
+						values.put(varName, mergedInterval);
+					}
+				}
 			}
 		}
 	}
