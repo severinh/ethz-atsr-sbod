@@ -84,7 +84,13 @@ public class Interval {
 
 	@Override
 	public String toString() {
-		return String.format("[%d,%d]", getLower(), getUpper());
+		if (equals(TOP)) {
+			return "TOP";
+		} else if (equals(BOTTOM)) {
+			return "BOTTOM";
+		} else {
+			return String.format("[%d,%d]", getLower(), getUpper());
+		}
 	}
 
 	public static Interval plus(Interval interval, Interval otherInterval) {
