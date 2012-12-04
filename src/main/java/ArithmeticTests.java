@@ -113,6 +113,8 @@ public class ArithmeticTests extends AbstractTest {
 		index = index << 2; // index == -4
 		index *= -1; // index == 4
 		System.out.println(array[index]);
+
+		// TODO: Add more tests
 	}
 
 	@Test

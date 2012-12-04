@@ -39,6 +39,13 @@ import soot.jimple.internal.JimpleLocal;
 import soot.toolkits.graph.UnitGraph;
 import soot.toolkits.scalar.ForwardBranchedFlowAnalysis;
 
+/**
+ * Computes a fix point of the abstract variable states in an individual method
+ * using the interval domain.
+ * 
+ * Besides mapping integer and boolean variables to an interval, it also maps an
+ * array allocated in the method to an interval, indicating its possible size.
+ */
 public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 
 	private static final Logger LOG = Logger
@@ -54,10 +61,14 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 	}
 
 	/**
-	 * Returns the first potentially unsafe statement in the method, or
-	 * <code>null</code> if there is no unsafe statement.
+	 * Returns the first potentially unsafe statement in the method associated
+	 * with this {@link Analysis}, or <code>null</code> if there is no unsafe
+	 * statement.
 	 * 
 	 * @param context
+	 *            may contain additional array size intervals that the analysis
+	 *            itself cannot determine, i.e., because it requires a points-to
+	 *            analysis
 	 * @return the first unsafe statement or <code>null</code> if there is none
 	 */
 	Stmt getFirstUnsafeStatement(IntervalPerVar context) {
@@ -78,6 +89,13 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 		return null;
 	}
 
+	/**
+	 * Stops the analysis because it cannot or does not need to handle a certain
+	 * feature.
+	 * 
+	 * @param what
+	 *            a description of the feature not handled
+	 */
 	static void unhandled(String what) {
 		LOG.error("Can't handle " + what);
 		System.exit(1);
@@ -101,7 +119,8 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 			LOG.debug("\tLeft: " + left.getClass().getName());
 			LOG.debug("\tRight: " + right.getClass().getName());
 
-			// You do not need to handle these cases:
+			// Only handle cases where the left value is either a
+			// StaticFieldRef, JimpleLoca, JArrayRef or JInstanceFieldRef
 			if ((!(left instanceof StaticFieldRef))
 					&& (!(left instanceof JimpleLocal))
 					&& (!(left instanceof JArrayRef))
@@ -162,14 +181,16 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 					Interval newInterval = Interval.neg(interval);
 					fallState.putIntervalForVar(varName, newInterval);
 				} else if (right instanceof NewArrayExpr) {
+					// This statement allocates a new array
+					// Store the array size interval in the state
 					JNewArrayExpr newArrayExpr = (JNewArrayExpr) right;
 					Value size = newArrayExpr.getSize();
 					Interval interval = current.tryGetIntervalForValue(size);
 					fallState.putIntervalForVar(varName, interval);
 				} else if (right instanceof StaticFieldRef) {
-					// Do nothing
+
 				} else if (right instanceof JArrayRef) {
-					// Do nothing
+
 				} else if (right instanceof NewExpr) {
 					// Do nothing
 				} else if (right instanceof InvokeExpr) {
@@ -212,12 +233,27 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 				Interval leftInterval = current.tryGetIntervalForValue(left);
 				Interval rightInterval = current.tryGetIntervalForValue(right);
 
+				// The constrained interval of the left value when the condition
+				// holds. It is Interval.BOTTOM if the left value cannot
+				// possibly satisfy the condition
 				Interval leftBranchInterval = Interval.cond(leftInterval,
 						rightInterval, conditionExprEnum);
+
+				// The constrained interval of the left value when the condition
+				// does not hold. It is Interval.BOTTOM if the left value
+				// certainly satisfies the condition
 				Interval leftFallInterval = Interval.cond(leftInterval,
 						rightInterval, conditionExprEnum.getNegation());
+
+				// The constrained interval of the right value when the
+				// condition holds. It is Interval.BOTTOM if the right value
+				// cannot possibly satisfy the condition
 				Interval rightBranchInterval = Interval.cond(rightInterval,
 						leftInterval, conditionExprEnum.getSwapped());
+
+				// The constrained interval of the right value when the
+				// condition does not hold. It is Interval.BOTTOM if the right
+				// value certainly satisfies the condition
 				Interval rightFallInterval = Interval.cond(rightInterval,
 						leftInterval, conditionExprEnum.getSwapped()
 								.getNegation());
@@ -226,12 +262,14 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 						&& rightBranchInterval.isBottom()) {
 					// If no values of the left and right intervals can satisfy
 					// the condition, mark the branch state as dead
+					// TODO: Replace this by a disjunction?
 					branchState.setInDeadCode();
 				} else if (leftFallInterval.isBottom()
 						&& rightFallInterval.isBottom()) {
 					// If no values of the left and right intervals can satisfy
 					// the negation of the condition, mark the fall through
 					// state as dead
+					// TODO: Replace this by disjunction?
 					fallState.setInDeadCode();
 				}
 

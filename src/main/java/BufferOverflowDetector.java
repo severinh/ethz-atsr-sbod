@@ -21,9 +21,15 @@ import soot.options.Options;
 import soot.toolkits.graph.BriefUnitGraph;
 import soot.toolkits.graph.UnitGraph;
 
+/**
+ * Detects potential {@link ArrayIndexOutOfBoundsException}s within a single
+ * class.
+ */
 public class BufferOverflowDetector {
 
+	// Whether to use points-to-analysis or not (expensive)
 	private static final boolean USE_POINTS_TO_ANALYSIS = false;
+
 	private static final Logger LOG = Logger
 			.getLogger(BufferOverflowDetector.class.getName());
 
@@ -42,6 +48,12 @@ public class BufferOverflowDetector {
 		analyzeClass();
 	}
 
+	/**
+	 * Returns the list of {@link SootMethod}s in the class whose name begins
+	 * with 'test'.
+	 * 
+	 * @return the list of methods
+	 */
 	private List<SootMethod> getTestMethods() {
 		List<SootMethod> testMethods = new ArrayList<SootMethod>();
 		for (SootMethod method : sootClass.getMethods()) {
@@ -52,6 +64,10 @@ public class BufferOverflowDetector {
 		return testMethods;
 	}
 
+	/**
+	 * Runs an {@link Analysis} for each method in the class and caches the
+	 * {@link Analysis} objects.
+	 */
 	private void analyzeClass() {
 		LOG.info("Analyzing " + className + "...");
 		List<SootMethod> testMethods = getTestMethods();
@@ -73,8 +89,19 @@ public class BufferOverflowDetector {
 		}
 	}
 
+	/**
+	 * Checks each array access of a method for the possibility of an
+	 * {@link ArrayIndexOutOfBoundsException}.
+	 * 
+	 * @param methodName
+	 *            the name of the method
+	 * @return the analysis result
+	 */
 	public AnalysisResult getAnalysisResult(String methodName) {
 		Analysis analysis = methodAnalyses.get(methodName);
+
+		// Maps each static or non-static array fields as well as array
+		// parameters to an array size interval
 		IntervalPerVar context = new IntervalPerVar();
 
 		if (USE_POINTS_TO_ANALYSIS) {
@@ -85,10 +112,9 @@ public class BufferOverflowDetector {
 			for (Local local : body.getLocals()) {
 				if (local.getType() instanceof RefLikeType) {
 					PointsToSet pointsToSet = pta.reachingObjects(local);
-					System.out.println("PTA ::::::: "
-							+ pointsToSet.getClass().getName());
-					// TODO: Decide how to use the points_to set and
-					// check if a method is safe.
+					// TODO: Read the array size intervals from the Analysis
+					// objects for the method that the arrays are initialized
+					// in. Merge the intervals and store it in the context.
 					LOG.info(local.getName() + " points to " + pointsToSet);
 				}
 			}

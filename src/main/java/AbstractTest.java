@@ -3,8 +3,16 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * Base class for unit tests that provides convenience assertion methods.
+ * 
+ * Use public static methods with the prefix 'testSafe' or 'testUnsafe' for
+ * methods to be analyzed by Soot. Then, create corresponding '_test' method
+ * with the @Test annotation and either call{@link #assertSafe(String)} or
+ * {@link #assertMaybeUnsafe(String)} in it.
+ * 
+ * Do not forget to add a main method that calls the 'test*' methods. Soot needs
+ * it for points-to analysis.
  */
-public class AbstractTest {
+public abstract class AbstractTest {
 
 	private final BufferOverflowDetector detector;
 
