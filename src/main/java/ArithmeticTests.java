@@ -97,4 +97,27 @@ public class ArithmeticTests extends AbstractTest {
 		assertMaybeUnsafe("testUnsafeComputedIndicesMul");
 	}
 
+	public static void testSafeLeftShift() {
+		int[] array = new int[8];
+		int index = 0;
+
+		index = 3;
+		index = index << 1; // index == 1
+		System.out.println(array[index]);
+
+		index = 1;
+		index = index << 2; // index == 4
+		System.out.println(array[index]);
+
+		index = -1;
+		index = index << 2; // index == -4
+		index *= -1; // index == 4
+		System.out.println(array[index]);
+	}
+
+	@Test
+	public void _testSafeLeftShift() {
+		assertSafe("testSafeLeftShift");
+	}
+
 }

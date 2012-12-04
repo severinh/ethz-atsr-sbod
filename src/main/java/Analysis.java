@@ -8,6 +8,12 @@ import soot.SootMethod;
 import soot.Type;
 import soot.Unit;
 import soot.Value;
+import soot.JastAddJ.AndBitwiseExpr;
+import soot.JastAddJ.LShiftExpr;
+import soot.JastAddJ.OrBitwiseExpr;
+import soot.JastAddJ.RShiftExpr;
+import soot.JastAddJ.URShiftExpr;
+import soot.JastAddJ.XorBitwiseExpr;
 import soot.jimple.AddExpr;
 import soot.jimple.BinopExpr;
 import soot.jimple.ConditionExpr;
@@ -118,28 +124,36 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 					Value firstValue = ((BinopExpr) right).getOp1();
 					Value secondValue = ((BinopExpr) right).getOp2();
 
-					Interval firstInterval = current
-							.tryGetIntervalForValue(firstValue);
-					Interval secondInterval = current
+					Interval first = current.tryGetIntervalForValue(firstValue);
+					Interval second = current
 							.tryGetIntervalForValue(secondValue);
 
-					if (firstInterval != null && secondInterval != null) {
+					if (first != null && second != null) {
+						Interval newInterval = null;
 						if (right instanceof AddExpr) {
-							fallState.putIntervalForVar(varName, Interval.plus(
-									firstInterval, secondInterval));
+							newInterval = Interval.plus(first, second);
 						} else if (right instanceof SubExpr) {
-							fallState
-									.putIntervalForVar(varName, Interval.sub(
-											firstInterval, secondInterval));
+							newInterval = Interval.sub(first, second);
 						} else if (right instanceof MulExpr) {
-							fallState
-									.putIntervalForVar(varName, Interval.mul(
-											firstInterval, secondInterval));
+							newInterval = Interval.mul(first, second);
+						} else if (right instanceof LShiftExpr) {
+							newInterval = Interval.lShift(first, second);
+						} else if (right instanceof RShiftExpr) {
+							newInterval = Interval.rShift(first, second);
+						} else if (right instanceof URShiftExpr) {
+							newInterval = Interval.uRShift(first, second);
+						} else if (right instanceof AndBitwiseExpr) {
+							newInterval = Interval.andBitwise(first, second);
+						} else if (right instanceof OrBitwiseExpr) {
+							newInterval = Interval.orBitwise(first, second);
+						} else if (right instanceof XorBitwiseExpr) {
+							newInterval = Interval.xorBitwise(first, second);
 						} else if (right instanceof RemExpr) {
 							unhandled("modulo expression");
 						} else if (right instanceof DivExpr) {
 							unhandled("division expression");
 						}
+						fallState.putIntervalForVar(varName, newInterval);
 					}
 				} else if (right instanceof NegExpr) {
 					NegExpr negExpr = (NegExpr) right;

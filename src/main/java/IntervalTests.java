@@ -216,6 +216,80 @@ public class IntervalTests {
 	}
 
 	@Test
+	public void testLShift() {
+		Interval leftInterval;
+		Interval rightInterval;
+
+		leftInterval = Interval.of(2, 4);
+		rightInterval = Interval.of(0, 2);
+		assertInterval(2, 16, Interval.lShift(leftInterval, rightInterval));
+
+		leftInterval = Interval.of(-2, 4);
+		rightInterval = Interval.of(1, 2);
+		assertInterval(-8, 16, Interval.lShift(leftInterval, rightInterval));
+	}
+
+	@Test
+	public void testRShift() {
+		Interval leftInterval;
+		Interval rightInterval;
+
+		leftInterval = Interval.of(8, 8);
+		rightInterval = Interval.of(2, 2);
+		assertInterval(2, 2, Interval.rShift(leftInterval, rightInterval));
+
+		// TODO: Add more tests
+	}
+
+	@Test
+	public void testURShift() {
+		Interval leftInterval;
+		Interval rightInterval;
+
+		leftInterval = Interval.of(8, 8);
+		rightInterval = Interval.of(2, 2);
+		assertInterval(2, 2, Interval.uRShift(leftInterval, rightInterval));
+
+		// TODO: Add more tests
+	}
+
+	@Test
+	public void testAndBitwiseShift() {
+		Interval leftInterval;
+		Interval rightInterval;
+
+		leftInterval = Interval.of(5, 5);
+		rightInterval = Interval.of(3, 3);
+		assertInterval(1, 1, Interval.andBitwise(leftInterval, rightInterval));
+
+		// TODO: Add more tests
+	}
+
+	@Test
+	public void testOrBitwiseShift() {
+		Interval leftInterval;
+		Interval rightInterval;
+
+		leftInterval = Interval.of(5, 5);
+		rightInterval = Interval.of(2, 2);
+		assertInterval(7, 7, Interval.orBitwise(leftInterval, rightInterval));
+
+		// TODO: Add more tests
+	}
+	
+	@Test
+	public void testXorBitwiseShift() {
+		Interval leftInterval;
+		Interval rightInterval;
+
+		leftInterval = Interval.of(5, 5);
+		rightInterval = Interval.of(3, 3);
+		assertInterval(6, 6, Interval.xorBitwise(leftInterval, rightInterval));
+
+		// TODO: Add more tests
+	}
+	
+	@Test
 	public void testLt() {
 		Interval leftInterval;
 		Interval rightInterval;

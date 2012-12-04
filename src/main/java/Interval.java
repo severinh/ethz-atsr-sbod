@@ -74,6 +74,11 @@ public class Interval {
 		return equals(TOP);
 	}
 
+	public boolean isSingleValue() {
+		boolean result = getLower() == getUpper();
+		return result;
+	}
+
 	public boolean contains(int value) {
 		if (isBottom()) {
 			return false;
@@ -139,6 +144,99 @@ public class Interval {
 			return TOP;
 		} else {
 			return Interval.of(-interval.getUpper(), -interval.getLower());
+		}
+	}
+
+	public static Interval lShift(Interval leftInterval, Interval rightInterval) {
+		if (leftInterval.isBottom() || rightInterval.isBottom()) {
+			return BOTTOM;
+		}
+		// TODO: Does not handle overflows yet
+		long a = leftInterval.getLower();
+		long b = leftInterval.getUpper();
+		long c = rightInterval.getLower();
+		long d = rightInterval.getUpper();
+		long lower = Math.min(a << c, a << d);
+		long upper = Math.max(b << c, b << d);
+		Interval result = Interval.of(lower, upper);
+		return result;
+	}
+
+	public static Interval rShift(Interval leftInterval, Interval rightInterval) {
+		if (leftInterval.isBottom() || rightInterval.isBottom()) {
+			return BOTTOM;
+		}
+
+		if (leftInterval.isSingleValue() && rightInterval.isSingleValue()) {
+			int value = leftInterval.getLower() >> rightInterval.getUpper();
+			Interval result = Interval.of(value);
+			return result;
+		} else {
+			// TODO: Imprecise
+			return TOP;
+		}
+	}
+
+	public static Interval uRShift(Interval leftInterval, Interval rightInterval) {
+		if (leftInterval.isBottom() || rightInterval.isBottom()) {
+			return BOTTOM;
+		}
+
+		if (leftInterval.isSingleValue() && rightInterval.isSingleValue()) {
+			int value = leftInterval.getLower() >>> rightInterval.getUpper();
+			Interval result = Interval.of(value);
+			return result;
+		} else {
+			// TODO: Imprecise
+			return TOP;
+		}
+	}
+
+	public static Interval andBitwise(Interval leftInterval,
+			Interval rightInterval) {
+		if (leftInterval.isBottom() || rightInterval.isBottom()) {
+			return BOTTOM;
+		}
+
+		if (leftInterval.isSingleValue() && rightInterval.isSingleValue()) {
+			int value = leftInterval.getLower() & rightInterval.getUpper();
+			Interval result = Interval.of(value);
+			return result;
+		} else {
+			// TODO: Imprecise
+			return TOP;
+		}
+	}
+
+	public static Interval orBitwise(Interval leftInterval,
+			Interval rightInterval) {
+		if (leftInterval.isBottom() || rightInterval.isBottom()) {
+			return BOTTOM;
+		}
+
+		if (leftInterval.isSingleValue() && rightInterval.isSingleValue()) {
+			int value = leftInterval.getLower() | rightInterval.getUpper();
+			Interval result = Interval.of(value);
+			return result;
+		} else {
+			// TODO: Imprecise
+			return TOP;
+		}
+	}
+
+	public static Interval xorBitwise(Interval leftInterval,
+			Interval rightInterval) {
+		if (leftInterval.isBottom() || rightInterval.isBottom()) {
+			return BOTTOM;
+		}
+
+		if (leftInterval.isSingleValue() && rightInterval.isSingleValue()) {
+			int value = leftInterval.getLower() ^ rightInterval.getUpper();
+			Interval result = Interval.of(value);
+			return result;
+		} else {
+			// TODO: Imprecise
+			return TOP;
 		}
 	}
 
