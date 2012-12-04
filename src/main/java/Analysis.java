@@ -8,13 +8,8 @@ import soot.SootMethod;
 import soot.Type;
 import soot.Unit;
 import soot.Value;
-import soot.JastAddJ.AndBitwiseExpr;
-import soot.JastAddJ.LShiftExpr;
-import soot.JastAddJ.OrBitwiseExpr;
-import soot.JastAddJ.RShiftExpr;
-import soot.JastAddJ.URShiftExpr;
-import soot.JastAddJ.XorBitwiseExpr;
 import soot.jimple.AddExpr;
+import soot.jimple.AndExpr;
 import soot.jimple.BinopExpr;
 import soot.jimple.ConditionExpr;
 import soot.jimple.DefinitionStmt;
@@ -27,11 +22,16 @@ import soot.jimple.MulExpr;
 import soot.jimple.NegExpr;
 import soot.jimple.NewArrayExpr;
 import soot.jimple.NewExpr;
+import soot.jimple.OrExpr;
 import soot.jimple.ParameterRef;
 import soot.jimple.RemExpr;
+import soot.jimple.ShlExpr;
+import soot.jimple.ShrExpr;
 import soot.jimple.StaticFieldRef;
 import soot.jimple.Stmt;
 import soot.jimple.SubExpr;
+import soot.jimple.UshrExpr;
+import soot.jimple.XorExpr;
 import soot.jimple.internal.JArrayRef;
 import soot.jimple.internal.JInstanceFieldRef;
 import soot.jimple.internal.JNewArrayExpr;
@@ -136,18 +136,18 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 							newInterval = Interval.sub(first, second);
 						} else if (right instanceof MulExpr) {
 							newInterval = Interval.mul(first, second);
-						} else if (right instanceof LShiftExpr) {
-							newInterval = Interval.lShift(first, second);
-						} else if (right instanceof RShiftExpr) {
-							newInterval = Interval.rShift(first, second);
-						} else if (right instanceof URShiftExpr) {
-							newInterval = Interval.uRShift(first, second);
-						} else if (right instanceof AndBitwiseExpr) {
-							newInterval = Interval.andBitwise(first, second);
-						} else if (right instanceof OrBitwiseExpr) {
-							newInterval = Interval.orBitwise(first, second);
-						} else if (right instanceof XorBitwiseExpr) {
-							newInterval = Interval.xorBitwise(first, second);
+						} else if (right instanceof ShlExpr) {
+							newInterval = Interval.shl(first, second);
+						} else if (right instanceof ShrExpr) {
+							newInterval = Interval.shr(first, second);
+						} else if (right instanceof UshrExpr) {
+							newInterval = Interval.ushr(first, second);
+						} else if (right instanceof AndExpr) {
+							newInterval = Interval.and(first, second);
+						} else if (right instanceof OrExpr) {
+							newInterval = Interval.or(first, second);
+						} else if (right instanceof XorExpr) {
+							newInterval = Interval.xor(first, second);
 						} else if (right instanceof RemExpr) {
 							unhandled("modulo expression");
 						} else if (right instanceof DivExpr) {

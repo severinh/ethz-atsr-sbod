@@ -147,7 +147,7 @@ public class Interval {
 		}
 	}
 
-	public static Interval lShift(Interval leftInterval, Interval rightInterval) {
+	public static Interval shl(Interval leftInterval, Interval rightInterval) {
 		if (leftInterval.isBottom() || rightInterval.isBottom()) {
 			return BOTTOM;
 		}
@@ -162,7 +162,7 @@ public class Interval {
 		return result;
 	}
 
-	public static Interval rShift(Interval leftInterval, Interval rightInterval) {
+	public static Interval shr(Interval leftInterval, Interval rightInterval) {
 		if (leftInterval.isBottom() || rightInterval.isBottom()) {
 			return BOTTOM;
 		}
@@ -177,7 +177,7 @@ public class Interval {
 		}
 	}
 
-	public static Interval uRShift(Interval leftInterval, Interval rightInterval) {
+	public static Interval ushr(Interval leftInterval, Interval rightInterval) {
 		if (leftInterval.isBottom() || rightInterval.isBottom()) {
 			return BOTTOM;
 		}
@@ -192,7 +192,7 @@ public class Interval {
 		}
 	}
 
-	public static Interval andBitwise(Interval leftInterval,
+	public static Interval and(Interval leftInterval,
 			Interval rightInterval) {
 		if (leftInterval.isBottom() || rightInterval.isBottom()) {
 			return BOTTOM;
@@ -208,7 +208,7 @@ public class Interval {
 		}
 	}
 
-	public static Interval orBitwise(Interval leftInterval,
+	public static Interval or(Interval leftInterval,
 			Interval rightInterval) {
 		if (leftInterval.isBottom() || rightInterval.isBottom()) {
 			return BOTTOM;
@@ -224,7 +224,7 @@ public class Interval {
 		}
 	}
 
-	public static Interval xorBitwise(Interval leftInterval,
+	public static Interval xor(Interval leftInterval,
 			Interval rightInterval) {
 		if (leftInterval.isBottom() || rightInterval.isBottom()) {
 			return BOTTOM;

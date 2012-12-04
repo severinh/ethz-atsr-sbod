@@ -216,79 +216,79 @@ public class IntervalTests {
 	}
 
 	@Test
-	public void testLShift() {
+	public void testShl() {
 		Interval leftInterval;
 		Interval rightInterval;
 
 		leftInterval = Interval.of(2, 4);
 		rightInterval = Interval.of(0, 2);
-		assertInterval(2, 16, Interval.lShift(leftInterval, rightInterval));
+		assertInterval(2, 16, Interval.shl(leftInterval, rightInterval));
 
 		leftInterval = Interval.of(-2, 4);
 		rightInterval = Interval.of(1, 2);
-		assertInterval(-8, 16, Interval.lShift(leftInterval, rightInterval));
+		assertInterval(-8, 16, Interval.shl(leftInterval, rightInterval));
 	}
 
 	@Test
-	public void testRShift() {
+	public void testShr() {
 		Interval leftInterval;
 		Interval rightInterval;
 
 		leftInterval = Interval.of(8, 8);
 		rightInterval = Interval.of(2, 2);
-		assertInterval(2, 2, Interval.rShift(leftInterval, rightInterval));
+		assertInterval(2, 2, Interval.shr(leftInterval, rightInterval));
 
 		// TODO: Add more tests
 	}
 
 	@Test
-	public void testURShift() {
+	public void testUshr() {
 		Interval leftInterval;
 		Interval rightInterval;
 
 		leftInterval = Interval.of(8, 8);
 		rightInterval = Interval.of(2, 2);
-		assertInterval(2, 2, Interval.uRShift(leftInterval, rightInterval));
+		assertInterval(2, 2, Interval.ushr(leftInterval, rightInterval));
 
 		// TODO: Add more tests
 	}
 
 	@Test
-	public void testAndBitwiseShift() {
+	public void testAnd() {
 		Interval leftInterval;
 		Interval rightInterval;
 
 		leftInterval = Interval.of(5, 5);
 		rightInterval = Interval.of(3, 3);
-		assertInterval(1, 1, Interval.andBitwise(leftInterval, rightInterval));
+		assertInterval(1, 1, Interval.and(leftInterval, rightInterval));
 
 		// TODO: Add more tests
 	}
 
 	@Test
-	public void testOrBitwiseShift() {
+	public void testOr() {
 		Interval leftInterval;
 		Interval rightInterval;
 
 		leftInterval = Interval.of(5, 5);
 		rightInterval = Interval.of(2, 2);
-		assertInterval(7, 7, Interval.orBitwise(leftInterval, rightInterval));
+		assertInterval(7, 7, Interval.or(leftInterval, rightInterval));
 
 		// TODO: Add more tests
 	}
-	
+
 	@Test
-	public void testXorBitwiseShift() {
+	public void testXor() {
 		Interval leftInterval;
 		Interval rightInterval;
 
 		leftInterval = Interval.of(5, 5);
 		rightInterval = Interval.of(3, 3);
-		assertInterval(6, 6, Interval.xorBitwise(leftInterval, rightInterval));
+		assertInterval(6, 6, Interval.xor(leftInterval, rightInterval));
 
 		// TODO: Add more tests
 	}
-	
+
 	@Test
 	public void testLt() {
 		Interval leftInterval;
