@@ -20,7 +20,6 @@ import soot.jimple.IntConstant;
 import soot.jimple.JimpleBody;
 import soot.jimple.NewArrayExpr;
 import soot.jimple.Stmt;
-import soot.jimple.internal.JNewArrayExpr;
 import soot.jimple.spark.SparkTransformer;
 import soot.jimple.spark.pag.AllocNode;
 import soot.jimple.spark.pag.Node;
@@ -136,19 +135,31 @@ public class BufferOverflowDetector {
 								if(n instanceof AllocNode){
 									AllocNode allocNode = (AllocNode) n;
 									Object newExprRaw = allocNode.getNewExpr();
-									if(newExprRaw instanceof JNewArrayExpr){
+									if(newExprRaw instanceof NewArrayExpr){
 										NewArrayExpr alloc = (NewArrayExpr) newExprRaw;
 										Value lenVal = alloc.getSize();
-										Analysis ptrContext = methodAnalyses.get(allocNode.getMethod());
+										// Retrieve analysis of method containing the allocation node.
+										Analysis allocEnv = methodAnalyses.get(allocNode.getMethod());
 										if(lenVal instanceof IntConstant){
 											context.putIntervalForVar(localPtr.getName(), Interval.of(((IntConstant)lenVal).value));
-										} else if(ptrContext != null) {
-											// The allocation is in a method that we have analysed. We should be able to give an interval for the array size.
-											// TODO: improve precision of allocations in methods that we have interval analysis for.
-											context.putIntervalForVar(localPtr.getName(), Interval.NON_NEGATIVE);
-											LOG.error("Usage of existing analysis for " + allocNode.getMethod() + 
-													" containing array allocation site " + alloc + 
-													" not implemented. Lookup triggered by reference " + localPtr + " in method " + methodName + ".");
+										} else if(allocEnv != null) {
+											// The allocation is in a method that we have analysed. 
+											// We should be able to give an interval for the array size.
+											Interval size = allocEnv.getAllocationNodeMap().get(alloc);
+											if(size != null){
+												context.putIntervalForVar(localPtr.getName(), size);
+												LOG.debug("Pointer analysis indicates that the array referred to by " 
+														+ localPtr.getName() + " in method " + methodName 
+														+ ", allocated as " + alloc + " in method " 
+														+ allocNode.getMethod().getName() 
+														+ " has size " + size + ".");
+											} else {
+												context.putIntervalForVar(localPtr.getName(), Interval.NON_NEGATIVE);
+												LOG.debug("No size on record for allocation site of the array referred to by " 
+														+ localPtr.getName() + " in method " + methodName 
+														+ ", allocated as " + alloc + " in method " 
+														+ allocNode.getMethod().getName() + ".");
+											}
 										} else {
 											// The allocation is in a method that we have not analysed. Will use TOP for array size.
 											context.putIntervalForVar(localPtr.getName(), Interval.NON_NEGATIVE);
@@ -157,6 +168,11 @@ public class BufferOverflowDetector {
 													". Lookup triggered by reference " + localPtr + " in method " + methodName + ".");
 										}
 									}
+								} else {
+									LOG.warn("Non-allocation node in points-to analysis results for pointer " 
+											+ localPtr + " in method " 
+											+ methodName + ".");
+									context.putIntervalForVar(localPtr.getName(), Interval.NON_NEGATIVE);
 								}
 							}
 						});

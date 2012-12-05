@@ -1,4 +1,6 @@
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 
@@ -53,6 +55,8 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 		super(graph);
 		LOG.debug(graph.toString());
 	}
+	
+	private final Map<NewArrayExpr,Interval> allocationNodeMap = new HashMap<NewArrayExpr,Interval>();
 
 	void run() {
 		doAnalysis();
@@ -186,10 +190,13 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 				} else if (right instanceof NewArrayExpr) {
 					// This statement allocates a new array
 					// Store the array size interval in the state
-					JNewArrayExpr newArrayExpr = (JNewArrayExpr) right;
+					NewArrayExpr newArrayExpr = (JNewArrayExpr) right;
 					Value size = newArrayExpr.getSize();
 					Interval interval = current.tryGetIntervalForValue(size);
 					fallState.putIntervalForVar(varName, interval);
+					// Also associate allocation site with size interval
+					// for use from other methods (via pointer-analysis)
+					getAllocationNodeMap().put(newArrayExpr, interval);
 				} else if (right instanceof StaticFieldRef) {
 
 				} else if (right instanceof JArrayRef) {
@@ -331,6 +338,10 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 	@Override
 	protected IntervalPerVar newInitialFlow() {
 		return new IntervalPerVar();
+	}
+
+	public Map<NewArrayExpr,Interval> getAllocationNodeMap() {
+		return allocationNodeMap;
 	}
 
 }
