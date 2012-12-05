@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -195,6 +196,8 @@ public class BufferOverflowDetector {
 		// Perform a whole-program analysis, but without the JDK
 		// It is unsound, but makes testing blazing fast
 		Options.v().set_no_bodies_for_excluded(true);
+		Options.v().set_exclude(Arrays.asList("org.apache"));
+		
 		// Soot choked because the following two classes were not loaded
 		// For JDKs other than OpenJDK 7, other classes might be needed
 		Scene.v().addBasicClass("sun.misc.ClassFileTransformer");
