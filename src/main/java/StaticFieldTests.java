@@ -12,7 +12,7 @@ public class StaticFieldTests extends AbstractTest {
 		CONSTANT_SIX = 5 + 1;
 	}
 
-	public void main(String[] args) {
+	public static void main(String[] args) {
 		testSafeConstantStaticField();
 	}
 
