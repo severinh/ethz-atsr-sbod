@@ -241,6 +241,8 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 			} else if (left instanceof JArrayRef) {
 				// Do nothing
 				// The array access is relevant at the end of the analysis
+			} else if (left instanceof StaticFieldRef) {
+				// Do nothing
 			} else {
 				unhandled("left-hand side of assignment");
 			}
