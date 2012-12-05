@@ -57,11 +57,11 @@ public abstract class AbstractTest {
 					+ methodName + "through reflection");
 		}
 
-		if (method.getAnnotation(Safe.class) != null || methodName.contains("Safe")) {
+		if (method.getAnnotation(Safe.class) != null) {
 			assertTrue("IMPRECISION: Method " + methodName
 					+ " is safe in the concrete, but was not detected as such",
 					result.isSafe());
-		} else if (method.getAnnotation(Unsafe.class) != null || methodName.contains("Unsafe")) {
+		} else if (method.getAnnotation(Unsafe.class) != null) {
 			assertFalse(
 					"UNSOUNDNESS: Method "
 							+ methodName
