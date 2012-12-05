@@ -6,6 +6,8 @@ public class Interval {
 	public static final Interval TOP = new Interval(Integer.MIN_VALUE,
 			Integer.MAX_VALUE);
 	public static final Interval BOTTOM = new Interval(1, 0);
+	public static final Interval NON_NEGATIVE = new Interval(0,
+			Integer.MAX_VALUE);
 
 	private final int lower;
 	private final int upper;
@@ -192,8 +194,7 @@ public class Interval {
 		}
 	}
 
-	public static Interval and(Interval leftInterval,
-			Interval rightInterval) {
+	public static Interval and(Interval leftInterval, Interval rightInterval) {
 		if (leftInterval.isBottom() || rightInterval.isBottom()) {
 			return BOTTOM;
 		}
@@ -208,8 +209,7 @@ public class Interval {
 		}
 	}
 
-	public static Interval or(Interval leftInterval,
-			Interval rightInterval) {
+	public static Interval or(Interval leftInterval, Interval rightInterval) {
 		if (leftInterval.isBottom() || rightInterval.isBottom()) {
 			return BOTTOM;
 		}
@@ -224,8 +224,7 @@ public class Interval {
 		}
 	}
 
-	public static Interval xor(Interval leftInterval,
-			Interval rightInterval) {
+	public static Interval xor(Interval leftInterval, Interval rightInterval) {
 		if (leftInterval.isBottom() || rightInterval.isBottom()) {
 			return BOTTOM;
 		}

@@ -144,13 +144,13 @@ public class BufferOverflowDetector {
 										} else if(ptrContext != null) {
 											// The allocation is in a method that we have analysed. We should be able to give an interval for the array size.
 											// TODO: improve precision of allocations in methods that we have interval analysis for.
-											context.putIntervalForVar(localPtr.getName(), Interval.TOP);
+											context.putIntervalForVar(localPtr.getName(), Interval.NON_NEGATIVE);
 											LOG.error("Usage of existing analysis for " + allocNode.getMethod() + 
 													" containing array allocation site " + alloc + 
 													" not implemented. Lookup triggered by reference " + localPtr + " in method " + methodName + ".");
 										} else {
 											// The allocation is in a method that we have not analysed. Will use TOP for array size.
-											context.putIntervalForVar(localPtr.getName(), Interval.TOP);
+											context.putIntervalForVar(localPtr.getName(), Interval.NON_NEGATIVE);
 											LOG.warn("Missing analysis for method " + allocNode.getMethod() + 
 													" containing array allocation site " + alloc + 
 													". Lookup triggered by reference " + localPtr + " in method " + methodName + ".");
