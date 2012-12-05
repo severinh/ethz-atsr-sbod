@@ -53,4 +53,17 @@ public abstract class AbstractTest {
 		}
 	}
 
+	/**
+	 * Returns a random integer. Determined by rolling a dice.
+	 * 
+	 * Our analysis assumes that a method with an integer return value always
+	 * returns {@link Interval#TOP}. This, this helper method can be used in
+	 * unit tests.
+	 * 
+	 * @return some integer
+	 */
+	protected int getAnyInt() {
+		return 4;
+	}
+
 }
