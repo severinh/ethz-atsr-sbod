@@ -9,14 +9,21 @@ import static org.junit.Assert.assertTrue;
  * with the @Test annotation and call{@link #assertAnalysis(String)}.
  * 
  * Do not forget to add a main method that calls the 'test*' methods. Soot needs
- * it for points-to analysis.
+ * it for points-to analysis. Also, add a call to the main method of the test
+ * class to {@link AggregateEntryPoint#main(String[])}.
  */
 public abstract class AbstractTest {
 
-	private final BufferOverflowDetector detector;
+	// Global BufferOverflowDetector, such that Soot performs the points-to
+	// analysis only once. Our analysis is then only performed on-demand.
+	private static final BufferOverflowDetector DETECTOR;
+
+	static {
+		String mainClassName = AggregateEntryPoint.class.getName();
+		DETECTOR = new BufferOverflowDetector(mainClassName);
+	}
 
 	public AbstractTest() {
-		detector = new BufferOverflowDetector(getClass().getName());
 	}
 
 	/**
@@ -32,7 +39,9 @@ public abstract class AbstractTest {
 	 *            name of the method in the subclass
 	 */
 	protected void assertAnalysis(String methodName) {
-		AnalysisResult result = detector.getAnalysisResult(methodName);
+		String className = getClass().getName();
+		AnalysisResult result = DETECTOR.getAnalysisResult(className,
+				methodName);
 		boolean isSafeInConrete = methodName.contains("Safe");
 		boolean isUnsafeInConcrete = methodName.contains("Unsafe");
 

@@ -30,42 +30,38 @@ import soot.toolkits.graph.BriefUnitGraph;
 import soot.toolkits.graph.UnitGraph;
 
 /**
- * Detects potential {@link ArrayIndexOutOfBoundsException}s within a single
- * class.
+ * Detects potential {@link ArrayIndexOutOfBoundsException}s.
  */
 public class BufferOverflowDetector {
 
 	// Whether to use points-to-analysis or not (expensive)
 	private static final boolean USE_POINTS_TO_ANALYSIS = false;
-
+	private static final String TEST_METHOD_PREFIX = "test";
 	private static final Logger LOG = Logger
 			.getLogger(BufferOverflowDetector.class.getName());
 
-	private final String className;
-	private final SootClass sootClass;
-	private final Map<String, Analysis> methodAnalyses;
+	// Cached method analyses
+	private final Map<SootMethod, Analysis> methodAnalyses;
 
-	public BufferOverflowDetector(String className) {
-		this.className = className;
-		this.sootClass = loadClass(className, true);
-		this.methodAnalyses = new HashMap<String, Analysis>();
+	public BufferOverflowDetector(String mainClassName) {
+		this.methodAnalyses = new HashMap<SootMethod, Analysis>();
 
+		SootClass mainSootClass = loadClass(mainClassName);
+		Scene.v().setMainClass(mainSootClass);
 		Scene.v().loadNecessaryClasses();
 		Scene.v().setEntryPoints(EntryPoints.v().all());
-		
-		analyzeClass();
 	}
 
 	/**
-	 * Returns the list of {@link SootMethod}s in the class whose name begins
-	 * with 'test'.
+	 * Returns the list of {@link SootMethod}s in the given class whose name
+	 * begins with 'test'.
 	 * 
 	 * @return the list of methods
 	 */
-	private List<SootMethod> getTestMethods() {
+	private List<SootMethod> getTestMethods(SootClass sootClass) {
 		List<SootMethod> testMethods = new ArrayList<SootMethod>();
 		for (SootMethod method : sootClass.getMethods()) {
-			if (method.getName().startsWith("test")) {
+			if (method.getName().startsWith(TEST_METHOD_PREFIX)) {
 				testMethods.add(method);
 			}
 		}
@@ -73,12 +69,12 @@ public class BufferOverflowDetector {
 	}
 
 	/**
-	 * Runs an {@link Analysis} for each method in the class and caches the
-	 * {@link Analysis} objects.
+	 * Runs an {@link Analysis} for each method in the given class and caches
+	 * the {@link Analysis} objects.
 	 */
-	private void analyzeClass() {
-		LOG.info("Analyzing " + className + "...");
-		List<SootMethod> testMethods = getTestMethods();
+	private void analyzeClass(SootClass sootClass) {
+		LOG.info("Analyzing " + sootClass.getName() + "...");
+		List<SootMethod> testMethods = getTestMethods(sootClass);
 
 		for (SootMethod method : testMethods) {
 			String methodName = method.getName();
@@ -89,24 +85,43 @@ public class BufferOverflowDetector {
 			Analysis analysis = new Analysis(graph);
 			analysis.run();
 
-			methodAnalyses.put(methodName, analysis);
+			methodAnalyses.put(method, analysis);
 		}
 
 		if (USE_POINTS_TO_ANALYSIS) {
 			setSparkPointsToAnalysis();
 		}
 	}
+	
+	/**
+	 * Returns the {@link Analysis} for a given method. If it has not been
+	 * computed yet, it performs an analysis of all methods in the declaring
+	 * class.
+	 * 
+	 * @param sootMethod
+	 * @return the analysis
+	 */
+	private Analysis getMethodAnalysis(SootMethod sootMethod) {
+		SootClass sootClass = sootMethod.getDeclaringClass();
+		if (!methodAnalyses.containsKey(sootMethod)) {
+			analyzeClass(sootClass);
+		}
+		Analysis analysis = methodAnalyses.get(sootMethod);
+		return analysis;
+	}
 
 	/**
 	 * Checks each array access of a method for the possibility of an
 	 * {@link ArrayIndexOutOfBoundsException}.
 	 * 
-	 * @param methodName
-	 *            the name of the method
+	 * @param sootMethod
+	 *            the method to search for unsafe statements
 	 * @return the analysis result
 	 */
-	public AnalysisResult getAnalysisResult(final String methodName) {
-		Analysis analysis = methodAnalyses.get(methodName);
+	public AnalysisResult getAnalysisResult(final SootMethod sootMethod) {
+		Analysis analysis = getMethodAnalysis(sootMethod);
+		final String className = sootMethod.getDeclaringClass().getName();
+		final String methodName = sootMethod.getName();
 
 		// Maps each static or non-static array fields as well as array
 		// parameters to an array size interval
@@ -114,8 +129,7 @@ public class BufferOverflowDetector {
 
 		if (USE_POINTS_TO_ANALYSIS) {
 			PointsToAnalysis pta = Scene.v().getPointsToAnalysis();
-			SootMethod method = sootClass.getMethodByName(methodName);
-			JimpleBody body = (JimpleBody) method.retrieveActiveBody();
+			JimpleBody body = (JimpleBody) sootMethod.retrieveActiveBody();
 
 			for (Local local : body.getLocals()) {
 				if (local.getType() instanceof RefLikeType) {
@@ -188,20 +202,36 @@ public class BufferOverflowDetector {
 				firstUnsafeStatement);
 		return result;
 	}
+	
+	public AnalysisResult getAnalysisResult(String className, String methodName) {
+		SootClass sootClass = Scene.v().getSootClass(className);
+		SootMethod sootMethod = sootClass.getMethodByName(methodName);
+		AnalysisResult result = getAnalysisResult(sootMethod);
+		return result;
+	}
 
-	public List<AnalysisResult> getAnalysisResults() {
+	public List<AnalysisResult> getAnalysisResults(String className) {
 		List<AnalysisResult> results = new ArrayList<AnalysisResult>();
-		for (SootMethod method : getTestMethods()) {
-			results.add(getAnalysisResult(method.getName()));
+		SootClass sootClass = Scene.v().getSootClass(className);
+		for (SootMethod sootMethod : getTestMethods(sootClass)) {
+			results.add(getAnalysisResult(sootMethod));
 		}
 		return results;
 	}
 
-	public static void main(String[] args) {
-		for (String className : args) {
-			BufferOverflowDetector detector = new BufferOverflowDetector(
-					className);
-			for (AnalysisResult result : detector.getAnalysisResults()) {
+	/**
+	 * Expects a list of class names to analyze.
+	 * 
+	 * Only the first class is used as the main class as there cannot be
+	 * multiple main classes in a Soot {@link Scene}.
+	 * 
+	 * @param classNames a list of class names
+	 */
+	public static void main(String[] classNames) {
+		String mainClassName = classNames[0];
+		BufferOverflowDetector detector = new BufferOverflowDetector(mainClassName);
+		for (String className : classNames) {
+			for (AnalysisResult result : detector.getAnalysisResults(className)) {
 				System.out.println(result.toCanonicalString());
 			}
 		}
@@ -217,12 +247,9 @@ public class BufferOverflowDetector {
 		setupLogging();
 	}
 
-	private static SootClass loadClass(String name, boolean isMainClass) {
+	public static SootClass loadClass(String name) {
 		SootClass sootClass = Scene.v().loadClassAndSupport(name);
 		sootClass.setApplicationClass();
-		if (isMainClass) {
-			Scene.v().setMainClass(sootClass);
-		}
 		return sootClass;
 	}
 
