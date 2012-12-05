@@ -68,9 +68,12 @@ public class BufferOverflowDetector {
 	 */
 	private void analyzeClass(SootClass sootClass) {
 		LOG.info("Analyzing " + sootClass.getName() + "...");
-		List<SootMethod> testMethods = getTestMethods(sootClass);
 
-		for (SootMethod method : testMethods) {
+		// Need to iterate over *all* methods of this class,
+		// because pointer analysis alone does not tell us
+		// what intervals were active at the various
+		// array allocation sites.
+		for (SootMethod method : sootClass.getMethods()) {
 			String methodName = method.getName();
 
 			LOG.info("Analyzing method " + methodName + "...");

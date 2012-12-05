@@ -67,7 +67,7 @@ public abstract class AbstractTest {
 	}
 
 	/**
-	 * Returns a random integer. Determined by rolling a dice.
+	 * Returns a random integer.  
 	 * 
 	 * Our analysis assumes that a method with an integer return value always
 	 * returns {@link Interval#TOP}. This, this helper method can be used in
@@ -76,7 +76,8 @@ public abstract class AbstractTest {
 	 * @return some integer
 	 */
 	protected static int getAnyInt() {
-		return 4;
+		return 4; 	// chosen by fair dice roll,
+					// guaranteed to be random
 	}
 
 }

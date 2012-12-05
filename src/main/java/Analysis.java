@@ -30,6 +30,7 @@ import soot.jimple.ShrExpr;
 import soot.jimple.StaticFieldRef;
 import soot.jimple.Stmt;
 import soot.jimple.SubExpr;
+import soot.jimple.ThisRef;
 import soot.jimple.UshrExpr;
 import soot.jimple.XorExpr;
 import soot.jimple.internal.JArrayRef;
@@ -198,9 +199,9 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 					// for use from other methods (via pointer-analysis)
 					getAllocationNodeMap().put(newArrayExpr, interval);
 				} else if (right instanceof StaticFieldRef) {
-
+					// Do nothing
 				} else if (right instanceof JArrayRef) {
-
+					// Do nothing
 				} else if (right instanceof NewExpr) {
 					// Do nothing
 				} else if (right instanceof InvokeExpr) {
@@ -219,6 +220,8 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 					} else {
 						unhandled("right-hand side of assignment");
 					}
+				} else if (right instanceof ThisRef) {
+					// nothing to do
 				} else {
 					unhandled("right-hand side of assignment");
 				}
