@@ -7,6 +7,11 @@ public class PointerAnalysisTests extends AbstractTest {
 		testSafeA5Branch();
 		testUnsafeA5Const();
 		testUnsafeA5Branch();
+		testSafeA5VarBottom();
+		testSafeA5VarBranch();
+		testSafeA5VarConst();
+		testUnsafeA5VarConst();
+		testUnsafeA5VarBranch();
 	}
 
 	public static int[] allocSize5Array() {
@@ -62,12 +67,12 @@ public class PointerAnalysisTests extends AbstractTest {
 	
 	public static int[] allocSize5VarArray() {
 		int s;
-		if(getAnyInt() > 0) {
-			s = 5;
-		} else {
-			s = 5;
-		}
-		
+//		if(getAnyInt() > 0) {
+//			s = 5;
+//		} else {
+//			s = 5;
+//		}
+		s = 5;
 		return new int[s];
 	}
 	
@@ -80,7 +85,7 @@ public class PointerAnalysisTests extends AbstractTest {
 	}
 	
 	@Test
-	public void _testA5VarConst() {
+	public void _testSafeA5VarConst() {
 		assertAnalysis("testSafeA5VarConst");
 	}
 	
@@ -93,7 +98,7 @@ public class PointerAnalysisTests extends AbstractTest {
 	}
 	
 	@Test
-	public void _testA5VarBranch() {
+	public void _testSafeA5VarBranch() {
 		assertAnalysis("testSafeA5VarBranch");
 	}
 	
