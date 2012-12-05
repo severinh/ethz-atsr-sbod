@@ -19,6 +19,10 @@ public abstract class AbstractTest {
 	private static final BufferOverflowDetector DETECTOR;
 
 	static {
+		// TODO: We might need this
+		// for (String className : AggregateEntryPoint.TEST_CLASS_NAMES){
+		// BufferOverflowDetector.loadClass(className);
+		// }
 		String mainClassName = AggregateEntryPoint.class.getName();
 		DETECTOR = new BufferOverflowDetector(mainClassName);
 	}
