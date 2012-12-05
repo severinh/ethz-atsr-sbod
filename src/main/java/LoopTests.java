@@ -17,6 +17,7 @@ public class LoopTests extends AbstractTest {
 		testUnsafeLoopLength();
 	}
 
+	@Safe
 	public static void testSafeLoop() {
 		int[] array = new int[8];
 		for (int i = 0; i < 8; i++) {
@@ -29,6 +30,7 @@ public class LoopTests extends AbstractTest {
 		assertAnalysis("testSafeLoop");
 	}
 
+	@Safe
 	public static void testSafeLoopLength() {
 		int[] array = new int[8];
 		for (int i = 0; i < array.length; i++) {
@@ -41,6 +43,7 @@ public class LoopTests extends AbstractTest {
 		assertAnalysis("testSafeLoopLength");
 	}
 
+	@Unsafe
 	public static void testUnsafeLoopLower() {
 		int[] array = new int[8];
 		for (int i = -1; i < 8; i++) {
@@ -53,6 +56,7 @@ public class LoopTests extends AbstractTest {
 		assertAnalysis("testUnsafeLoopLower");
 	}
 
+	@Unsafe
 	public static void testUnsafeLoopUpperLeq() {
 		int[] array = new int[8];
 		for (int i = 0; i <= 8; i++) {
@@ -65,6 +69,7 @@ public class LoopTests extends AbstractTest {
 		assertAnalysis("testUnsafeLoopUpperLeq");
 	}
 
+	@Unsafe
 	public static void testUnsafeLoopUpperLt() {
 		int[] array = new int[8];
 		for (int i = 0; i < 9; i++) {
@@ -77,6 +82,7 @@ public class LoopTests extends AbstractTest {
 		assertAnalysis("testUnsafeLoopUpperLt");
 	}
 
+	@Safe
 	public static void testSafeLoopNe() {
 		int[] array = new int[8];
 		for (int i = 7; i != -1; i--) {
@@ -89,6 +95,7 @@ public class LoopTests extends AbstractTest {
 		assertAnalysis("testSafeLoopNe");
 	}
 
+	@Unsafe
 	public static void testUnsafeLoopLowerNe() {
 		int[] array = new int[8];
 		for (int i = 7; i != -2; i--) {
@@ -101,6 +108,7 @@ public class LoopTests extends AbstractTest {
 		assertAnalysis("testUnsafeLoopLowerNe");
 	}
 
+	@Safe
 	public static void testSafeLoopGt() {
 		int[] array = new int[8];
 		for (int i = 7; i > -1; i--) {
@@ -113,6 +121,7 @@ public class LoopTests extends AbstractTest {
 		assertAnalysis("testSafeLoopGt");
 	}
 
+	@Unsafe
 	public static void testUnsafeLoopLowerGt() {
 		int[] array = new int[8];
 		for (int i = 7; i > -2; i--) {
@@ -125,6 +134,7 @@ public class LoopTests extends AbstractTest {
 		assertAnalysis("testUnsafeLoopLowerGt");
 	}
 
+	@Safe
 	public static void testSafeLoopGe() {
 		int[] array = new int[8];
 		for (int i = 7; i >= 0; i--) {
@@ -137,6 +147,7 @@ public class LoopTests extends AbstractTest {
 		assertAnalysis("testSafeLoopGe");
 	}
 
+	@Unsafe
 	public static void testUnsafeLoopLowerGe() {
 		int[] array = new int[8];
 		for (int i = 7; i >= -1; i--) {
@@ -149,6 +160,7 @@ public class LoopTests extends AbstractTest {
 		assertAnalysis("testUnsafeLoopLowerGe");
 	}
 
+	@Unsafe
 	public static void testUnsafeLoopLength() {
 		int[] array = new int[8];
 		for (int i = 0; i <= array.length; i++) {

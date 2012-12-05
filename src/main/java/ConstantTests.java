@@ -14,6 +14,7 @@ public class ConstantTests extends AbstractTest {
 		testUnsafeReads2();
 	}
 
+	@Safe
 	public static void testSafeAccesses() {
 		int[] array = new int[2];
 		array[0] = 0;
@@ -26,6 +27,7 @@ public class ConstantTests extends AbstractTest {
 		assertAnalysis("testSafeAccesses");
 	}
 
+	@Unsafe
 	public static void testUnsafeWrites1() {
 		int[] array = new int[2];
 		array[-1] = 0;
@@ -37,6 +39,7 @@ public class ConstantTests extends AbstractTest {
 		assertAnalysis("testUnsafeWrites1");
 	}
 
+	@Unsafe
 	public static void testUnsafeWrites2() {
 		int[] array = new int[2];
 		array[2] = 1;
@@ -48,6 +51,7 @@ public class ConstantTests extends AbstractTest {
 		assertAnalysis("testUnsafeWrites2");
 	}
 
+	@Unsafe
 	public static void testUnsafeReads1() {
 		int[] array = new int[2];
 		System.out.println(array[-1]);
@@ -58,6 +62,7 @@ public class ConstantTests extends AbstractTest {
 		assertAnalysis("testUnsafeReads1");
 	}
 
+	@Unsafe
 	public static void testUnsafeReads2() {
 		int[] array = new int[2];
 		System.out.println(array[2]);

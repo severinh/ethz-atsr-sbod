@@ -10,6 +10,7 @@ public class ConditionalTests extends AbstractTest {
 		testUnsafe();
 	}
 
+	@Safe
 	public static void testSafeDeadCode1() {
 		boolean flag = true;
 		int[] array = new int[2];
@@ -27,6 +28,7 @@ public class ConditionalTests extends AbstractTest {
 		assertAnalysis("testSafeDeadCode1");
 	}
 
+	@Safe
 	public static void testSafeDeadCode2() {
 		int[] array = new int[2];
 		int index = 0;
@@ -45,6 +47,7 @@ public class ConditionalTests extends AbstractTest {
 		assertAnalysis("testSafeDeadCode2");
 	}
 
+	@Safe
 	public static void testSafeDeadCode3() {
 		int[] array = new int[2];
 		int index = 0;
@@ -63,6 +66,7 @@ public class ConditionalTests extends AbstractTest {
 		assertAnalysis("testSafeDeadCode3");
 	}
 
+	@Safe
 	public static void testSafeDeadCodeNested() {
 		int[] array = new int[2];
 		int index = 0;
@@ -83,6 +87,7 @@ public class ConditionalTests extends AbstractTest {
 		assertAnalysis("testSafeDeadCodeNested");
 	}
 
+	@Unsafe
 	public static void testUnsafe() {
 		int[] array = new int[2];
 		// Flag could be either false or true

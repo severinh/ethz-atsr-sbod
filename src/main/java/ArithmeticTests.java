@@ -14,6 +14,7 @@ public class ArithmeticTests extends AbstractTest {
 		testSafeLeftShift();
 	}
 
+	@Safe
 	public static void testSafeComputedIndices() {
 		int[] array = new int[8];
 		int minusOne = -1;
@@ -37,6 +38,7 @@ public class ArithmeticTests extends AbstractTest {
 		assertAnalysis("testSafeComputedIndices");
 	}
 
+	@Unsafe
 	public static void testUnsafeComputedIndicesPlus() {
 		int[] array = new int[8];
 		int one = 1;
@@ -50,6 +52,7 @@ public class ArithmeticTests extends AbstractTest {
 		assertAnalysis("testUnsafeComputedIndicesPlus");
 	}
 
+	@Unsafe
 	public static void testUnsafeComputedIndicesNeg() {
 		int[] array = new int[8];
 		int one = 1;
@@ -62,6 +65,7 @@ public class ArithmeticTests extends AbstractTest {
 		assertAnalysis("testUnsafeComputedIndicesNeg");
 	}
 
+	@Unsafe
 	public static void testUnsafeComputedIndicesSub() {
 		int[] array = new int[8];
 		int nine = 9;
@@ -75,6 +79,7 @@ public class ArithmeticTests extends AbstractTest {
 		assertAnalysis("testUnsafeComputedIndicesSub");
 	}
 
+	@Unsafe
 	public static void testUnsafeComputedIndicesSub2() {
 		int[] array = new int[8];
 		int eight = 8;
@@ -88,6 +93,7 @@ public class ArithmeticTests extends AbstractTest {
 		assertAnalysis("testUnsafeComputedIndicesSub2");
 	}
 
+	@Unsafe
 	public static void testUnsafeComputedIndicesMul() {
 		int[] array = new int[8];
 		int two = 2;
@@ -101,6 +107,7 @@ public class ArithmeticTests extends AbstractTest {
 		assertAnalysis("testUnsafeComputedIndicesMul");
 	}
 
+	@Safe
 	public static void testSafeLeftShift() {
 		int[] array = new int[8];
 		int index = 0;
