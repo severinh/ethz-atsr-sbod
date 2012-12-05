@@ -40,6 +40,7 @@ public class PointerAnalysisTests extends AbstractTest {
 		return new int[5];
 	}
 
+	@Safe
 	public static void testSafeA5Const() {
 		int[] a = allocSize5Array();
 		a[0] = 1;
@@ -51,6 +52,7 @@ public class PointerAnalysisTests extends AbstractTest {
 		assertAnalysis("testSafeA5Const");
 	}
 
+	@Safe
 	public static void testSafeA5Branch() {
 		int[] a = allocSize5Array();
 		int t = getAnyInt();
@@ -64,6 +66,7 @@ public class PointerAnalysisTests extends AbstractTest {
 		assertAnalysis("testSafeA5Branch");
 	}
 
+	@Unsafe
 	public static void testUnsafeA5Const() {
 		int[] a = allocSize5Array();
 		a[7] = 1;
@@ -74,6 +77,7 @@ public class PointerAnalysisTests extends AbstractTest {
 		assertAnalysis("testUnsafeA5Const");
 	}
 
+	@Unsafe
 	public static void testUnsafeA5Branch() {
 		int[] a = allocSize5Array();
 		int t = getAnyInt();
@@ -100,6 +104,7 @@ public class PointerAnalysisTests extends AbstractTest {
 	//////////////////////////////////////////////////////////////////////////////////
 	// Allocation function using a variable (very simple)
 	
+	@Safe
 	public static void testSafeA5VarConst() {
 		int[] a = allocSize5VarArray();
 		a[4] = 3;
@@ -113,6 +118,7 @@ public class PointerAnalysisTests extends AbstractTest {
 		assertAnalysis("testSafeA5VarConst");
 	}
 	
+	@Safe
 	public static void testSafeA5VarBranch() {
 		int[] a = allocSize5VarArray();
 		int t = getAnyInt();
@@ -126,6 +132,7 @@ public class PointerAnalysisTests extends AbstractTest {
 		assertAnalysis("testSafeA5VarBranch");
 	}
 	
+	@Unsafe
 	public static void testUnsafeA5VarBranch() {
 		int[] a = allocSize5VarArray();
 		int t = getAnyInt();
@@ -139,6 +146,7 @@ public class PointerAnalysisTests extends AbstractTest {
 		assertAnalysis("testUnsafeA5VarConst");
 	}
 	
+	@Unsafe
 	public static void testUnsafeA5VarConst() {
 		int[] a = allocSize5VarArray();
 		a[5] = 3;
@@ -149,6 +157,7 @@ public class PointerAnalysisTests extends AbstractTest {
 		assertAnalysis("testUnsafeA5VarBranch");
 	}
 	
+	@Safe
 	public static void testSafeA5VarBottom() {
 		int[] a = allocSize5VarArray();
 		int t = getAnyInt();
@@ -174,6 +183,7 @@ public class PointerAnalysisTests extends AbstractTest {
 		}
 	}
 	
+	@Safe
 	public static void testSafeSomeArrayEasy() {
 		int[] a = allocSomeArrayEasy();
 		int i = getAnyInt();
@@ -190,6 +200,7 @@ public class PointerAnalysisTests extends AbstractTest {
 		assertAnalysis("testSafeSomeArrayEasy");
 	}
 	
+	@Unsafe
 	public static void testUnsafeSomeArrayEasy() {
 		int[] a = allocSomeArrayEasy();
 		int i = getAnyInt();
@@ -218,6 +229,7 @@ public class PointerAnalysisTests extends AbstractTest {
 		}
 	}
 	
+	@Safe
 	public static void testSafeNonC() {
 		int[] a = allocNonC();
 		int i = getAnyInt();
@@ -231,6 +243,7 @@ public class PointerAnalysisTests extends AbstractTest {
 		assertAnalysis("testSafeNonC");
 	}
 	
+	@Unsafe
 	public static void testUnsafeNonC() {
 		int[] a = allocNonC();
 		int t = getAnyInt();
@@ -247,6 +260,7 @@ public class PointerAnalysisTests extends AbstractTest {
 	/////////////////////////////////////////////////////////////////////////////////////////
 	// array.length is top for extra-procedurally (yes, that is a word now) allocated arrays
 	
+	@Unsafe
 	public static void testUnsafeForeignArrayLength() {
 		int[] a = allocAnyArray();
 		a[a.length-1] = 7; 	// If we wanted to support this without inter-procedural analysis of 
@@ -259,6 +273,7 @@ public class PointerAnalysisTests extends AbstractTest {
 		assertAnalysis("testUnsafeForeignArrayLength");
 	}
 	
+	@Unsafe
 	public static void testUnsafeArrayMightBeEmpty() {
 		int[] a = allocAnyArray();
 		a[0] = 7;
