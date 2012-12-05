@@ -62,7 +62,7 @@ public abstract class AbstractTest {
 	 * 
 	 * @return some integer
 	 */
-	protected int getAnyInt() {
+	protected static int getAnyInt() {
 		return 4;
 	}
 

@@ -11,14 +11,6 @@ public class PointerAnalysisTests extends AbstractTest {
 		return new int[5];
 	}
 
-	public static int topint() {
-		return 0;
-	}
-
-	public static int topint2() {
-		return 999999;
-	}
-
 	public static void testSafeA5Const() {
 		int[] a = allocSize5Array();
 		a[0] = 1;
@@ -32,7 +24,7 @@ public class PointerAnalysisTests extends AbstractTest {
 
 	public static void testSafeA5Branch() {
 		int[] a = allocSize5Array();
-		int t = topint();
+		int t = getAnyInt();
 		if (0 <= t && t < 5) {
 			a[t] = 3;
 		}
@@ -55,7 +47,7 @@ public class PointerAnalysisTests extends AbstractTest {
 
 	public static void testUnsafeA5Branch() {
 		int[] a = allocSize5Array();
-		int t = topint2();
+		int t = getAnyInt();
 		if (17 <= t && t < 20) {
 			a[t] = 3;
 		}
