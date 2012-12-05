@@ -7,13 +7,20 @@ public class PointerAnalysisTests extends AbstractTest {
 		testSafeA5Branch();
 		testUnsafeA5Const();
 		testUnsafeA5Branch();
+		
 		testSafeA5VarBottom();
 		testSafeA5VarBranch();
 		testSafeA5VarConst();
 		testUnsafeA5VarConst();
 		testUnsafeA5VarBranch();
+		
+		testSafeSomeArrayEasy();
+		testUnsafeSomeArrayEasy();
 	}
 
+	////////////////////////////////////////////////////////////////////////////////////
+	// Simple allocation function
+	
 	public static int[] allocSize5Array() {
 		return new int[5];
 	}
@@ -74,6 +81,9 @@ public class PointerAnalysisTests extends AbstractTest {
 		}
 		return new int[s];
 	}
+	
+	//////////////////////////////////////////////////////////////////////////////////
+	// Allocation function using a variable (very simple)
 	
 	public static void testSafeA5VarConst() {
 		int[] a = allocSize5VarArray();
@@ -137,4 +147,45 @@ public class PointerAnalysisTests extends AbstractTest {
 		assertAnalysis("testSafeA5VarBottom");
 	}
 
+	/////////////////////////////////////////////////////////////////////////////////////////
+	// Allocation method that creates an array with a size in an interval (easy)
+	
+	public static int[] allocSomeArrayEasy() {
+		int t = getAnyInt();
+		if(5 <= t && t <= 10) {
+			return new int[t];
+		} else {
+			return new int[7];
+		}
+	}
+	
+	public static void testSafeSomeArrayEasy() {
+		int[] a = allocSomeArrayEasy();
+		int i = getAnyInt();
+		if(2 <= i && i < 5-1){
+			a[i] = 7;
+			a[i+1] = 8;
+		} else if(i == 5) {
+			a[4] = 9;
+		}
+	}
+	
+	@Test
+	public void _testSafeSomeArrayEasy() {
+		assertAnalysis("testSafeSomeArrayEasy");
+	}
+	
+	public static void testUnsafeSomeArrayEasy() {
+		int[] a = allocSomeArrayEasy();
+		int i = getAnyInt();
+		if(2 <= i && i < 5){
+			a[i] = 7;
+			a[i+1] = 8;
+		}
+	}
+	
+	@Test
+	public void _testUnsafeSomeArrayEasy() {
+		assertAnalysis("testUnsafeSomeArrayEasy");
+	}
 }
