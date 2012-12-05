@@ -15,7 +15,7 @@ public class LoopTests extends AbstractTest {
 
 	@Test
 	public void _testSafeLoop() {
-		assertSafe("testSafeLoop");
+		assertAnalysis("testSafeLoop");
 	}
 
 	public static void testSafeLoopLength() {
@@ -27,7 +27,7 @@ public class LoopTests extends AbstractTest {
 
 	@Test
 	public void _testSafeLoopLength() {
-		assertSafe("testSafeLoopLength");
+		assertAnalysis("testSafeLoopLength");
 	}
 
 	public static void testUnsafeLoopLower() {
@@ -39,7 +39,7 @@ public class LoopTests extends AbstractTest {
 
 	@Test
 	public void _testUnsafeLoopLower() {
-		assertMaybeUnsafe("testUnsafeLoopLower");
+		assertAnalysis("testUnsafeLoopLower");
 	}
 
 	public static void testUnsafeLoopUpperLeq() {
@@ -51,7 +51,7 @@ public class LoopTests extends AbstractTest {
 
 	@Test
 	public void _testUnsafeLoopUpperLeq() {
-		assertMaybeUnsafe("testUnsafeLoopUpperLeq");
+		assertAnalysis("testUnsafeLoopUpperLeq");
 	}
 
 	public static void testUnsafeLoopUpperLt() {
@@ -63,7 +63,7 @@ public class LoopTests extends AbstractTest {
 
 	@Test
 	public void _testUnsafeLoopUpperLt() {
-		assertMaybeUnsafe("testUnsafeLoopUpperLt");
+		assertAnalysis("testUnsafeLoopUpperLt");
 	}
 
 	public static void testSafeLoopNe() {
@@ -75,7 +75,7 @@ public class LoopTests extends AbstractTest {
 
 	@Test
 	public void _testSafeLoopNe() {
-		assertSafe("testSafeLoopNe");
+		assertAnalysis("testSafeLoopNe");
 	}
 
 	public static void testUnsafeLoopLowerNe() {
@@ -87,7 +87,7 @@ public class LoopTests extends AbstractTest {
 
 	@Test
 	public void _testUnsafeLoopLowerNe() {
-		assertMaybeUnsafe("testUnsafeLoopLowerNe");
+		assertAnalysis("testUnsafeLoopLowerNe");
 	}
 
 	public static void testSafeLoopGt() {
@@ -99,7 +99,7 @@ public class LoopTests extends AbstractTest {
 
 	@Test
 	public void _testSafeLoopGt() {
-		assertSafe("testSafeLoopGt");
+		assertAnalysis("testSafeLoopGt");
 	}
 
 	public static void testUnsafeLoopLowerGt() {
@@ -111,7 +111,7 @@ public class LoopTests extends AbstractTest {
 
 	@Test
 	public void _testUnsafeLoopLowerGt() {
-		assertMaybeUnsafe("testUnsafeLoopLowerGt");
+		assertAnalysis("testUnsafeLoopLowerGt");
 	}
 
 	public static void testSafeLoopGe() {
@@ -123,7 +123,7 @@ public class LoopTests extends AbstractTest {
 
 	@Test
 	public void _testSafeLoopGe() {
-		assertSafe("testSafeLoopGe");
+		assertAnalysis("testSafeLoopGe");
 	}
 
 	public static void testUnsafeLoopLowerGe() {
@@ -135,7 +135,7 @@ public class LoopTests extends AbstractTest {
 
 	@Test
 	public void _testUnsafeLoopLowerGe() {
-		assertMaybeUnsafe("testUnsafeLoopLowerGe");
+		assertAnalysis("testUnsafeLoopLowerGe");
 	}
 
 	public static void testUnsafeLoopLength() {
@@ -147,7 +147,7 @@ public class LoopTests extends AbstractTest {
 
 	@Test
 	public void _testUnsafeLoopLength() {
-		assertMaybeUnsafe("testUnsafeLoopLength");
+		assertAnalysis("testUnsafeLoopLength");
 	}
 
 }

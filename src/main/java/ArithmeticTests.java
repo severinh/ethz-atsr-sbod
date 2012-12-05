@@ -30,7 +30,7 @@ public class ArithmeticTests extends AbstractTest {
 
 	@Test
 	public void _testSafeComputedIndices() {
-		assertSafe("testSafeComputedIndices");
+		assertAnalysis("testSafeComputedIndices");
 	}
 
 	public static void testUnsafeComputedIndicesPlus() {
@@ -43,7 +43,7 @@ public class ArithmeticTests extends AbstractTest {
 
 	@Test
 	public void _testUnsafeComputedIndicesPlus() {
-		assertMaybeUnsafe("testUnsafeComputedIndicesPlus");
+		assertAnalysis("testUnsafeComputedIndicesPlus");
 	}
 
 	public static void testUnsafeComputedIndicesNeg() {
@@ -55,7 +55,7 @@ public class ArithmeticTests extends AbstractTest {
 
 	@Test
 	public void _testUnsafeComputedIndicesNeg() {
-		assertMaybeUnsafe("testUnsafeComputedIndicesNeg");
+		assertAnalysis("testUnsafeComputedIndicesNeg");
 	}
 
 	public static void testUnsafeComputedIndicesSub() {
@@ -68,7 +68,7 @@ public class ArithmeticTests extends AbstractTest {
 
 	@Test
 	public void _testUnsafeComputedIndicesSub() {
-		assertMaybeUnsafe("testUnsafeComputedIndicesSub");
+		assertAnalysis("testUnsafeComputedIndicesSub");
 	}
 
 	public static void testUnsafeComputedIndicesSub2() {
@@ -81,7 +81,7 @@ public class ArithmeticTests extends AbstractTest {
 
 	@Test
 	public void _testUnsafeComputedIndicesSub2() {
-		assertMaybeUnsafe("testUnsafeComputedIndicesSub2");
+		assertAnalysis("testUnsafeComputedIndicesSub2");
 	}
 
 	public static void testUnsafeComputedIndicesMul() {
@@ -94,7 +94,7 @@ public class ArithmeticTests extends AbstractTest {
 
 	@Test
 	public void _testUnsafeComputedIndicesMul() {
-		assertMaybeUnsafe("testUnsafeComputedIndicesMul");
+		assertAnalysis("testUnsafeComputedIndicesMul");
 	}
 
 	public static void testSafeLeftShift() {
@@ -119,7 +119,7 @@ public class ArithmeticTests extends AbstractTest {
 
 	@Test
 	public void _testSafeLeftShift() {
-		assertSafe("testSafeLeftShift");
+		assertAnalysis("testSafeLeftShift");
 	}
 
 }

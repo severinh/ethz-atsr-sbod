@@ -20,7 +20,7 @@ public class ConditionalTests extends AbstractTest {
 
 	@Test
 	public void _testSafeDeadCode1() {
-		assertSafe("testSafeDeadCode1");
+		assertAnalysis("testSafeDeadCode1");
 	}
 
 	public static void testSafeDeadCode2() {
@@ -38,7 +38,7 @@ public class ConditionalTests extends AbstractTest {
 
 	@Test
 	public void _testSafeDeadCode2() {
-		assertSafe("testSafeDeadCode2");
+		assertAnalysis("testSafeDeadCode2");
 	}
 
 	public static void testSafeDeadCode3() {
@@ -56,7 +56,7 @@ public class ConditionalTests extends AbstractTest {
 
 	@Test
 	public void _testSafeDeadCode3() {
-		assertSafe("testSafeDeadCode3");
+		assertAnalysis("testSafeDeadCode3");
 	}
 
 	public static void testSafeDeadCodeNested() {
@@ -76,7 +76,7 @@ public class ConditionalTests extends AbstractTest {
 
 	@Test
 	public void _testSafeDeadCodeNested() {
-		assertSafe("testSafeDeadCodeNested");
+		assertAnalysis("testSafeDeadCodeNested");
 	}
 
 	public static void testUnsafe() {
@@ -94,7 +94,7 @@ public class ConditionalTests extends AbstractTest {
 
 	@Test
 	public void _testUnsafe() {
-		assertMaybeUnsafe("testUnsafe");
+		assertAnalysis("testUnsafe");
 	}
 
 }

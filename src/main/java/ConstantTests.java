@@ -23,7 +23,7 @@ public class ConstantTests extends AbstractTest {
 
 	@Test
 	public void _testSafeAccesses() {
-		assertSafe("testSafeAccesses");
+		assertAnalysis("testSafeAccesses");
 	}
 
 	public static void testUnsafeWrites1() {
@@ -34,7 +34,7 @@ public class ConstantTests extends AbstractTest {
 
 	@Test
 	public void _testUnsafeWrites1() {
-		assertMaybeUnsafe("testUnsafeWrites1");
+		assertAnalysis("testUnsafeWrites1");
 	}
 
 	public static void testUnsafeWrites2() {
@@ -45,7 +45,7 @@ public class ConstantTests extends AbstractTest {
 
 	@Test
 	public void _testUnsafeWrites2() {
-		assertMaybeUnsafe("testUnsafeWrites2");
+		assertAnalysis("testUnsafeWrites2");
 	}
 
 	public static void testUnsafeReads1() {
@@ -55,7 +55,7 @@ public class ConstantTests extends AbstractTest {
 
 	@Test
 	public void _testUnsafeReads1() {
-		assertMaybeUnsafe("testUnsafeReads1");
+		assertAnalysis("testUnsafeReads1");
 	}
 
 	public static void testUnsafeReads2() {
@@ -65,7 +65,7 @@ public class ConstantTests extends AbstractTest {
 
 	@Test
 	public void _testUnsafeReads2() {
-		assertMaybeUnsafe("testUnsafeReads2");
+		assertAnalysis("testUnsafeReads2");
 	}
 
 }

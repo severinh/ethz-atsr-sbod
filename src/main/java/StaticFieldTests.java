@@ -23,7 +23,7 @@ public class StaticFieldTests extends AbstractTest {
 
 	@Test
 	public void _testSafeConstantStaticField() {
-		assertSafe("testSafeConstantStaticField");
+		assertAnalysis("testSafeConstantStaticField");
 	}
 
 	public static void testUnsafeConstantStaticField() {
@@ -33,7 +33,7 @@ public class StaticFieldTests extends AbstractTest {
 
 	@Test
 	public void _testUnsafeConstantStaticField() {
-		assertMaybeUnsafe("testUnsafeConstantStaticField");
+		assertAnalysis("testUnsafeConstantStaticField");
 	}
 
 }

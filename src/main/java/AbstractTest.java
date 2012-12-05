@@ -6,8 +6,7 @@ import static org.junit.Assert.assertTrue;
  * 
  * Use public static methods with the prefix 'testSafe' or 'testUnsafe' for
  * methods to be analyzed by Soot. Then, create corresponding '_test' method
- * with the @Test annotation and either call{@link #assertSafe(String)} or
- * {@link #assertMaybeUnsafe(String)} in it.
+ * with the @Test annotation and call{@link #assertAnalysis(String)}.
  * 
  * Do not forget to add a main method that calls the 'test*' methods. Soot needs
  * it for points-to analysis.
@@ -21,29 +20,37 @@ public abstract class AbstractTest {
 	}
 
 	/**
-	 * Asserts that a given method in the test class is deemed safe.
+	 * Asserts that the {@link BufferOverflowDetector} is both sound and correct
+	 * w.r.t. to the analysis of given method.
+	 * 
+	 * The method name must contain string "Safe" if the method is safe in the
+	 * concrete, meaning that no {@link ArrayIndexOutOfBoundsException} can
+	 * occur, or "Unsafe" if an {@link ArrayIndexOutOfBoundsException} can occur
+	 * in a concrete execution.
 	 * 
 	 * @param methodName
 	 *            name of the method in the subclass
 	 */
-	protected void assertSafe(String methodName) {
+	protected void assertAnalysis(String methodName) {
 		AnalysisResult result = detector.getAnalysisResult(methodName);
-		assertTrue("Method " + methodName
-				+ " is safe, but was not detected as such", result.isSafe());
-	}
+		boolean isSafeInConrete = methodName.contains("Safe");
+		boolean isUnsafeInConcrete = methodName.contains("Unsafe");
 
-	/**
-	 * Asserts that a given method in the test class is deemed potentially
-	 * unsafe.
-	 * 
-	 * @param methodName
-	 *            name of the method in the subclass
-	 */
-	protected void assertMaybeUnsafe(String methodName) {
-		AnalysisResult result = detector.getAnalysisResult(methodName);
-		assertFalse("Method " + methodName
-				+ " is potentially unsafe, but was not detected as such",
-				result.isSafe());
+		if (isSafeInConrete) {
+			assertTrue("IMPRECISION: Method " + methodName
+					+ " is safe in the concrete, but was not detected as such",
+					result.isSafe());
+		} else if (isUnsafeInConcrete) {
+			assertFalse(
+					"UNSOUNDNESS: Method "
+							+ methodName
+							+ " is unsafe in the concrete, but was not detected as such",
+					result.isSafe());
+		} else {
+			throw new IllegalArgumentException(
+					"method name must either contain 'Safe' or 'Unsafe', got "
+							+ methodName);
+		}
 	}
 
 }

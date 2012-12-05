@@ -27,7 +27,7 @@ public class TestClass1 extends AbstractTest {
 
 	@Test
 	public void _test1() {
-		assertSafe("test1");
+		assertAnalysis("test1");
 	}
 
 	public static void test2(int[] code) {
@@ -42,7 +42,7 @@ public class TestClass1 extends AbstractTest {
 
 	@Test
 	public void _test2() {
-		assertSafe("test2");
+		assertAnalysis("test2");
 	}
 
 	public static void test3(int[] code) {
@@ -56,7 +56,7 @@ public class TestClass1 extends AbstractTest {
 
 	@Test
 	public void _test3() {
-		assertMaybeUnsafe("test3");
+		assertAnalysis("test3");
 	}
 
 	public static void test4() {
@@ -68,7 +68,7 @@ public class TestClass1 extends AbstractTest {
 
 	@Test
 	public void _test4() {
-		assertMaybeUnsafe("test4");
+		assertAnalysis("test4");
 	}
 
 }
