@@ -1,6 +1,8 @@
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.lang.reflect.Method;
+
 /**
  * Base class for unit tests that provides convenience assertion methods.
  * 
@@ -42,23 +44,32 @@ public abstract class AbstractTest {
 		String className = getClass().getName();
 		AnalysisResult result = DETECTOR.getAnalysisResult(className,
 				methodName);
-		boolean isSafeInConrete = methodName.contains("Safe");
-		boolean isUnsafeInConcrete = methodName.contains("Unsafe");
+		Method method = null;
+		for (Method someMethod : getClass().getMethods()) {
+			if (someMethod.getName().equals(methodName)) {
+				method = someMethod;
+				break;
+			}
+		}
 
-		if (isSafeInConrete) {
+		if (method == null) {
+			throw new IllegalArgumentException("could not find method "
+					+ methodName + "through reflection");
+		}
+
+		if (method.getAnnotation(Safe.class) != null || methodName.contains("Safe")) {
 			assertTrue("IMPRECISION: Method " + methodName
 					+ " is safe in the concrete, but was not detected as such",
 					result.isSafe());
-		} else if (isUnsafeInConcrete) {
+		} else if (method.getAnnotation(Unsafe.class) != null || methodName.contains("Unsafe")) {
 			assertFalse(
 					"UNSOUNDNESS: Method "
 							+ methodName
 							+ " is unsafe in the concrete, but was not detected as such",
 					result.isSafe());
 		} else {
-			throw new IllegalArgumentException(
-					"method name must either contain 'Safe' or 'Unsafe', got "
-							+ methodName);
+			throw new IllegalArgumentException("method " + methodName
+					+ " must either have the annotation @Safe or @Unsafe");
 		}
 	}
 
