@@ -99,8 +99,21 @@ public class IntervalPerVar {
 		values.put(varName, interval);
 	}
 
-	Interval getIntervalForVar(String var) {
-		return values.get(var);
+	/**
+	 * Returns the interval associated with a particular variable, or
+	 * {@link Interval#BOTTOM} if there is no record of the variable yet.
+	 * 
+	 * @param variableName
+	 *            the name of the variable
+	 * @return the interval
+	 */
+	Interval getIntervalForVar(String variableName) {
+		Interval interval = values.get(variableName);
+		if (interval == null) {
+			return Interval.BOTTOM;
+		} else {
+			return interval;
+		}
 	}
 
 	Interval tryGetIntervalForValue(Value value) {

@@ -56,8 +56,8 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 		super(graph);
 		LOG.debug(graph.toString());
 	}
-	
-	private final Map<NewArrayExpr,Interval> allocationNodeMap = new HashMap<NewArrayExpr,Interval>();
+
+	private final Map<NewArrayExpr, Interval> allocationNodeMap = new HashMap<NewArrayExpr, Interval>();
 
 	void run() {
 		doAnalysis();
@@ -137,6 +137,7 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 
 			if (left instanceof JimpleLocal) {
 				String varName = ((JimpleLocal) left).getName();
+				Interval newInterval = null;
 
 				if (right instanceof IntConstant
 						|| right instanceof JimpleLocal
@@ -152,7 +153,6 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 							.tryGetIntervalForValue(secondValue);
 
 					if (first != null && second != null) {
-						Interval newInterval = null;
 						if (right instanceof AddExpr) {
 							newInterval = Interval.plus(first, second);
 						} else if (right instanceof SubExpr) {
@@ -180,28 +180,30 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 								newInterval = Interval.TOP;
 							}
 						}
-						fallState.putIntervalForVar(varName, newInterval);
+
 					}
 				} else if (right instanceof NegExpr) {
 					NegExpr negExpr = (NegExpr) right;
 					Value value = negExpr.getOp();
-					Interval interval = current.tryGetIntervalForValue(value);
-					Interval newInterval = Interval.neg(interval);
-					fallState.putIntervalForVar(varName, newInterval);
+					newInterval = Interval.neg(current
+							.tryGetIntervalForValue(value));
 				} else if (right instanceof NewArrayExpr) {
 					// This statement allocates a new array
 					// Store the array size interval in the state
 					NewArrayExpr newArrayExpr = (JNewArrayExpr) right;
 					Value size = newArrayExpr.getSize();
-					Interval interval = current.tryGetIntervalForValue(size);
-					fallState.putIntervalForVar(varName, interval);
+					newInterval = current.tryGetIntervalForValue(size);
 					// Also associate allocation site with size interval
 					// for use from other methods (via pointer-analysis)
-					getAllocationNodeMap().put(newArrayExpr, interval);
+					getAllocationNodeMap().put(newArrayExpr, newInterval);
 				} else if (right instanceof StaticFieldRef) {
 					// Do nothing
 				} else if (right instanceof JArrayRef) {
-					// Do nothing
+					JArrayRef arrayRef = (JArrayRef) right;
+					if (arrayRef.getType().equals(IntType.v())) {
+						// TODO: Causes problems as the moment
+						// newInterval = Interval.TOP;
+					}
 				} else if (right instanceof NewExpr) {
 					// Do nothing
 				} else if (right instanceof InvokeExpr) {
@@ -210,16 +212,16 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 					InvokeExpr invokeExpr = (InvokeExpr) right;
 					SootMethod method = invokeExpr.getMethod();
 					if (method.getReturnType() instanceof IntType) {
-						fallState.putIntervalForVar(varName, Interval.TOP);
+						newInterval = Interval.TOP;
 					}
 				} else if (right instanceof ParameterRef) {
 					ParameterRef parameterRef = (ParameterRef) right;
 					Type parameterType = parameterRef.getType();
 					if (parameterType instanceof ArrayType) {
 						// Do nothing
-					} else if(parameterType == IntType.v()){
+					} else if (parameterType == IntType.v()) {
 						// int parameter are considered to be TOP
-						fallState.putIntervalForVar(varName, Interval.TOP);
+						newInterval = Interval.TOP;
 					} else {
 						unhandled("right-hand side of assignment (unsupported parameter reference)");
 					}
@@ -227,6 +229,12 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 					// nothing to do
 				} else {
 					unhandled("right-hand side of assignment");
+				}
+				if (newInterval != null) {
+					Interval oldInterval = fallState.getIntervalForVar(varName);
+					fallState.putIntervalForVar(varName, newInterval);
+					LOG.debug("\t" + varName + ": " + oldInterval + " -> "
+							+ newInterval);
 				}
 			} else if (left instanceof JArrayRef) {
 				// Do nothing
@@ -346,7 +354,7 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 		return new IntervalPerVar();
 	}
 
-	public Map<NewArrayExpr,Interval> getAllocationNodeMap() {
+	public Map<NewArrayExpr, Interval> getAllocationNodeMap() {
 		return allocationNodeMap;
 	}
 
