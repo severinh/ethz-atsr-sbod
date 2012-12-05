@@ -67,12 +67,11 @@ public class PointerAnalysisTests extends AbstractTest {
 	
 	public static int[] allocSize5VarArray() {
 		int s;
-//		if(getAnyInt() > 0) {
-//			s = 5;
-//		} else {
-//			s = 5;
-//		}
-		s = 5;
+		if(getAnyInt() > 0) {
+			s = 5;
+		} else {
+			s = 5;
+		}
 		return new int[s];
 	}
 	
