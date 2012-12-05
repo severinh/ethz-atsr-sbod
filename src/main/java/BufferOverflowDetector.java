@@ -29,7 +29,7 @@ import soot.toolkits.graph.UnitGraph;
 public class BufferOverflowDetector {
 
 	// Whether to use points-to-analysis or not (expensive)
-	private static final boolean USE_POINTS_TO_ANALYSIS = false;
+	private static final boolean USE_POINTS_TO_ANALYSIS = true;
 	private static final String TEST_METHOD_PREFIX = "test";
 	static final Logger LOG = Logger.getLogger(BufferOverflowDetector.class
 			.getName());
@@ -44,6 +44,10 @@ public class BufferOverflowDetector {
 		Scene.v().setMainClass(mainSootClass);
 		Scene.v().loadNecessaryClasses();
 		Scene.v().setEntryPoints(EntryPoints.v().all());
+
+		if (USE_POINTS_TO_ANALYSIS) {
+			setSparkPointsToAnalysis();
+		}
 	}
 
 	/**
@@ -80,10 +84,6 @@ public class BufferOverflowDetector {
 			analysis.run();
 
 			methodAnalyses.put(method, analysis);
-		}
-
-		if (USE_POINTS_TO_ANALYSIS) {
-			setSparkPointsToAnalysis();
 		}
 	}
 
@@ -128,10 +128,6 @@ public class BufferOverflowDetector {
 			for (Local local : body.getLocals()) {
 				if (local.getType() instanceof RefLikeType) {
 					PointsToSet pointsToSet = pta.reachingObjects(local);
-
-					// TODO: Read the array size intervals from the Analysis
-					// objects for the method that the arrays are initialized
-					// in. Merge the intervals and store it in the context.
 					LOG.info(local.getName() + " points to " + pointsToSet);
 
 					if (pointsToSet instanceof PointsToSetInternal) {
@@ -196,9 +192,18 @@ public class BufferOverflowDetector {
 		Options.v().set_whole_program(true);
 		Options.v().set_app(true);
 		Options.v().setPhaseOption("cg", "verbose:true");
-		// Options.v().setPhaseOption("cg", "all-reachable:true");
+		Options.v().setPhaseOption("cg", "all-reachable:true");
 		Options.v().set_allow_phantom_refs(true);
 		Options.v().set_output_format(Options.output_format_none);
+
+		// Perform a whole-program analysis, but without the JDK
+		// It is unsound, but makes testing blazing fast
+		Options.v().set_no_bodies_for_excluded(true);
+		// Soot choked because the following two classes were not loaded
+		// For JDKs other than OpenJDK 7, other classes might be needed
+		Scene.v().addBasicClass("sun.misc.ClassFileTransformer");
+		Scene.v().addBasicClass("java.io.ObjectStreamClass$MemberSignature");
+
 		setupLogging();
 	}
 
