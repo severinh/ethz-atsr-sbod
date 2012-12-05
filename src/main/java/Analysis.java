@@ -217,8 +217,11 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 					Type parameterType = parameterRef.getType();
 					if (parameterType instanceof ArrayType) {
 						// Do nothing
+					} else if(parameterType == IntType.v()){
+						// int parameter are considered to be TOP
+						fallState.putIntervalForVar(varName, Interval.TOP);
 					} else {
-						unhandled("right-hand side of assignment");
+						unhandled("right-hand side of assignment (unsupported parameter reference)");
 					}
 				} else if (right instanceof ThisRef) {
 					// nothing to do
