@@ -13,6 +13,7 @@ import soot.Value;
 import soot.jimple.AddExpr;
 import soot.jimple.AndExpr;
 import soot.jimple.BinopExpr;
+import soot.jimple.CaughtExceptionRef;
 import soot.jimple.ConditionExpr;
 import soot.jimple.DefinitionStmt;
 import soot.jimple.IfStmt;
@@ -201,8 +202,7 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 				} else if (right instanceof JArrayRef) {
 					JArrayRef arrayRef = (JArrayRef) right;
 					if (arrayRef.getType().equals(IntType.v())) {
-						// TODO: Causes problems as the moment
-						// newInterval = Interval.TOP;
+						newInterval = Interval.TOP;
 					}
 				} else if (right instanceof NewExpr) {
 					// Do nothing
@@ -226,6 +226,8 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 						unhandled("right-hand side of assignment (unsupported parameter reference)");
 					}
 				} else if (right instanceof ThisRef) {
+					// nothing to do
+				} else if (right instanceof CaughtExceptionRef) {
 					// nothing to do
 				} else {
 					unhandled("right-hand side of assignment");

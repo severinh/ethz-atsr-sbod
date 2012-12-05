@@ -42,18 +42,26 @@ public class Interval {
 		if (lower > upper) {
 			return BOTTOM;
 		} else {
-			boolean isLowerOverflow = lower < Integer.MIN_VALUE
-					|| Integer.MAX_VALUE < lower;
-			boolean isUpperOverflow = upper < Integer.MIN_VALUE
+			boolean hasOverflow = lower < Integer.MIN_VALUE
+					|| upper < Integer.MIN_VALUE || Integer.MAX_VALUE < lower
 					|| Integer.MAX_VALUE < upper;
-			if (isLowerOverflow != isUpperOverflow) {
+			boolean hasOnlyNegativeOverflow = lower < Integer.MIN_VALUE
+					&& upper < Integer.MIN_VALUE;
+			boolean hasOnlyPositiveOverflow = Integer.MAX_VALUE < lower
+					&& Integer.MAX_VALUE < upper;
+			if (hasOverflow && !hasOnlyNegativeOverflow
+					&& !hasOnlyPositiveOverflow) {
+				// An overflow is allowed only if both the lower and upper bound
+				// cause a negative overflow or both cause a positive overflow
+				// TODO: This is probably not enough yet, when considering large
+				// numbers that cause multiple wrap-arounds
 				return TOP;
 			} else {
 				Interval interval = Interval.of((int) lower, (int) upper);
 				if (interval.isBottom()) {
 					throw new IllegalStateException(
-							"Interval.of is not correct yet: " + lower + " "
-									+ upper);
+							"must not return BOTTOM for [" + lower + ","
+									+ upper + "]");
 				}
 				return interval;
 			}
