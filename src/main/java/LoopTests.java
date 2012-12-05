@@ -4,6 +4,17 @@ public class LoopTests extends AbstractTest {
 
 	public static void main(String[] args) {
 		testSafeLoop();
+		testSafeLoopLength();
+		testUnsafeLoopLower();
+		testUnsafeLoopUpperLeq();
+		testUnsafeLoopUpperLt();
+		testSafeLoopNe();
+		testUnsafeLoopLowerNe();
+		testSafeLoopGt();
+		testUnsafeLoopLowerGt();
+		testSafeLoopGe();
+		testUnsafeLoopLowerGe();
+		testUnsafeLoopLength();
 	}
 
 	public static void testSafeLoop() {

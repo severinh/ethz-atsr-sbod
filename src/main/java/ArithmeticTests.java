@@ -8,6 +8,10 @@ public class ArithmeticTests extends AbstractTest {
 
 	public static void main(String[] args) {
 		testSafeComputedIndices();
+		testUnsafeComputedIndicesPlus();
+		testUnsafeComputedIndicesSub();
+		testUnsafeComputedIndicesMul();
+		testSafeLeftShift();
 	}
 
 	public static void testSafeComputedIndices() {

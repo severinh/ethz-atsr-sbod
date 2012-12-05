@@ -4,6 +4,10 @@ public class ConditionalTests extends AbstractTest {
 
 	public static void main(String[] args) {
 		testSafeDeadCode1();
+		testSafeDeadCode2();
+		testSafeDeadCode3();
+		testSafeDeadCodeNested();
+		testUnsafe();
 	}
 
 	public static void testSafeDeadCode1() {

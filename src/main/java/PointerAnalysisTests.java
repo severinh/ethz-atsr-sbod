@@ -5,6 +5,8 @@ public class PointerAnalysisTests extends AbstractTest {
 	public static void main(String[] args) {
 		testSafeA5Const();
 		testSafeA5Branch();
+		testUnsafeA5Const();
+		testUnsafeA5Branch();
 	}
 
 	public static int[] allocSize5Array() {

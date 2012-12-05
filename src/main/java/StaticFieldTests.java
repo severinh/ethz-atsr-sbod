@@ -14,6 +14,7 @@ public class StaticFieldTests extends AbstractTest {
 
 	public void main(String[] args) {
 		testSafeConstantStaticField();
+		testUnsafeConstantStaticField();
 	}
 
 	public static void testSafeConstantStaticField() {
