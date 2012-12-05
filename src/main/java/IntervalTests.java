@@ -227,6 +227,58 @@ public class IntervalTests {
 		leftInterval = Interval.of(-2, 4);
 		rightInterval = Interval.of(1, 2);
 		assertInterval(-8, 16, Interval.shl(leftInterval, rightInterval));
+		
+		leftInterval = Interval.of(3,3);
+		rightInterval = Interval.of(-2,-2);
+		assertInterval(3 << -2, 3 << -2,Interval.shl(leftInterval, rightInterval));
+		
+		leftInterval = Interval.of(3,6);
+		rightInterval = Interval.of(-2,-2);
+		assertIsTop(Interval.shl(leftInterval, rightInterval));
+		
+		leftInterval = Interval.of(3,4);
+		rightInterval = Interval.of(-2,-2);
+		assertIsTop(Interval.shl(leftInterval, rightInterval));
+		
+		leftInterval = Interval.of(-3,3);
+		rightInterval = Interval.of(-2,-2);
+		assertIsTop(Interval.shl(leftInterval, rightInterval));
+		
+		leftInterval = Interval.of(3,3);
+		rightInterval = Interval.of(-1,Integer.MAX_VALUE);
+		assertIsTop(Interval.shl(leftInterval, rightInterval));
+		
+		leftInterval = Interval.of(-3,4);
+		rightInterval = Interval.of(-2,2);
+		assertIsTop(Interval.shl(leftInterval, rightInterval));
+		
+		leftInterval = Interval.of(3,3);
+		rightInterval = Interval.of(31,31);
+		assertInterval(3 << 31, 3 << 31, Interval.shl(leftInterval, rightInterval));
+		
+		leftInterval = Interval.of(1024,1024);
+		rightInterval = Interval.of(15,48);
+		assertIsTop(Interval.shl(leftInterval,rightInterval));
+		
+		leftInterval = Interval.of(1024,1024);
+		rightInterval = Interval.of(15,49);
+		assertIsTop(Interval.shl(leftInterval,rightInterval));
+		
+		leftInterval = Interval.of(1024,1024);
+		rightInterval = Interval.of(31,34);
+		assertInterval(0,4096,Interval.shl(leftInterval,rightInterval));
+		
+		leftInterval = Interval.of(1024,1024);
+		rightInterval = Interval.of(30,48);
+		assertIsTop(Interval.shl(leftInterval,rightInterval));
+		
+		leftInterval = Interval.of(1024,1024);
+		rightInterval = Interval.of(15,30);
+		assertIsTop(Interval.shl(leftInterval,rightInterval));
+		
+		leftInterval = Interval.of(3,3);
+		rightInterval = Interval.of(29,31);
+		assertIsTop(Interval.shl(leftInterval, rightInterval));
 	}
 
 	@Test
@@ -497,6 +549,10 @@ public class IntervalTests {
 	protected void assertInterval(int expectedValue, Interval interval) {
 		assertEquals(expectedValue, interval.getLower());
 		assertEquals(expectedValue, interval.getUpper());
+	}
+	
+	protected void assertIsTop(Interval interval) {
+		assertEquals(Interval.TOP,interval);
 	}
 
 }

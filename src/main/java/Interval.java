@@ -149,19 +149,30 @@ public class Interval {
 		}
 	}
 
+	static final long MASK_32 = 0x20-1;
+	
 	public static Interval shl(Interval leftInterval, Interval rightInterval) {
 		if (leftInterval.isBottom() || rightInterval.isBottom()) {
 			return BOTTOM;
-		}
-		// TODO: Does not handle overflows yet
+		} 
+		// TODO: Shift-left is currently set to return top.
 		long a = leftInterval.getLower();
 		long b = leftInterval.getUpper();
 		long c = rightInterval.getLower();
 		long d = rightInterval.getUpper();
+		
+		c = c & MASK_32;
+		d = d & MASK_32;
+		
+		if(c < 0 || d < 0){
+			return TOP; 
+		}
+		
 		long lower = Math.min(a << c, a << d);
 		long upper = Math.max(b << c, b << d);
 		Interval result = Interval.of(lower, upper);
-		return result;
+		//return result;
+		return TOP;
 	}
 
 	public static Interval shr(Interval leftInterval, Interval rightInterval) {
