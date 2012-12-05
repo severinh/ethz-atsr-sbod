@@ -9,6 +9,7 @@ import org.apache.log4j.xml.DOMConfigurator;
 import soot.Body;
 import soot.EntryPoints;
 import soot.Local;
+import soot.PointsToAnalysis;
 import soot.PointsToSet;
 import soot.RefLikeType;
 import soot.Scene;
@@ -49,9 +50,9 @@ public class BufferOverflowDetector {
 		this.sootClass = loadClass(className, true);
 		this.methodAnalyses = new HashMap<String, Analysis>();
 
-		soot.Scene.v().loadNecessaryClasses();
-		soot.Scene.v().setEntryPoints(EntryPoints.v().all());
-
+		Scene.v().loadNecessaryClasses();
+		Scene.v().setEntryPoints(EntryPoints.v().all());
+		
 		analyzeClass();
 	}
 
@@ -112,7 +113,7 @@ public class BufferOverflowDetector {
 		final IntervalPerVar context = new IntervalPerVar();
 
 		if (USE_POINTS_TO_ANALYSIS) {
-			soot.PointsToAnalysis pta = Scene.v().getPointsToAnalysis();
+			PointsToAnalysis pta = Scene.v().getPointsToAnalysis();
 			SootMethod method = sootClass.getMethodByName(methodName);
 			JimpleBody body = (JimpleBody) method.retrieveActiveBody();
 
@@ -207,12 +208,12 @@ public class BufferOverflowDetector {
 	}
 
 	static {
-		soot.options.Options.v().set_keep_line_number(true);
-		soot.options.Options.v().set_whole_program(true);
-		soot.options.Options.v().set_app(true);
-		soot.options.Options.v().setPhaseOption("cg", "verbose:true");
-		soot.options.Options.v().set_allow_phantom_refs(true);
-		soot.options.Options.v().set_output_format(Options.output_format_none);
+		Options.v().set_keep_line_number(true);
+		Options.v().set_whole_program(true);
+		Options.v().set_app(true);
+		Options.v().setPhaseOption("cg", "verbose:true");
+		Options.v().set_allow_phantom_refs(true);
+		Options.v().set_output_format(Options.output_format_none);
 		setupLogging();
 	}
 
