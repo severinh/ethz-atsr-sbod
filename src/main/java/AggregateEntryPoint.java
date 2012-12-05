@@ -1,11 +1,5 @@
-import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const;
-
-
 public class AggregateEntryPoint {
 
-	/**
-	 * @param args
-	 */
 	public static void main(String[] args) {
 		ArithmeticTests.main(args);
 		ConditionalTests.main(args);
