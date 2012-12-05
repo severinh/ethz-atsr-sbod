@@ -14,9 +14,17 @@ import soot.RefLikeType;
 import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
+import soot.Value;
+import soot.jimple.IntConstant;
 import soot.jimple.JimpleBody;
+import soot.jimple.NewArrayExpr;
 import soot.jimple.Stmt;
+import soot.jimple.internal.JNewArrayExpr;
 import soot.jimple.spark.SparkTransformer;
+import soot.jimple.spark.pag.AllocNode;
+import soot.jimple.spark.pag.Node;
+import soot.jimple.spark.sets.P2SetVisitor;
+import soot.jimple.spark.sets.PointsToSetInternal;
 import soot.options.Options;
 import soot.toolkits.graph.BriefUnitGraph;
 import soot.toolkits.graph.UnitGraph;
@@ -97,12 +105,12 @@ public class BufferOverflowDetector {
 	 *            the name of the method
 	 * @return the analysis result
 	 */
-	public AnalysisResult getAnalysisResult(String methodName) {
+	public AnalysisResult getAnalysisResult(final String methodName) {
 		Analysis analysis = methodAnalyses.get(methodName);
 
 		// Maps each static or non-static array fields as well as array
 		// parameters to an array size interval
-		IntervalPerVar context = new IntervalPerVar();
+		final IntervalPerVar context = new IntervalPerVar();
 
 		if (USE_POINTS_TO_ANALYSIS) {
 			soot.PointsToAnalysis pta = Scene.v().getPointsToAnalysis();
@@ -112,10 +120,48 @@ public class BufferOverflowDetector {
 			for (Local local : body.getLocals()) {
 				if (local.getType() instanceof RefLikeType) {
 					PointsToSet pointsToSet = pta.reachingObjects(local);
+					
 					// TODO: Read the array size intervals from the Analysis
 					// objects for the method that the arrays are initialized
 					// in. Merge the intervals and store it in the context.
 					LOG.info(local.getName() + " points to " + pointsToSet);
+					
+					if(pointsToSet instanceof PointsToSetInternal){
+						PointsToSetInternal ptsi = (PointsToSetInternal) pointsToSet;
+						final Local localPtr = local; // capture variable local for use in closure
+						ptsi.forall(new P2SetVisitor() {
+							@Override
+							public void visit(Node n) {
+								if(n instanceof AllocNode){
+									AllocNode allocNode = (AllocNode) n;
+									Object newExprRaw = allocNode.getNewExpr();
+									if(newExprRaw instanceof JNewArrayExpr){
+										NewArrayExpr alloc = (NewArrayExpr) newExprRaw;
+										Value lenVal = alloc.getSize();
+										Analysis ptrContext = methodAnalyses.get(allocNode.getMethod());
+										if(lenVal instanceof IntConstant){
+											context.putIntervalForVar(localPtr.getName(), Interval.of(((IntConstant)lenVal).value));
+										} else if(ptrContext != null) {
+											// The allocation is in a method that we have analysed. We should be able to give an interval for the array size.
+											// TODO: improve precision of allocations in methods that we have interval analysis for.
+											context.putIntervalForVar(localPtr.getName(), Interval.TOP);
+											LOG.error("Usage of existing analysis for " + allocNode.getMethod() + 
+													" containing array allocation site " + alloc + 
+													" not implemented. Lookup triggered by reference " + localPtr + " in method " + methodName + ".");
+										} else {
+											// The allocation is in a method that we have not analysed. Will use TOP for array size.
+											context.putIntervalForVar(localPtr.getName(), Interval.TOP);
+											LOG.warn("Missing analysis for method " + allocNode.getMethod() + 
+													" containing array allocation site " + alloc + 
+													". Lookup triggered by reference " + localPtr + " in method " + methodName + ".");
+										}
+									}
+								}
+							}
+						});
+					} else {
+						LOG.warn("Cannot iterate over nodes in points to set.");
+					}
 				}
 			}
 		}

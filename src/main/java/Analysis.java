@@ -98,7 +98,7 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 	 */
 	static void unhandled(String what) {
 		LOG.error("Can't handle " + what);
-		System.exit(1);
+		System.exit(1); // TODO: is System.exit(1) a good idea for code that we want to unit-test?
 	}
 
 	@Override
