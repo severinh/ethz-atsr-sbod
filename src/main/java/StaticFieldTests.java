@@ -17,6 +17,7 @@ public class StaticFieldTests extends AbstractTest {
 		testUnsafeConstantStaticField();
 	}
 
+	@Safe
 	public static void testSafeConstantStaticField() {
 		int[] array = new int[7];
 		array[CONSTANT_SIX] = 1;
@@ -27,6 +28,7 @@ public class StaticFieldTests extends AbstractTest {
 		assertAnalysis("testSafeConstantStaticField");
 	}
 
+	@Unsafe
 	public static void testUnsafeConstantStaticField() {
 		int[] array = new int[6];
 		array[CONSTANT_SIX] = 1;
