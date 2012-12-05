@@ -15,15 +15,9 @@ import soot.RefLikeType;
 import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
-import soot.Value;
-import soot.jimple.IntConstant;
 import soot.jimple.JimpleBody;
-import soot.jimple.NewArrayExpr;
 import soot.jimple.Stmt;
 import soot.jimple.spark.SparkTransformer;
-import soot.jimple.spark.pag.AllocNode;
-import soot.jimple.spark.pag.Node;
-import soot.jimple.spark.sets.P2SetVisitor;
 import soot.jimple.spark.sets.PointsToSetInternal;
 import soot.options.Options;
 import soot.toolkits.graph.BriefUnitGraph;
@@ -37,8 +31,8 @@ public class BufferOverflowDetector {
 	// Whether to use points-to-analysis or not (expensive)
 	private static final boolean USE_POINTS_TO_ANALYSIS = false;
 	private static final String TEST_METHOD_PREFIX = "test";
-	private static final Logger LOG = Logger
-			.getLogger(BufferOverflowDetector.class.getName());
+	static final Logger LOG = Logger.getLogger(BufferOverflowDetector.class
+			.getName());
 
 	// Cached method analyses
 	private final Map<SootMethod, Analysis> methodAnalyses;
@@ -92,7 +86,7 @@ public class BufferOverflowDetector {
 			setSparkPointsToAnalysis();
 		}
 	}
-	
+
 	/**
 	 * Returns the {@link Analysis} for a given method. If it has not been
 	 * computed yet, it performs an analysis of all methods in the declaring
@@ -101,7 +95,7 @@ public class BufferOverflowDetector {
 	 * @param sootMethod
 	 * @return the analysis
 	 */
-	private Analysis getMethodAnalysis(SootMethod sootMethod) {
+	public Analysis getMethodAnalysis(SootMethod sootMethod) {
 		SootClass sootClass = sootMethod.getDeclaringClass();
 		if (!methodAnalyses.containsKey(sootMethod)) {
 			analyzeClass(sootClass);
@@ -118,14 +112,14 @@ public class BufferOverflowDetector {
 	 *            the method to search for unsafe statements
 	 * @return the analysis result
 	 */
-	public AnalysisResult getAnalysisResult(final SootMethod sootMethod) {
+	public AnalysisResult getAnalysisResult(SootMethod sootMethod) {
 		Analysis analysis = getMethodAnalysis(sootMethod);
-		final String className = sootMethod.getDeclaringClass().getName();
-		final String methodName = sootMethod.getName();
+		String className = sootMethod.getDeclaringClass().getName();
+		String methodName = sootMethod.getName();
 
 		// Maps each static or non-static array fields as well as array
 		// parameters to an array size interval
-		final IntervalPerVar context = new IntervalPerVar();
+		IntervalPerVar context = new IntervalPerVar();
 
 		if (USE_POINTS_TO_ANALYSIS) {
 			PointsToAnalysis pta = Scene.v().getPointsToAnalysis();
@@ -134,62 +128,16 @@ public class BufferOverflowDetector {
 			for (Local local : body.getLocals()) {
 				if (local.getType() instanceof RefLikeType) {
 					PointsToSet pointsToSet = pta.reachingObjects(local);
-					
+
 					// TODO: Read the array size intervals from the Analysis
 					// objects for the method that the arrays are initialized
 					// in. Merge the intervals and store it in the context.
 					LOG.info(local.getName() + " points to " + pointsToSet);
-					
-					if(pointsToSet instanceof PointsToSetInternal){
+
+					if (pointsToSet instanceof PointsToSetInternal) {
 						PointsToSetInternal ptsi = (PointsToSetInternal) pointsToSet;
-						final Local localPtr = local; // capture variable local for use in closure
-						ptsi.forall(new P2SetVisitor() {
-							@Override
-							public void visit(Node n) {
-								if(n instanceof AllocNode){
-									AllocNode allocNode = (AllocNode) n;
-									Object newExprRaw = allocNode.getNewExpr();
-									if(newExprRaw instanceof NewArrayExpr){
-										NewArrayExpr alloc = (NewArrayExpr) newExprRaw;
-										Value lenVal = alloc.getSize();
-										// Retrieve analysis of method containing the allocation node.
-										Analysis allocEnv = methodAnalyses.get(allocNode.getMethod());
-										if(lenVal instanceof IntConstant){
-											context.putIntervalForVar(localPtr.getName(), Interval.of(((IntConstant)lenVal).value));
-										} else if(allocEnv != null) {
-											// The allocation is in a method that we have analysed. 
-											// We should be able to give an interval for the array size.
-											Interval size = allocEnv.getAllocationNodeMap().get(alloc);
-											if(size != null){
-												context.putIntervalForVar(localPtr.getName(), size);
-												LOG.debug("Pointer analysis indicates that the array referred to by " 
-														+ localPtr.getName() + " in method " + methodName 
-														+ ", allocated as " + alloc + " in method " 
-														+ allocNode.getMethod().getName() 
-														+ " has size " + size + ".");
-											} else {
-												context.putIntervalForVar(localPtr.getName(), Interval.NON_NEGATIVE);
-												LOG.debug("No size on record for allocation site of the array referred to by " 
-														+ localPtr.getName() + " in method " + methodName 
-														+ ", allocated as " + alloc + " in method " 
-														+ allocNode.getMethod().getName() + ".");
-											}
-										} else {
-											// The allocation is in a method that we have not analysed. Will use TOP for array size.
-											context.putIntervalForVar(localPtr.getName(), Interval.NON_NEGATIVE);
-											LOG.warn("Missing analysis for method " + allocNode.getMethod() + 
-													" containing array allocation site " + alloc + 
-													". Lookup triggered by reference " + localPtr + " in method " + methodName + ".");
-										}
-									}
-								} else {
-									LOG.warn("Non-allocation node in points-to analysis results for pointer " 
-											+ localPtr + " in method " 
-											+ methodName + ".");
-									context.putIntervalForVar(localPtr.getName(), Interval.NON_NEGATIVE);
-								}
-							}
-						});
+						ptsi.forall(new ArraySizeIntervalCollector(this, local,
+								context, methodName));
 					} else {
 						LOG.warn("Cannot iterate over nodes in points to set.");
 					}
@@ -202,7 +150,7 @@ public class BufferOverflowDetector {
 				firstUnsafeStatement);
 		return result;
 	}
-	
+
 	public AnalysisResult getAnalysisResult(String className, String methodName) {
 		SootClass sootClass = Scene.v().getSootClass(className);
 		SootMethod sootMethod = sootClass.getMethodByName(methodName);
@@ -225,11 +173,17 @@ public class BufferOverflowDetector {
 	 * Only the first class is used as the main class as there cannot be
 	 * multiple main classes in a Soot {@link Scene}.
 	 * 
-	 * @param classNames a list of class names
+	 * @param classNames
+	 *            a list of class names
 	 */
 	public static void main(String[] classNames) {
 		String mainClassName = classNames[0];
-		BufferOverflowDetector detector = new BufferOverflowDetector(mainClassName);
+		// TODO: We might not need this
+		for (String className : classNames) {
+			BufferOverflowDetector.loadClass(className);
+		}
+		BufferOverflowDetector detector = new BufferOverflowDetector(
+				mainClassName);
 		for (String className : classNames) {
 			for (AnalysisResult result : detector.getAnalysisResults(className)) {
 				System.out.println(result.toCanonicalString());
@@ -242,6 +196,7 @@ public class BufferOverflowDetector {
 		Options.v().set_whole_program(true);
 		Options.v().set_app(true);
 		Options.v().setPhaseOption("cg", "verbose:true");
+		// Options.v().setPhaseOption("cg", "all-reachable:true");
 		Options.v().set_allow_phantom_refs(true);
 		Options.v().set_output_format(Options.output_format_none);
 		setupLogging();
@@ -258,7 +213,7 @@ public class BufferOverflowDetector {
 
 		HashMap<String, String> flags = new HashMap<String, String>();
 		flags.put("enabled", "true");
-		// flags.put("verbose", "true");
+		flags.put("verbose", "true");
 		flags.put("ignore-types", "false");
 		flags.put("force-gc", "false");
 		flags.put("pre-jimplify", "false");
