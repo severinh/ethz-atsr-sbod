@@ -3,7 +3,7 @@ import org.junit.Test;
 /**
  * Various tests from the project template.
  */
-public class TestClass1 extends AbstractTest {
+public class TemplateTests extends AbstractTest {
 
 	public static void main(String[] args) {
 		// Call test1 so that the pointer analysis can work

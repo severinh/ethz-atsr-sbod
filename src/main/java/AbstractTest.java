@@ -10,7 +10,7 @@ import static org.junit.Assert.assertTrue;
  * 
  * Do not forget to add a main method that calls the 'test*' methods. Soot needs
  * it for points-to analysis. Also, add a call to the main method of the test
- * class to {@link AggregateEntryPoint#main(String[])}.
+ * class to {@link AllTests#main(String[])}.
  */
 public abstract class AbstractTest {
 
@@ -19,11 +19,7 @@ public abstract class AbstractTest {
 	private static final BufferOverflowDetector DETECTOR;
 
 	static {
-		// TODO: We might need this
-		// for (String className : AggregateEntryPoint.TEST_CLASS_NAMES){
-		// BufferOverflowDetector.loadClass(className);
-		// }
-		String mainClassName = AggregateEntryPoint.class.getName();
+		String mainClassName = AllTests.class.getName();
 		DETECTOR = new BufferOverflowDetector(mainClassName);
 	}
 

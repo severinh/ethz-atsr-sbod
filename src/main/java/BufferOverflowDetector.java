@@ -40,7 +40,8 @@ public class BufferOverflowDetector {
 	public BufferOverflowDetector(String mainClassName) {
 		this.methodAnalyses = new HashMap<SootMethod, Analysis>();
 
-		SootClass mainSootClass = loadClass(mainClassName);
+		SootClass mainSootClass = Scene.v().loadClassAndSupport(mainClassName);
+		mainSootClass.setApplicationClass();
 		Scene.v().setMainClass(mainSootClass);
 		Scene.v().loadNecessaryClasses();
 		Scene.v().setEntryPoints(EntryPoints.v().all());
@@ -114,7 +115,6 @@ public class BufferOverflowDetector {
 	 */
 	public AnalysisResult getAnalysisResult(SootMethod sootMethod) {
 		Analysis analysis = getMethodAnalysis(sootMethod);
-		String className = sootMethod.getDeclaringClass().getName();
 		String methodName = sootMethod.getName();
 
 		// Maps each static or non-static array fields as well as array
@@ -142,7 +142,7 @@ public class BufferOverflowDetector {
 		}
 
 		Stmt firstUnsafeStatement = analysis.getFirstUnsafeStatement(context);
-		AnalysisResult result = new AnalysisResult(className, methodName,
+		AnalysisResult result = new AnalysisResult(sootMethod,
 				firstUnsafeStatement);
 		return result;
 	}
@@ -174,10 +174,6 @@ public class BufferOverflowDetector {
 	 */
 	public static void main(String[] classNames) {
 		String mainClassName = classNames[0];
-		// TODO: We might not need this
-		for (String className : classNames) {
-			BufferOverflowDetector.loadClass(className);
-		}
 		BufferOverflowDetector detector = new BufferOverflowDetector(
 				mainClassName);
 		for (String className : classNames) {
@@ -205,12 +201,6 @@ public class BufferOverflowDetector {
 		Scene.v().addBasicClass("java.io.ObjectStreamClass$MemberSignature");
 
 		setupLogging();
-	}
-
-	public static SootClass loadClass(String name) {
-		SootClass sootClass = Scene.v().loadClassAndSupport(name);
-		sootClass.setApplicationClass();
-		return sootClass;
 	}
 
 	static void setSparkPointsToAnalysis() {

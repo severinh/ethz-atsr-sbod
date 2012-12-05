@@ -1,3 +1,5 @@
+import soot.SootClass;
+import soot.SootMethod;
 import soot.jimple.Stmt;
 
 /**
@@ -6,24 +8,29 @@ import soot.jimple.Stmt;
  */
 public class AnalysisResult {
 
-	private final String className;
-	private final String methodName;
+	private final SootMethod sootMethod;
 	private final Stmt unsafeStatement;
 
-	public AnalysisResult(String className, String methodName,
-			Stmt unsafeStatement) {
+	public AnalysisResult(SootMethod sootMethod, Stmt unsafeStatement) {
 		super();
-		this.className = className;
-		this.methodName = methodName;
+		this.sootMethod = sootMethod;
 		this.unsafeStatement = unsafeStatement;
 	}
 
+	public SootMethod getSootMethod() {
+		return sootMethod;
+	}
+
+	public SootClass getSootClass() {
+		return getSootMethod().getDeclaringClass();
+	}
+
 	public String getClassName() {
-		return className;
+		return getSootClass().getName();
 	}
 
 	public String getMethodName() {
-		return methodName;
+		return getSootMethod().getName();
 	}
 
 	public boolean isSafe() {
