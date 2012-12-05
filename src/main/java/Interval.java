@@ -14,7 +14,7 @@ public class Interval {
 
 	/**
 	 * The constructor is deliberately private, such that clients are forced to
-	 * use the two static constructor methods.
+	 * use the static constructor methods.
 	 * 
 	 * @param lower
 	 *            the lower boundary of the interval
