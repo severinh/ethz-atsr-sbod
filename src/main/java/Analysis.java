@@ -13,7 +13,6 @@ import soot.jimple.AndExpr;
 import soot.jimple.BinopExpr;
 import soot.jimple.ConditionExpr;
 import soot.jimple.DefinitionStmt;
-import soot.jimple.DivExpr;
 import soot.jimple.IfStmt;
 import soot.jimple.IntConstant;
 import soot.jimple.InvokeExpr;
@@ -24,7 +23,6 @@ import soot.jimple.NewArrayExpr;
 import soot.jimple.NewExpr;
 import soot.jimple.OrExpr;
 import soot.jimple.ParameterRef;
-import soot.jimple.RemExpr;
 import soot.jimple.ShlExpr;
 import soot.jimple.ShrExpr;
 import soot.jimple.StaticFieldRef;
@@ -98,7 +96,8 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 	 */
 	static void unhandled(String what) {
 		LOG.error("Can't handle " + what);
-		System.exit(1); // TODO: is System.exit(1) a good idea for code that we want to unit-test?
+		System.exit(1); // TODO: is System.exit(1) a good idea for code that we
+						// want to unit-test?
 	}
 
 	@Override
@@ -167,10 +166,14 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 							newInterval = Interval.or(first, second);
 						} else if (right instanceof XorExpr) {
 							newInterval = Interval.xor(first, second);
-						} else if (right instanceof RemExpr) {
-							unhandled("modulo expression");
-						} else if (right instanceof DivExpr) {
-							unhandled("division expression");
+						} else {
+							LOG.warn("loss of precision due to unsupported binary expression of type "
+									+ right.getClass().getName());
+							if (first.isBottom() || second.isBottom()) {
+								newInterval = Interval.BOTTOM;
+							} else {
+								newInterval = Interval.TOP;
+							}
 						}
 						fallState.putIntervalForVar(varName, newInterval);
 					}
