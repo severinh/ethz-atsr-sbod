@@ -21,6 +21,15 @@ class ArraySizeIntervalCollector extends P2SetVisitor {
 		this.methodName = methodName;
 	}
 
+	private void provideIntervalForVar(Local local, Interval size) {
+		String name = local.getName();
+		Interval existing = context.getIntervalForVar(name);
+		if(existing != null){
+			size = Interval.meet(existing, size);
+		}
+		context.putIntervalForVar(name, size);
+	}
+	
 	@Override
 	public void visit(Node n) {
 		if(n instanceof AllocNode){
@@ -33,21 +42,20 @@ class ArraySizeIntervalCollector extends P2SetVisitor {
 				Analysis allocEnv = detector.getMethodAnalysis(allocNode
 						.getMethod());
 				if (lenVal instanceof IntConstant) {
-					context.putIntervalForVar(localPtr.getName(),
-							Interval.of(((IntConstant) lenVal).value));
+					provideIntervalForVar(localPtr, Interval.of(((IntConstant) lenVal).value));
 				} else if (allocEnv != null) {
 					// The allocation is in a method that we have analysed.
 					// We should be able to give an interval for the array size.
 					Interval size = allocEnv.getAllocationNodeMap().get(alloc);
 					if (size != null) {
-						context.putIntervalForVar(localPtr.getName(), size);
+						provideIntervalForVar(localPtr, size);
 						BufferOverflowDetector.LOG.debug("Pointer analysis indicates that the array referred to by " 
 								+ localPtr.getName() + " in method " + methodName 
 								+ ", allocated as " + alloc + " in method " 
 								+ allocNode.getMethod().getName() 
 								+ " has size " + size + ".");
 					} else {
-						context.putIntervalForVar(localPtr.getName(), Interval.NON_NEGATIVE);
+						provideIntervalForVar(localPtr, Interval.NON_NEGATIVE);
 						BufferOverflowDetector.LOG.debug("No size on record for allocation site of the array referred to by " 
 								+ localPtr.getName() + " in method " + methodName 
 								+ ", allocated as " + alloc + " in method " 
@@ -55,7 +63,7 @@ class ArraySizeIntervalCollector extends P2SetVisitor {
 					}
 				} else {
 					// The allocation is in a method that we have not analysed. Will use TOP for array size.
-					context.putIntervalForVar(localPtr.getName(), Interval.NON_NEGATIVE);
+					provideIntervalForVar(localPtr, Interval.NON_NEGATIVE);
 					BufferOverflowDetector.LOG.warn("Missing analysis for method " + allocNode.getMethod() + 
 							" containing array allocation site " + alloc + 
 							". Lookup triggered by reference " + localPtr + " in method " + methodName + ".");

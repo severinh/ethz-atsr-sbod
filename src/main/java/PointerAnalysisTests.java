@@ -16,8 +16,23 @@ public class PointerAnalysisTests extends AbstractTest {
 		
 		testSafeSomeArrayEasy();
 		testUnsafeSomeArrayEasy();
+		
+		testSafeNonC();
+		testUnsafeNonC();
+		
+		testUnsafeForeignArrayLength();
+		testUnsafeArrayMightBeEmpty();
 	}
 
+	public static int[] allocAnyArray() {
+		int t = getAnyInt();
+		if(0 <= t) {
+			return new int[t];
+		} else {
+			return new int[4];
+		}
+	}
+	
 	////////////////////////////////////////////////////////////////////////////////////
 	// Simple allocation function
 	
@@ -187,5 +202,70 @@ public class PointerAnalysisTests extends AbstractTest {
 	@Test
 	public void _testUnsafeSomeArrayEasy() {
 		assertAnalysis("testUnsafeSomeArrayEasy");
+	}
+
+	/////////////////////////////////////////////////////////////////////////////////////////
+	// Allocation method that creates an array with a size in an interval (non-contiguous)
+	
+	public static int[] allocNonC() {
+		int t = getAnyInt();
+		if(20 <= t && t <= 30) {
+			return new int[t];
+		} else if(5 < t && t < 10) {
+			return new int[t];
+		} else {
+			return new int[255];
+		}
+	}
+	
+	public static void testSafeNonC() {
+		int[] a = allocNonC();
+		int i = getAnyInt();
+		if(2 <= i && i < 6){
+			a[i] = 77;
+		}
+	}
+	
+	@Test
+	public void _testSafeNonC(){
+		assertAnalysis("testSafeNonC");
+	}
+	
+	public static void testUnsafeNonC() {
+		int[] a = allocNonC();
+		int t = getAnyInt();
+		if(5 < t && t < 10){
+			a[t] = 88;
+		}
+	}
+	
+	@Test
+	public void _testUnsafeNonC(){
+		assertAnalysis("testUnsafeNonC");
+	}
+	
+	/////////////////////////////////////////////////////////////////////////////////////////
+	// array.length is top for extra-procedurally (yes, that is a word now) allocated arrays
+	
+	public static void testUnsafeForeignArrayLength() {
+		int[] a = allocAnyArray();
+		a[a.length-1] = 7; 	// If we wanted to support this without inter-procedural analysis of 
+							// intervals, we'd have to introduce some kind of symbolic representation
+							// of array length fields. Things would get hairy very fast. So we didn't.
+	}
+	
+	@Test 
+	public void _testUnsafeForeignArrayLength() {
+		assertAnalysis("testUnsafeForeignArrayLength");
+	}
+	
+	public static void testUnsafeArrayMightBeEmpty() {
+		int[] a = allocAnyArray();
+		a[0] = 7;
+	}
+	
+	@Test
+	public void _testUnsafeArrayMightBeEmpty() {
+		assertAnalysis("testUnsafeArrayMightBeEmpty");
 	}
 }
