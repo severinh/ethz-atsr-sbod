@@ -5,6 +5,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import soot.ArrayType;
+import soot.BooleanType;
 import soot.IntType;
 import soot.SootMethod;
 import soot.Type;
@@ -201,7 +202,7 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 					// Do nothing
 				} else if (right instanceof JArrayRef) {
 					JArrayRef arrayRef = (JArrayRef) right;
-					if (arrayRef.getType().equals(IntType.v())) {
+					if (isBooleanOrIntType(arrayRef.getType())) {
 						newInterval = Interval.TOP;
 					}
 				} else if (right instanceof NewExpr) {
@@ -211,7 +212,7 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 					// that the return value could be anything
 					InvokeExpr invokeExpr = (InvokeExpr) right;
 					SootMethod method = invokeExpr.getMethod();
-					if (method.getReturnType() instanceof IntType) {
+					if (isBooleanOrIntType(method.getReturnType())) {
 						newInterval = Interval.TOP;
 					}
 				} else if (right instanceof ParameterRef) {
@@ -219,8 +220,7 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 					Type parameterType = parameterRef.getType();
 					if (parameterType instanceof ArrayType) {
 						// Do nothing
-					} else if (parameterType == IntType.v()) {
-						// int parameter are considered to be TOP
+					} else if (isBooleanOrIntType(parameterType)) {
 						newInterval = Interval.TOP;
 					} else {
 						unhandled("right-hand side of assignment (unsupported parameter reference)");
@@ -360,6 +360,12 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 
 	public Map<NewArrayExpr, Interval> getAllocationNodeMap() {
 		return allocationNodeMap;
+	}
+
+	protected boolean isBooleanOrIntType(Type type) {
+		// TODO: In the case of booleans, one might also return [0, 1] rather
+		// than Interval.TOP.
+		return type.equals(IntType.v()) || type.equals(BooleanType.v());
 	}
 
 }
