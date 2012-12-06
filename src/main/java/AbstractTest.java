@@ -54,7 +54,7 @@ public abstract class AbstractTest {
 
 		if (method == null) {
 			throw new IllegalArgumentException("could not find method "
-					+ methodName + "through reflection");
+					+ methodName + " through reflection");
 		}
 
 		if (method.getAnnotation(Safe.class) != null) {
