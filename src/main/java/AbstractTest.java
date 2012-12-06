@@ -74,13 +74,13 @@ public abstract class AbstractTest {
 	}
 
 	/**
-	 * Returns a random integer. Determined by rolling a dice.
+	 * Returns a random integer. Determined emprically by rolling a dice.
 	 * 
 	 * Our analysis assumes that a method with an integer return value always
-	 * returns {@link Interval#TOP}. This, this helper method can be used in
+	 * returns {@link Interval#TOP}. This helper method can be used in
 	 * unit tests.
 	 * 
-	 * @return some integer
+	 * @return random integer
 	 */
 	protected static int getAnyInt() {
 		return 4;
