@@ -39,7 +39,9 @@ import soot.jimple.internal.JArrayRef;
 import soot.jimple.internal.JInstanceFieldRef;
 import soot.jimple.internal.JNewArrayExpr;
 import soot.jimple.internal.JimpleLocal;
-import soot.toolkits.graph.UnitGraph;
+import soot.toolkits.graph.BriefUnitGraph;
+import soot.toolkits.graph.DirectedGraph;
+import soot.toolkits.graph.LoopNestTree;
 import soot.toolkits.scalar.ForwardBranchedFlowAnalysis;
 
 /**
@@ -54,12 +56,24 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 	private static final Logger LOG = Logger
 			.getLogger(Analysis.class.getName());
 
-	public Analysis(UnitGraph graph) {
-		super(graph);
-		LOG.debug(graph.toString());
+	private final Map<NewArrayExpr, Interval> allocationNodeMap;
+	private final LoopNestTree loopNestTree;
+
+	public Analysis(SootMethod method) {
+		super(new BriefUnitGraph(method.retrieveActiveBody()));
+		allocationNodeMap = new HashMap<NewArrayExpr, Interval>();
+		loopNestTree = new LoopNestTree(method.retrieveActiveBody());
+
+		LOG.debug(getGraph().toString());
 	}
 
-	private final Map<NewArrayExpr, Interval> allocationNodeMap = new HashMap<NewArrayExpr, Interval>();
+	protected DirectedGraph<Unit> getGraph() {
+		return graph;
+	}
+
+	protected LoopNestTree getLoopNestTree() {
+		return loopNestTree;
+	}
 
 	void run() {
 		doAnalysis();
@@ -77,7 +91,7 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 	 * @return the first unsafe statement or <code>null</code> if there is none
 	 */
 	Stmt getFirstUnsafeStatement(IntervalPerVar context) {
-		for (Unit unit : graph) {
+		for (Unit unit : getGraph()) {
 			Stmt stmt = (Stmt) unit;
 			if (stmt instanceof DefinitionStmt) {
 				DefinitionStmt defStmt = (DefinitionStmt) stmt;

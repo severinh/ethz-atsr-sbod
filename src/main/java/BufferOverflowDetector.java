@@ -7,7 +7,6 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 
-import soot.Body;
 import soot.EntryPoints;
 import soot.Local;
 import soot.PointsToAnalysis;
@@ -21,8 +20,6 @@ import soot.jimple.Stmt;
 import soot.jimple.spark.SparkTransformer;
 import soot.jimple.spark.sets.PointsToSetInternal;
 import soot.options.Options;
-import soot.toolkits.graph.BriefUnitGraph;
-import soot.toolkits.graph.UnitGraph;
 
 /**
  * Detects potential {@link ArrayIndexOutOfBoundsException}s.
@@ -83,9 +80,7 @@ public class BufferOverflowDetector {
 			String methodName = method.getName();
 
 			LOG.info("Analyzing method " + methodName + "...");
-			Body body = method.retrieveActiveBody();
-			UnitGraph graph = new BriefUnitGraph(body);
-			Analysis analysis = new Analysis(graph);
+			Analysis analysis = new Analysis(method);
 			analysis.run();
 
 			methodAnalyses.put(method, analysis);
