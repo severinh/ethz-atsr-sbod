@@ -59,7 +59,7 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 
 	/**
 	 * The maximum number of times that a back-jump statement of any loop in the
-	 * method is allowed be handled by the
+	 * method is allowed be handled by the method
 	 * {@link #flowThrough(IntervalPerVar, Unit, List, List)} before widening
 	 * kicks in.
 	 */
