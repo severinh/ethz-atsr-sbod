@@ -123,6 +123,9 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 				Value left = defStmt.getLeftOp();
 				Value right = defStmt.getRightOp();
 				IntervalPerVar intervalPerVar = getFlowBefore(unit);
+				if (intervalPerVar.isInDeadCode()) {
+					continue;
+				}
 				IntervalPerVar merged = new IntervalPerVar();
 				merged.mergeFrom(intervalPerVar, context);
 				if (!merged.isSafe(left) || !merged.isSafe(right)) {

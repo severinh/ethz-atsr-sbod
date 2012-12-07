@@ -8,6 +8,7 @@ public class ConditionalTests extends AbstractTest {
 		testSafeDeadCode3();
 		testSafeDeadCodeNested();
 		testUnsafe();
+		testSafeDeadCode4(getAnyInt());
 	}
 
 	@Safe
@@ -104,6 +105,25 @@ public class ConditionalTests extends AbstractTest {
 	@Test
 	public void _testUnsafe() {
 		assertAnalysis("testUnsafe");
+	}
+
+	@Safe
+	public static void testSafeDeadCode4(int i) {
+		int[] array = new int[10];
+		int index = -1;
+		if (i < Integer.MIN_VALUE) {
+			// This branch will never be taken, so the unsafe array access
+			// should not be a reason for concern
+			index = array[index];
+		} else {
+			index = 0;
+		}
+		System.out.println(array[index]);
+	}
+
+	@Test
+	public void _testSafeDeadCode4() {
+		assertAnalysis("testSafeDeadCode4");
 	}
 
 }
