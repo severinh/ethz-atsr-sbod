@@ -163,7 +163,13 @@ public class Interval {
 		if (leftInterval.isBottom() || rightInterval.isBottom()) {
 			return BOTTOM;
 		}
-		// TODO: Shift-left is currently set to return top.
+
+		// At least be more precise that TOP in the most trivial case
+		if (leftInterval.isSingleValue() && rightInterval.isSingleValue()) {
+			int newValue = leftInterval.getLower() << rightInterval.getLower();
+			return Interval.of(newValue);
+		}
+
 		long a = leftInterval.getLower();
 		long b = leftInterval.getUpper();
 		long c = rightInterval.getLower();
