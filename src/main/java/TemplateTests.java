@@ -31,7 +31,7 @@ public class TemplateTests extends AbstractTest {
 		assertAnalysis("test1");
 	}
 
-	@Safe
+	@Unsafe
 	public static void test2(int[] code) {
 		// The pointer analysis should be able to tell you that code was
 		// allocated with size 7 and prove this method.
