@@ -281,7 +281,10 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 				} else if (right instanceof ClassConstant) {
 					// a reference to a class object, not relevant for us
 				} else {
-					unhandled("right-hand side of assignment");
+					LOG.warn("cannot handle right-hand side of assignment of type "
+							+ right.getClass().getName()
+							+ ", assuming TOP to be on the safe side");
+					newInterval = Interval.TOP;
 				}
 				if (newInterval != null) {
 					Interval oldInterval = fallState.getIntervalForVar(varName);
