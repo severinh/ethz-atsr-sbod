@@ -1,7 +1,11 @@
+import org.apache.log4j.Logger;
+
 /**
  * Represents an immutable element of the interval domain.
  */
 public class Interval {
+
+	private static final Logger LOG = Logger.getLogger(Interval.class);
 
 	public static final Interval TOP = new Interval(Integer.MIN_VALUE,
 			Integer.MAX_VALUE);
@@ -142,6 +146,38 @@ public class Interval {
 		long e = Math.min(a * c, Math.min(a * d, Math.min(b * c, b * d)));
 		long f = Math.max(a * c, Math.max(a * d, Math.max(b * c, b * d)));
 		return Interval.of(e, f);
+	}
+
+	public static Interval div(Interval leftInterval, Interval rightInterval) {
+		if (leftInterval.isBottom() || rightInterval.isBottom()) {
+			return BOTTOM;
+		}
+
+		if (leftInterval.isSingleValue() && rightInterval.isSingleValue()) {
+			int value = leftInterval.getLower() / rightInterval.getUpper();
+			Interval result = Interval.of(value);
+			return result;
+		} else {
+			// We do not need to be more precise
+			LOG.warn("loss of precision due to unsupported division expression");
+			return TOP;
+		}
+	}
+
+	public static Interval rem(Interval leftInterval, Interval rightInterval) {
+		if (leftInterval.isBottom() || rightInterval.isBottom()) {
+			return BOTTOM;
+		}
+
+		if (leftInterval.isSingleValue() && rightInterval.isSingleValue()) {
+			int value = leftInterval.getLower() % rightInterval.getUpper();
+			Interval result = Interval.of(value);
+			return result;
+		} else {
+			// We do not need to be more precise
+			LOG.warn("loss of precision due to unsupported modulo expression");
+			return TOP;
+		}
 	}
 
 	public static Interval neg(Interval interval) {

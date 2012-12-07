@@ -18,6 +18,7 @@ import soot.jimple.CaughtExceptionRef;
 import soot.jimple.ClassConstant;
 import soot.jimple.ConditionExpr;
 import soot.jimple.DefinitionStmt;
+import soot.jimple.DivExpr;
 import soot.jimple.IfStmt;
 import soot.jimple.IntConstant;
 import soot.jimple.InvokeExpr;
@@ -28,6 +29,7 @@ import soot.jimple.NewArrayExpr;
 import soot.jimple.NewExpr;
 import soot.jimple.OrExpr;
 import soot.jimple.ParameterRef;
+import soot.jimple.RemExpr;
 import soot.jimple.ShlExpr;
 import soot.jimple.ShrExpr;
 import soot.jimple.StaticFieldRef;
@@ -198,6 +200,10 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 							newInterval = Interval.sub(first, second);
 						} else if (right instanceof MulExpr) {
 							newInterval = Interval.mul(first, second);
+						} else if (right instanceof DivExpr) {
+							newInterval = Interval.div(first, second);
+						} else if (right instanceof RemExpr) {
+							newInterval = Interval.rem(first, second);
 						} else if (right instanceof ShlExpr) {
 							newInterval = Interval.shl(first, second);
 						} else if (right instanceof ShrExpr) {
