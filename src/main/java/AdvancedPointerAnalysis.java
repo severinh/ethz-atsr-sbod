@@ -12,6 +12,12 @@ public class AdvancedPointerAnalysis extends AbstractTest {
 		testUnsafeExchange();
 		testUnsafeFlipFlop0();
 		testSafeExchange();
+		
+		testSafeAccessInCall();
+		testUnsafeAccessInCall();
+		testUnsafeAccessExpression();
+		
+		testUnsafeCellCouldBeNull();
 	}
 	
 	// We need a separate identity function for each test case, because
@@ -234,6 +240,23 @@ public class AdvancedPointerAnalysis extends AbstractTest {
 		assertAnalysis("testUnsafeFlipFlop0");
 	}
 	
+	public static class CellNull {
+		public CellNull(int[] f) {
+			this.f = f;
+		}
+		
+		public int[] f;
+
+		public int[] get() {
+			return f;
+		}
+
+		public void set(int[] f) {
+			this.f = f;
+		}
+		
+	}
+	
 	public static class Cell0 {
 		public Cell0(int[] f) {
 			this.f = f;
@@ -283,5 +306,61 @@ public class AdvancedPointerAnalysis extends AbstractTest {
 			this.f = f;
 		}
 		
+	}
+	
+	///////////////////////////////////////////////////////////////////////////
+	
+	public static void someMethod0(int a) {
+		
+	}
+	
+	@Safe
+	public static void testSafeAccessInCall() {
+		int[] a = new int[5];
+		int x;
+		someMethod0(a[4]);
+		x = 4+a[4];
+		someMethod0(x);
+	}
+	
+	@Test
+	public void _testSafeAccessInCall() {
+		assertAnalysis("testSafeAccessInCall");
+	}
+	
+	@Unsafe 
+	public static void testUnsafeAccessInCall() {
+		int[] a = new int[5];
+		someMethod0(a[5]);
+	}
+	
+	@Test
+	public void _testUnsafeAccessInCall() {
+		assertAnalysis("testUnsafeAccessInCall");
+	}
+	
+	@Unsafe 
+	public static void testUnsafeAccessExpression() {
+		int[] a = new int[5];
+		int x = 4+(3*(a[5]));
+		someMethod0(x);
+	}
+	
+	@Test
+	public void _testUnsafeAccessExpression() {
+		assertAnalysis("testUnsafeAccessExpression");
+	}
+	
+	//////////////////////////////////////////////////////////////////////////////////////////
+	
+	@Unsafe
+	public static void testUnsafeCellCouldBeNull() {
+		CellNull x = new CellNull(null);
+		x.f[5] = 3;
+	}
+	
+	@Test
+	public void _testUnsafeCellCouldBeNull() {
+		assertAnalysis("testUnsafeCellCouldBeNull");
 	}
 }
