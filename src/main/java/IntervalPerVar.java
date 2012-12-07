@@ -196,13 +196,13 @@ public class IntervalPerVar {
 		if (arrayBase instanceof JimpleLocal) {
 			JimpleLocal localArrayBase = (JimpleLocal) arrayBase;
 			Interval arraySizeInterval = tryGetIntervalForValue(localArrayBase);
-			if (arraySizeInterval == null) {
-				LOG.warn("unknown array size interval for array access, assuming unsafe");
+			if (arraySizeInterval == null || arraySizeInterval.isBottom()) {
+				LOG.warn("unknown array size interval for array access, assuming unsafe array access");
 				return false;
 			}
 			Interval indexInterval = tryGetIntervalForValue(arrayIndex);
-			if (indexInterval == null) {
-				LOG.warn("unknown index interval for array access");
+			if (indexInterval == null || indexInterval.isBottom()) {
+				LOG.warn("unknown index interval for array access, assuming unsafe array access");
 				return false;
 			}
 			return 0 <= indexInterval.getLower()
