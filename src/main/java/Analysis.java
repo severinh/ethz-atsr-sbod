@@ -4,7 +4,6 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-import soot.ArrayType;
 import soot.BooleanType;
 import soot.IntType;
 import soot.SootMethod;
@@ -20,6 +19,7 @@ import soot.jimple.ConditionExpr;
 import soot.jimple.DefinitionStmt;
 import soot.jimple.DivExpr;
 import soot.jimple.IfStmt;
+import soot.jimple.InstanceFieldRef;
 import soot.jimple.IntConstant;
 import soot.jimple.InvokeExpr;
 import soot.jimple.LengthExpr;
@@ -241,6 +241,11 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 					// Also associate allocation site with size interval
 					// for use from other methods (via pointer-analysis)
 					getAllocationNodeMap().put(newArrayExpr, newInterval);
+				} else if (right instanceof InstanceFieldRef) {
+					InstanceFieldRef instFieldRef = (InstanceFieldRef) right;
+					if(isBooleanOrIntType(instFieldRef.getType())) {
+						newInterval = Interval.TOP;
+					}
 				} else if (right instanceof StaticFieldRef) {
 					StaticFieldRef staticFieldRef = (StaticFieldRef) right;
 					if (isBooleanOrIntType(staticFieldRef.getType())) {
@@ -264,12 +269,10 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 				} else if (right instanceof ParameterRef) {
 					ParameterRef parameterRef = (ParameterRef) right;
 					Type parameterType = parameterRef.getType();
-					if (parameterType instanceof ArrayType) {
-						// Do nothing
-					} else if (isBooleanOrIntType(parameterType)) {
+					if (isBooleanOrIntType(parameterType)) {
 						newInterval = Interval.TOP;
 					} else {
-						unhandled("right-hand side of assignment (unsupported parameter reference)");
+						// Do nothing
 					}
 				} else if (right instanceof ThisRef) {
 					// nothing to do
@@ -289,7 +292,7 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 			} else if (left instanceof JArrayRef) {
 				// Do nothing
 				// The array access is relevant at the end of the analysis
-			} else if (left instanceof StaticFieldRef) {
+			} else if (left instanceof StaticFieldRef || left instanceof InstanceFieldRef) {
 				// Do nothing
 			} else {
 				unhandled("left-hand side of assignment");
