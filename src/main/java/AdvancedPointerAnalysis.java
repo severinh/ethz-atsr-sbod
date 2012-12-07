@@ -6,6 +6,12 @@ public class AdvancedPointerAnalysis extends AbstractTest {
 		testUnsafeId1();
 		testUnsafeId2();
 		testUnsafeId3();
+		
+		testSafeCountBackwards();
+		testUnsafeCountBackwards();
+		testUnsafeExchange();
+		testUnsafeFlipFlop0();
+		testSafeExchange();
 	}
 	
 	// We need a separate identity function for each test case, because
@@ -115,5 +121,167 @@ public class AdvancedPointerAnalysis extends AbstractTest {
 	@Test
 	public void _testUnsafeId3() {
 		assertAnalysis("testUnsafeId3");
+	}
+	
+	/////////////////////////////////////////////////////////////////////////////////////////////
+	
+	public static void cellExchange0(Cell0 a, Cell0 b) {
+		int[] t;
+		t = a.f;
+		a.f = b.get();
+		b.set(t);
+	}
+	
+	public static void cellExchange2(Cell2 a, Cell2 b) {
+		int[] t;
+		t = a.f;
+		a.f = b.get();
+		b.set(t);
+	}
+	
+	public static void cellExchange3(Cell3 a, Cell3 b) {
+		int[] t;
+		t = a.f;
+		a.f = b.get();
+		b.set(t);
+	}
+	
+	public static int[] id5(int[] xs) {
+		return xs;
+	}
+	
+	@Safe
+	public static void testSafeExchange() {
+		Cell0 a = new Cell0(new int[32]);
+		Cell0 b = new Cell0(new int[32]);
+		b.f = new int[16];
+		
+		cellExchange0(a,b);
+		
+		a.f[15] = 4;
+	}
+	
+	@Test
+	public void _testSafeExchange() {
+		assertAnalysis("testSafeExchange");
+	}
+	
+	@Unsafe
+	public static void testUnsafeExchange() {
+		Cell2 a = new Cell2(new int[32]);
+		Cell2 b = new Cell2(new int[32]);
+		b.f = new int[16];
+		
+		// There is nothing wrong with this program, but due to
+		// the way the abstraction in points-to-analysis works
+		// we coalesce the points-to-sets for a.f and b.f into one
+		
+		cellExchange2(a,b);
+		
+		a.f[15] = 4;
+		
+		cellExchange2(a,b);
+		
+		a.get()[31] = 3;
+	}
+	
+	@Test
+	public void _testUnsafeExchange() {
+		assertAnalysis("testUnsafeExchange");
+	}
+	
+	@Unsafe
+	public static void testUnsafeCountBackwards() {
+		// Again, nothing wrong with this program
+		// Our analysis is simply not precise enough
+		for(int i = 10; i > 0; i--) {
+			int[] a = id5(new int[i]);
+			a[i-1] = 3;
+		}
+	}
+	
+	@Test
+	public void _testUnsafeCountBackwards() {
+		assertAnalysis("testUnsafeCountBackwards");
+	}
+	
+	@Safe
+	public static void testSafeCountBackwards() {
+		for(int i = 10; i > 0; i--) {
+			int[] a = id5(new int[i]);
+			a[0] = 3;
+		}
+	}
+	
+	@Test
+	public void _testSafeCountBackwards() {
+		assertAnalysis("testSafeCountBackwards");
+	}
+	
+	@Unsafe
+	public static void testUnsafeFlipFlop0() {
+		Cell3 a = new Cell3(new int[32]);
+		Cell3 b = new Cell3(new int[32]);
+		for(int i = 10; i > 0; i--) {
+			b.f = new int[i];
+			cellExchange3(a, b);
+			a.f[i-1] = 1;
+		}
+	}
+	
+	@Test
+	public void _testUnsafeFlipFlop0() {
+		assertAnalysis("testUnsafeFlipFlop0");
+	}
+	
+	public static class Cell0 {
+		public Cell0(int[] f) {
+			this.f = f;
+		}
+		
+		public int[] f;
+
+		public int[] get() {
+			return f;
+		}
+
+		public void set(int[] f) {
+			this.f = f;
+		}
+		
+	}
+	
+	public static class Cell2 {
+		public Cell2(int[] f) {
+			this.f = f;
+		}
+		
+		public int[] f;
+
+		public int[] get() {
+			return f;
+		}
+
+		public void set(int[] f) {
+			this.f = f;
+		}
+		
+	}
+	
+	public static class Cell3 {
+		public Cell3(int[] f) {
+			this.f = f;
+		}
+		
+		public int[] f;
+
+		public int[] get() {
+			return f;
+		}
+
+		public void set(int[] f) {
+			this.f = f;
+		}
+		
 	}
 }
