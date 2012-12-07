@@ -1,6 +1,7 @@
 public class AllTests {
 
 	public static void main(String[] args) {
+		AdvancedPointerAnalysis.main(args);
 		ArithmeticTests.main(args);
 		ConditionalTests.main(args);
 		ConstantTests.main(args);

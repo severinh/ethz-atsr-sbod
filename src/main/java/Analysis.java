@@ -15,6 +15,7 @@ import soot.jimple.AddExpr;
 import soot.jimple.AndExpr;
 import soot.jimple.BinopExpr;
 import soot.jimple.CaughtExceptionRef;
+import soot.jimple.ClassConstant;
 import soot.jimple.ConditionExpr;
 import soot.jimple.DefinitionStmt;
 import soot.jimple.IfStmt;
@@ -246,6 +247,8 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 					// nothing to do
 				} else if (right instanceof CaughtExceptionRef) {
 					// nothing to do
+				} else if(right instanceof ClassConstant) {
+					// a reference to a class object, not relevant for us
 				} else {
 					unhandled("right-hand side of assignment");
 				}
