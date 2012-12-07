@@ -1,7 +1,10 @@
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+
+import org.apache.log4j.Logger;
 
 import soot.Value;
 import soot.jimple.IntConstant;
@@ -10,6 +13,8 @@ import soot.jimple.internal.JArrayRef;
 import soot.jimple.internal.JimpleLocal;
 
 public class IntervalPerVar {
+
+	private final static Logger LOG = Logger.getLogger(IntervalPerVar.class);
 
 	private final HashMap<String, Interval> values;
 	private boolean isInDeadCode;
@@ -53,12 +58,64 @@ public class IntervalPerVar {
 		return builder.toString();
 	}
 
-	// This does deep copy of values as opposed to shallow copy, but feel free
-	// to optimize.
+	/**
+	 * Replaces all existing {@link Interval}s with the ones in the
+	 * {@link IntervalPerVar} passed as a parameter.
+	 * 
+	 * @param other
+	 *            the new intervals
+	 */
 	public void copyFrom(IntervalPerVar other) {
 		values.clear();
 		values.putAll(other.values);
 		isInDeadCode = other.isInDeadCode;
+	}
+
+	/**
+	 * Replaces all existing {@link Interval}s with the ones in the
+	 * {@link IntervalPerVar} passed as a parameter.
+	 * 
+	 * Compared to {@link #copyFrom(IntervalPerVar)}, this method widens all new
+	 * intervals if they differ from the existing ones stored in this
+	 * {@link IntervalPerVar}.
+	 * 
+	 * @param newIntervalPerVar
+	 *            the new intervals
+	 */
+	public void copyAndWidenFrom(IntervalPerVar newIntervalPerVar) {
+		IntervalPerVar widenedIntervalPerVar = new IntervalPerVar();
+		if (newIntervalPerVar.isInDeadCode()) {
+			widenedIntervalPerVar.setInDeadCode();
+		}
+		LOG.debug("Widening " + newIntervalPerVar + "...");
+		for (Entry<String, Interval> otherEntry : newIntervalPerVar.values
+				.entrySet()) {
+			String varName = otherEntry.getKey();
+			Interval newInterval = otherEntry.getValue();
+			Interval oldInterval = values.get(varName);
+			Interval widenedInterval = newInterval;
+			if (oldInterval != null && !oldInterval.equals(Interval.BOTTOM)
+					&& !oldInterval.equals(newInterval)) {
+				int lower = newInterval.getLower();
+				int upper = newInterval.getUpper();
+				boolean hasWidened = false;
+				if (lower < oldInterval.getLower()) {
+					lower = Integer.MIN_VALUE;
+					hasWidened = true;
+				}
+				if (upper > oldInterval.getUpper()) {
+					upper = Integer.MAX_VALUE;
+					hasWidened = true;
+				}
+				widenedInterval = Interval.of(lower, upper);
+				if (hasWidened) {
+					LOG.debug(varName + ": " + newInterval + " -> "
+							+ widenedInterval);
+				}
+			}
+			widenedIntervalPerVar.putIntervalForVar(varName, widenedInterval);
+		}
+		copyFrom(widenedIntervalPerVar);
 	}
 
 	public void mergeFrom(IntervalPerVar first, IntervalPerVar second) {

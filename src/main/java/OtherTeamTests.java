@@ -191,19 +191,19 @@ public class OtherTeamTests extends AbstractTest {
 		assertAnalysis("test14");
 	}
 
-	// @Safe
-	// public void test15(boolean b) {
-	// int n = 100000;
-	// int[] a = new int[n];
-	// for (int i = 0; i <= n - 1; i++) {
-	// System.out.println(a[i]);
-	// }
-	// }
-	//
-	// @Test
-	// public void _test15() {
-	// assertAnalysis("test15");
-	// }
+	@Safe
+	public void test15(boolean b) {
+		int n = 100000;
+		int[] a = new int[n];
+		for (int i = 0; i <= n - 1; i++) {
+			System.out.println(a[i]);
+		}
+	}
+
+	@Test
+	public void _test15() {
+		assertAnalysis("test15");
+	}
 
 	@Safe
 	public void test16(boolean b) {
@@ -233,46 +233,46 @@ public class OtherTeamTests extends AbstractTest {
 		assertAnalysis("test17");
 	}
 
-	// @Safe
-	// public void test18(boolean b) {
-	// int n = 100000;
-	// int[] a = new int[n];
-	// for (int i = 0; i < n; i++) {
-	// System.out.println(a[i]);
-	// }
-	// }
-	//
-	// @Test
-	// public void _test18() {
-	// assertAnalysis("test18");
-	// }
+	@Safe
+	public void test18(boolean b) {
+		int n = 100000;
+		int[] a = new int[n];
+		for (int i = 0; i < n; i++) {
+			System.out.println(a[i]);
+		}
+	}
 
-	// @Safe
-	// public void test19(boolean b) {
-	// int n = 100000;
-	// int[] a = new int[n];
-	// int t = a[0];
-	// if (t <= a.length - 1 && t >= 0) {
-	// System.out.println(a[t]);
-	// }
-	// }
-	//
-	// @Test
-	// public void _test19() {
-	// assertAnalysis("test19");
-	// }
+	@Test
+	public void _test18() {
+		assertAnalysis("test18");
+	}
 
-	// @Safe
-	// public void test20(boolean b) {
-	// int n = 100000;
-	// int[] a = new int[n];
-	// System.out.println(a[a.length - 10]);
-	// }
-	//
-	// @Test
-	// public void _test20() {
-	// assertAnalysis("test20");
-	// }
+	@Safe
+	public void test19(boolean b) {
+		int n = 100000;
+		int[] a = new int[n];
+		int t = a[0];
+		if (t <= a.length - 1 && t >= 0) {
+			System.out.println(a[t]);
+		}
+	}
+
+	@Test
+	public void _test19() {
+		assertAnalysis("test19");
+	}
+
+	@Safe
+	public void test20(boolean b) {
+		int n = 100000;
+		int[] a = new int[n];
+		System.out.println(a[a.length - 10]);
+	}
+
+	@Test
+	public void _test20() {
+		assertAnalysis("test20");
+	}
 
 	@Safe
 	public void test21(int i) {

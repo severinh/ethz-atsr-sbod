@@ -40,6 +40,7 @@ import soot.jimple.internal.JArrayRef;
 import soot.jimple.internal.JInstanceFieldRef;
 import soot.jimple.internal.JNewArrayExpr;
 import soot.jimple.internal.JimpleLocal;
+import soot.jimple.toolkits.annotation.logic.Loop;
 import soot.toolkits.graph.BriefUnitGraph;
 import soot.toolkits.graph.DirectedGraph;
 import soot.toolkits.graph.LoopNestTree;
@@ -54,16 +55,37 @@ import soot.toolkits.scalar.ForwardBranchedFlowAnalysis;
  */
 public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 
-	private static final Logger LOG = Logger
-			.getLogger(Analysis.class.getName());
+	/**
+	 * The maximum number of times that a back-jump statement of any loop in the
+	 * method is allowed be handled by the
+	 * {@link #flowThrough(IntervalPerVar, Unit, List, List)} before widening
+	 * kicks in.
+	 */
+	private static final int LOOP_BACK_JUMP_COUNT_THRESHOLD = 10;
+
+	private static final Logger LOG = Logger.getLogger(Analysis.class);
 
 	private final Map<NewArrayExpr, Interval> allocationNodeMap;
+
+	/**
+	 * Keeps track of how many times the back-jump statement of any loop in the
+	 * method was handled in the
+	 * {@link #flowThrough(IntervalPerVar, Unit, List, List)} method.
+	 */
+	private final Map<Stmt, Integer> loopBackJumpCountMap;
+
 	private final LoopNestTree loopNestTree;
 
 	public Analysis(SootMethod method) {
 		super(new BriefUnitGraph(method.retrieveActiveBody()));
 		allocationNodeMap = new HashMap<NewArrayExpr, Interval>();
 		loopNestTree = new LoopNestTree(method.retrieveActiveBody());
+		loopBackJumpCountMap = new HashMap<Stmt, Integer>();
+
+		// Set the counter for every back-jump statement to zero
+		for (Loop loop : loopNestTree) {
+			loopBackJumpCountMap.put(loop.getBackJumpStmt(), 0);
+		}
 
 		LOG.debug(getGraph().toString());
 	}
@@ -250,7 +272,7 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 					// nothing to do
 				} else if (right instanceof CaughtExceptionRef) {
 					// nothing to do
-				} else if(right instanceof ClassConstant) {
+				} else if (right instanceof ClassConstant) {
 					// a reference to a class object, not relevant for us
 				} else {
 					unhandled("right-hand side of assignment");
@@ -283,6 +305,9 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 				Value right = conditionExpr.getOp2();
 				Interval leftInterval = current.tryGetIntervalForValue(left);
 				Interval rightInterval = current.tryGetIntervalForValue(right);
+
+				LOG.debug("\tLeft Interval: " + leftInterval);
+				LOG.debug("\tRight Interval: " + rightInterval);
 
 				// The constrained interval of the left value when the condition
 				// holds. It is Interval.BOTTOM if the left value cannot
@@ -327,6 +352,14 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 				if (left instanceof JimpleLocal) {
 					JimpleLocal leftLocal = (JimpleLocal) left;
 					String varName = leftLocal.getName();
+
+					LOG.debug("\tLeft Branch Interval: "
+							+ branchState.getIntervalForVar(varName) + " -> "
+							+ leftBranchInterval);
+					LOG.debug("\tLeft Fall Interval: "
+							+ fallState.getIntervalForVar(varName) + " -> "
+							+ leftFallInterval);
+
 					branchState.putIntervalForVar(varName, leftBranchInterval);
 					fallState.putIntervalForVar(varName, leftFallInterval);
 				}
@@ -334,6 +367,14 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 				if (right instanceof JimpleLocal) {
 					JimpleLocal rightLocal = (JimpleLocal) right;
 					String varName = rightLocal.getName();
+
+					LOG.debug("\tRight Branch Interval: "
+							+ branchState.getIntervalForVar(varName) + " -> "
+							+ rightBranchInterval);
+					LOG.debug("\tRight Fall Interval: "
+							+ fallState.getIntervalForVar(varName) + " -> "
+							+ rightFallInterval);
+
 					branchState.putIntervalForVar(varName, rightBranchInterval);
 					fallState.putIntervalForVar(varName, rightFallInterval);
 				}
@@ -342,15 +383,34 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 			}
 		}
 
-		// TODO: Maybe avoid copying objects too much. Feel free to optimize.
+		// If the statement under inspection is a back-jump statement of a loop,
+		// apply widening if it has already been handled at least
+		// LOOP_BACK_JUMP_COUNT_THRESHOLD times.
+		boolean isWideningNeeded = false;
+		if (loopBackJumpCountMap.containsKey(stmt)) {
+			int newCount = loopBackJumpCountMap.get(stmt) + 1;
+			loopBackJumpCountMap.put(stmt, newCount);
+			if (newCount > LOOP_BACK_JUMP_COUNT_THRESHOLD) {
+				isWideningNeeded = true;
+			}
+		}
+
 		for (IntervalPerVar fnext : fallOut) {
 			if (fallState != null) {
-				fnext.copyFrom(fallState);
+				if (isWideningNeeded) {
+					fnext.copyAndWidenFrom(fallState);
+				} else {
+					fnext.copyFrom(fallState);
+				}
 			}
 		}
 		for (IntervalPerVar fnext : branchOuts) {
 			if (branchState != null) {
-				fnext.copyFrom(branchState);
+				if (isWideningNeeded) {
+					fnext.copyAndWidenFrom(branchState);
+				} else {
+					fnext.copyFrom(branchState);
+				}
 			}
 		}
 	}
