@@ -243,7 +243,7 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 					getAllocationNodeMap().put(newArrayExpr, newInterval);
 				} else if (right instanceof InstanceFieldRef) {
 					InstanceFieldRef instFieldRef = (InstanceFieldRef) right;
-					if(isBooleanOrIntType(instFieldRef.getType())) {
+					if (isBooleanOrIntType(instFieldRef.getType())) {
 						newInterval = Interval.TOP;
 					}
 				} else if (right instanceof StaticFieldRef) {
@@ -292,9 +292,12 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 			} else if (left instanceof JArrayRef) {
 				// Do nothing
 				// The array access is relevant at the end of the analysis
-			} else if (left instanceof StaticFieldRef || left instanceof InstanceFieldRef) {
+			} else if (left instanceof StaticFieldRef
+					|| left instanceof InstanceFieldRef) {
 				// Do nothing
 			} else {
+				// This branch will never be taken due to the earlier check
+				// regarding the type of 'left'
 				unhandled("left-hand side of assignment");
 			}
 		} else if (op instanceof IfStmt) {
