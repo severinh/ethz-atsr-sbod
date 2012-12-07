@@ -5,7 +5,6 @@ import org.junit.Test;
  */
 public class StaticFieldTests extends AbstractTest {
 
-	public static int VALUE_TWO = 2;
 	public static final int CONSTANT_SIX;
 
 	static {
@@ -13,19 +12,7 @@ public class StaticFieldTests extends AbstractTest {
 	}
 
 	public static void main(String[] args) {
-		testSafeConstantStaticField();
 		testUnsafeConstantStaticField();
-	}
-
-	@Safe
-	public static void testSafeConstantStaticField() {
-		int[] array = new int[7];
-		array[CONSTANT_SIX] = 1;
-	}
-
-	@Test
-	public void _testSafeConstantStaticField() {
-		assertAnalysis("testSafeConstantStaticField");
 	}
 
 	@Unsafe

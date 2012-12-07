@@ -199,7 +199,10 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 					// for use from other methods (via pointer-analysis)
 					getAllocationNodeMap().put(newArrayExpr, newInterval);
 				} else if (right instanceof StaticFieldRef) {
-					// Do nothing
+					StaticFieldRef staticFieldRef = (StaticFieldRef) right;
+					if (isBooleanOrIntType(staticFieldRef.getType())) {
+						newInterval = Interval.TOP;
+					}
 				} else if (right instanceof JArrayRef) {
 					JArrayRef arrayRef = (JArrayRef) right;
 					if (isBooleanOrIntType(arrayRef.getType())) {
