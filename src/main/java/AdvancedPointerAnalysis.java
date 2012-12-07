@@ -18,6 +18,7 @@ public class AdvancedPointerAnalysis extends AbstractTest {
 		testUnsafeAccessExpression();
 		
 		testUnsafeCellCouldBeNull();
+		testUnsafeCellMightBeNull();
 	}
 	
 	// We need a separate identity function for each test case, because
@@ -240,21 +241,13 @@ public class AdvancedPointerAnalysis extends AbstractTest {
 		assertAnalysis("testUnsafeFlipFlop0");
 	}
 	
-	public static class CellNull {
-		public CellNull(int[] f) {
-			this.f = f;
-		}
-		
+	public static class CellNull0 {		
 		public int[] f;
-
-		public int[] get() {
-			return f;
-		}
-
-		public void set(int[] f) {
-			this.f = f;
-		}
 		
+	}
+	
+	public static class CellNull1 {
+		public int[] f;
 	}
 	
 	public static class Cell0 {
@@ -355,12 +348,34 @@ public class AdvancedPointerAnalysis extends AbstractTest {
 	
 	@Unsafe
 	public static void testUnsafeCellCouldBeNull() {
-		CellNull x = new CellNull(null);
+		CellNull0 x = new CellNull0();
+		x.f = null;
 		x.f[5] = 3;
 	}
 	
 	@Test
 	public void _testUnsafeCellCouldBeNull() {
 		assertAnalysis("testUnsafeCellCouldBeNull");
+	}
+	
+	@Safe
+	public static void testUnsafeCellMightBeNull() {
+		// This program is actually incorrect (NullPointerException), 
+		// but detecting null references is out of the scope of this project.
+		// If pointer analysis had returned null references along with actual references
+		// we might have been able to detect null dereferences, but SPARK seems  to simply 
+		// ignore null references.
+		CellNull1 x  = new CellNull1();
+		if(getAnyInt() > 5){
+			x.f = new int[256];
+		} else {
+			x.f = null;
+		}
+		x.f[5] = 3;
+	}
+	
+	@Test
+	public void _testUnsafeCellMightBeNull() {
+		assertAnalysis("testUnsafeCellMightBeNull");
 	}
 }
