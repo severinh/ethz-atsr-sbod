@@ -11,6 +11,7 @@ public class AllTests {
 		PointerAnalysisTests.main(args);
 		StaticFieldTests.main(args);
 		TemplateTests.main(args);
+		WideningTests.main(args);
 	}
 
 }
