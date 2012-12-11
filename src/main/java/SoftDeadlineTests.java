@@ -1581,6 +1581,9 @@ public class SoftDeadlineTests extends AbstractTest {
 	}
 
 	public static void main(String[] args) {
+		testPreciseEqual1();
+		testPreciseEqual2();
+		testPreciseEqual3();
 		testOLLL_Negative_22();
 		testOLO_OK_8();
 		testOL_Negative_6();
