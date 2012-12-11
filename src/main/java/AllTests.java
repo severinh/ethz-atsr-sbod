@@ -9,6 +9,7 @@ public class AllTests {
 		LoopTests.main(args);
 		OtherTeamTests.main(args);
 		PointerAnalysisTests.main(args);
+		SoftDeadlineTests.main(args);
 		StaticFieldTests.main(args);
 		TemplateTests.main(args);
 		WideningTests.main(args);
