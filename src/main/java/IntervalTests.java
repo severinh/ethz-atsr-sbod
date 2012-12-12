@@ -337,7 +337,23 @@ public class IntervalTests {
 		rightInterval = Interval.of(2, 2);
 		assertInterval(7, 7, Interval.or(leftInterval, rightInterval));
 
-		// TODO: Add more tests
+		leftInterval = Interval.of(0, 1);
+		rightInterval = Interval.of(0, 0);
+		assertInterval(0, 1, Interval.or(leftInterval, rightInterval));
+
+		// TODO: Could be more precise
+		// [0, 6] | [0, 0] should be [0, 6] and not [0, 7].
+		for (int i = 2; i < 4; i++) {
+			leftInterval = Interval.of(0, i);
+			rightInterval = Interval.of(0, 0);
+			assertInterval(0, 3, Interval.or(leftInterval, rightInterval));
+		}
+
+		for (int i = 4; i < 8; i++) {
+			leftInterval = Interval.of(0, i);
+			rightInterval = Interval.of(0, 0);
+			assertInterval(0, 7, Interval.or(leftInterval, rightInterval));
+		}
 	}
 
 	@Test

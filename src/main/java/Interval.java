@@ -93,6 +93,11 @@ public class Interval {
 		return result;
 	}
 
+	public boolean isNonNegative() {
+		boolean result = getLower() >= 0;
+		return result;
+	}
+
 	public boolean contains(int value) {
 		if (isBottom()) {
 			return false;
@@ -282,8 +287,34 @@ public class Interval {
 			int value = leftInterval.getLower() | rightInterval.getUpper();
 			Interval result = Interval.of(value);
 			return result;
+		} else if (leftInterval.isNonNegative()
+				&& rightInterval.isNonNegative()) {
+			// For the two lower bounds a and c, the resulting lower bound will
+			// be at least as large as the maximum of a and c.
+			int maxLower = Math.max(leftInterval.getLower(),
+					rightInterval.getLower());
+
+			// For the two upper bounds b and d, the resulting upper bound will
+			// be at least as large as the maximum of a and c.
+			int maxUpper = Math.max(leftInterval.getUpper(),
+					rightInterval.getUpper());
+
+			int lower = maxLower;
+			int upper = Integer.MAX_VALUE;
+
+			if (maxUpper > 0) {
+				// 00001***** == maxUpper results in
+				// 0001000000 == a
+				int a = 1 << (32 - Integer.numberOfLeadingZeros(maxUpper));
+
+				// 00001***** == maxUpper results in
+				// 0000111111 == upper
+				upper = a - 1;
+			}
+
+			Interval result = Interval.of(lower, upper);
+			return result;
 		} else {
-			// TODO: Imprecise
 			return TOP;
 		}
 	}
