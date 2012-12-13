@@ -13,7 +13,6 @@ public class AllTests {
 		StaticFieldTests.main(args);
 		TemplateTests.main(args);
 		WideningTests.main(args);
-		ImprecisionTests.main(args);
 	}
 
 }
