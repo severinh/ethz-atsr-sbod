@@ -341,7 +341,7 @@ public class IntervalTests {
 	}
 
 	@Test
-	public void testOr() {
+	public void testOrExhaustive() {
 		Interval leftInterval;
 		Interval rightInterval;
 
@@ -350,6 +350,45 @@ public class IntervalTests {
 			rightInterval = Interval.of(0, 0);
 			assertInterval(0, i, Interval.or(leftInterval, rightInterval));
 		}
+		
+		leftInterval = Interval.of(15,16);
+		rightInterval = Interval.of(15,16);
+		assertInterval(15,31,Interval.or(leftInterval,rightInterval));
+		
+		leftInterval = Interval.of(15,16);
+		rightInterval = Interval.of(16,16);
+		assertInterval(16,31,Interval.or(leftInterval,rightInterval));
+		
+		leftInterval = Interval.of(15,16);
+		rightInterval = Interval.of(16,16);
+		assertInterval(16,31,Interval.or(leftInterval,rightInterval));
+		
+		leftInterval = Interval.of(240,240);
+		rightInterval = Interval.of(0,15);
+		assertInterval(240,255,Interval.or(leftInterval,rightInterval));
+	}
+	
+	@Test
+	public void testOrFallback() {
+		Interval leftInterval,rightInterval;
+		
+		leftInterval = Interval.of(0, 127);
+		rightInterval = Interval.of(0, 127);
+		assertInterval(0, 127, Interval.or(leftInterval, rightInterval));
+
+		leftInterval = Interval.of(0, 127);
+		rightInterval = Interval.of(0, 128);
+		assertInterval(0, 255, Interval.or(leftInterval, rightInterval));
+		
+		leftInterval = Interval.of(16, 127);
+		rightInterval = Interval.of(16, 128);
+		assertInterval(16, 255, Interval.or(leftInterval, rightInterval));
+		
+		leftInterval = Interval.of(16, 127);
+		rightInterval = Interval.of(15, 128);
+		// for this particular case, 16 is the smallest number that | can produce
+		// but our analysis is not precise enough
+		assertInterval(15, 255, Interval.or(leftInterval, rightInterval));
 	}
 
 	@Test
@@ -377,6 +416,10 @@ public class IntervalTests {
 		rightInterval = Interval.of(15,15);
 		assertInterval(0, 31, Interval.xor(leftInterval, rightInterval));
 		
+		leftInterval = Interval.of(15, 15);
+		rightInterval = Interval.of(16,16);
+		assertInterval(31, 31, Interval.xor(leftInterval, rightInterval));
+		
 		// TODO: Add more tests
 	}
 	
@@ -391,6 +434,19 @@ public class IntervalTests {
 
 		leftInterval = Interval.of(0, 127);
 		rightInterval = Interval.of(0, 128);
+		assertInterval(0, 255, Interval.xor(leftInterval, rightInterval));
+		
+		leftInterval = Interval.of(127, 127);
+		rightInterval = Interval.of(127, 128);
+		assertInterval(0, 255, Interval.xor(leftInterval, rightInterval));
+		
+		leftInterval = Interval.of(127, 127);
+		rightInterval = Interval.of(128, 128);
+		assertInterval(255, 255, Interval.xor(leftInterval, rightInterval));
+		
+		
+		leftInterval = Interval.of(16, 127);
+		rightInterval = Interval.of(16, 128);
 		assertInterval(0, 255, Interval.xor(leftInterval, rightInterval));
 	}
 

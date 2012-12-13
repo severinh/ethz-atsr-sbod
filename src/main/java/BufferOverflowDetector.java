@@ -77,14 +77,18 @@ public class BufferOverflowDetector {
 		// array size (intervals) at the allocations sites reported
 		// by pointer analysis.
 		for (SootMethod method : sootClass.getMethods()) {
-			String methodName = method.getName();
-
-			LOG.info("Analyzing method " + methodName + "...");
-			Analysis analysis = new Analysis(method);
-			analysis.run();
-
-			methodAnalyses.put(method, analysis);
+			analyzeMethod(method);
 		}
+	}
+
+	private void analyzeMethod(SootMethod method) {
+		String methodName = method.getName();
+
+		LOG.info("Analyzing method " + methodName + "...");
+		Analysis analysis = new Analysis(method);
+		analysis.run();
+
+		methodAnalyses.put(method, analysis);
 	}
 
 	/**
@@ -96,9 +100,8 @@ public class BufferOverflowDetector {
 	 * @return the analysis
 	 */
 	public Analysis getMethodAnalysis(SootMethod sootMethod) {
-		SootClass sootClass = sootMethod.getDeclaringClass();
 		if (!methodAnalyses.containsKey(sootMethod)) {
-			analyzeClass(sootClass);
+			analyzeMethod(sootMethod);
 		}
 		Analysis analysis = methodAnalyses.get(sootMethod);
 		return analysis;
