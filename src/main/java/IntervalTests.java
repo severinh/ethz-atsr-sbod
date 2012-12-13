@@ -130,11 +130,6 @@ public class IntervalTests {
 		assertInterval(Integer.MIN_VALUE, Integer.MIN_VALUE + 2,
 				Interval.sub(otherInterval, interval));
 
-		interval = Interval.of(Integer.MAX_VALUE + 1, Integer.MAX_VALUE);
-		otherInterval = Interval.of(-1);
-		assertTrue(Interval.sub(interval, otherInterval).isTop());
-		assertTrue(Interval.sub(otherInterval, interval).isTop());
-
 		interval = Interval.of(Integer.MAX_VALUE);
 		otherInterval = Interval.of(Integer.MIN_VALUE);
 		assertInterval(-1, Interval.sub(interval, otherInterval));
@@ -240,15 +235,31 @@ public class IntervalTests {
 
 		leftInterval = Interval.of(3, 6);
 		rightInterval = Interval.of(-2, -2);
-		assertIsTop(Interval.shl(leftInterval, rightInterval));
+		// 3 << -2 == -1073741824
+		// 4 << -2 == 0
+		// 5 << -2 == 1073741824
+		// 6 << -2 == Integer.MIN_VALUE
+		assertInterval(Integer.MIN_VALUE, 5 << -2,
+				Interval.shl(leftInterval, rightInterval));
 
 		leftInterval = Interval.of(3, 4);
 		rightInterval = Interval.of(-2, -2);
-		assertIsTop(Interval.shl(leftInterval, rightInterval));
+		// 3 << -2 == -1073741824
+		// 4 << -2 == 0
+		assertInterval(-1073741824, 0,
+				Interval.shl(leftInterval, rightInterval));
 
 		leftInterval = Interval.of(-3, 3);
 		rightInterval = Interval.of(-2, -2);
-		assertIsTop(Interval.shl(leftInterval, rightInterval));
+		// -3 << -2 == 1073741824
+		// -2 << -2 == -2147483648
+		// -1 << -2 == -1073741824
+		// 0 << -2 == 0
+		// 1 << -2 == 1073741824
+		// 2 << -2 == -2147483648
+		// 3 << -2 == -1073741824
+		assertInterval(-2147483648, 1073741824,
+				Interval.shl(leftInterval, rightInterval));
 
 		leftInterval = Interval.of(3, 3);
 		rightInterval = Interval.of(-1, Integer.MAX_VALUE);
@@ -256,7 +267,8 @@ public class IntervalTests {
 
 		leftInterval = Interval.of(-3, 4);
 		rightInterval = Interval.of(-2, 2);
-		assertIsTop(Interval.shl(leftInterval, rightInterval));
+		assertInterval(-2147483648, 1073741824,
+				Interval.shl(leftInterval, rightInterval));
 
 		leftInterval = Interval.of(3, 3);
 		rightInterval = Interval.of(31, 31);
@@ -265,11 +277,13 @@ public class IntervalTests {
 
 		leftInterval = Interval.of(1024, 1024);
 		rightInterval = Interval.of(15, 48);
-		assertIsTop(Interval.shl(leftInterval, rightInterval));
+		assertInterval(-2147483648, 1073741824,
+				Interval.shl(leftInterval, rightInterval));
 
 		leftInterval = Interval.of(1024, 1024);
 		rightInterval = Interval.of(15, 49);
-		assertIsTop(Interval.shl(leftInterval, rightInterval));
+		assertInterval(-2147483648, 1073741824,
+				Interval.shl(leftInterval, rightInterval));
 
 		leftInterval = Interval.of(1024, 1024);
 		rightInterval = Interval.of(31, 34);
@@ -277,15 +291,17 @@ public class IntervalTests {
 
 		leftInterval = Interval.of(1024, 1024);
 		rightInterval = Interval.of(30, 48);
-		assertIsTop(Interval.shl(leftInterval, rightInterval));
+		assertInterval(0, 67108864, Interval.shl(leftInterval, rightInterval));
 
 		leftInterval = Interval.of(1024, 1024);
 		rightInterval = Interval.of(15, 30);
-		assertIsTop(Interval.shl(leftInterval, rightInterval));
+		assertInterval(-2147483648, 1073741824,
+				Interval.shl(leftInterval, rightInterval));
 
 		leftInterval = Interval.of(3, 3);
 		rightInterval = Interval.of(29, 31);
-		assertIsTop(Interval.shl(leftInterval, rightInterval));
+		assertInterval(-2147483648, 1610612736,
+				Interval.shl(leftInterval, rightInterval));
 	}
 
 	@Test
