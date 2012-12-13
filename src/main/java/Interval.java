@@ -13,6 +13,13 @@ public class Interval {
 	public static final Interval NON_NEGATIVE = new Interval(0,
 			Integer.MAX_VALUE);
 
+	/**
+	 * The maximum number of combinations of values that
+	 * {@link #binOp(Interval, Interval, BinOp)} is allowed to compute in the
+	 * concrete.
+	 */
+	public static final int MAX_PRECISE_COMBINATIONS = 100;
+	
 	private final int lower;
 	private final int upper;
 
@@ -139,8 +146,6 @@ public class Interval {
 		}
 
 	}
-
-	public static final int MAX_PRECISE_COMBINATIONS = 100;
 
 	/**
 	 * Tries to compute the most precise interval resulting from a binary
