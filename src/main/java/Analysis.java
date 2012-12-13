@@ -409,6 +409,17 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 			loopBackJumpCountMap.put(stmt, newCount);
 			if (newCount > LOOP_BACK_JUMP_COUNT_THRESHOLD) {
 				isWideningNeeded = true;
+
+				// When there are nested loop and the threshold has been
+				// reached in the case of the inner loop, the intervals
+				// of the inner loop may change when the symbolic execution
+				// moves on to the second element of the outer loop.
+				// Because the threshold of the inner loop is still reached,
+				// another widening is performed, which accidentally affects
+				// the outer loop as well, even though the execution has only
+				// reached its second element.
+				// As a simple measure, reset the counter back to zero.
+				loopBackJumpCountMap.put(stmt, 0);
 			}
 		}
 
