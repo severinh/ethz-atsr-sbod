@@ -263,7 +263,7 @@ public class IntervalTests {
 
 		leftInterval = Interval.of(3, 3);
 		rightInterval = Interval.of(-1, Integer.MAX_VALUE);
-		assertIsTop(Interval.shl(leftInterval, rightInterval));
+		assertTop(Interval.shl(leftInterval, rightInterval));
 
 		leftInterval = Interval.of(-3, 4);
 		rightInterval = Interval.of(-2, 2);
@@ -353,7 +353,7 @@ public class IntervalTests {
 	}
 
 	@Test
-	public void testXor() {
+	public void testXorExhaustive() {
 		Interval leftInterval;
 		Interval rightInterval;
 
@@ -361,7 +361,37 @@ public class IntervalTests {
 		rightInterval = Interval.of(3, 3);
 		assertInterval(6, 6, Interval.xor(leftInterval, rightInterval));
 
+		leftInterval = Interval.of(0, 5);
+		rightInterval = Interval.of(0, 3);
+		assertInterval(0, 7, Interval.xor(leftInterval, rightInterval));
+		
+		leftInterval = Interval.of(2, 5);
+		rightInterval = Interval.of(6,7);
+		assertInterval(2, 5, Interval.xor(leftInterval, rightInterval));
+		
+		leftInterval = Interval.of(4, 5);
+		rightInterval = Interval.of(6,7);
+		assertInterval(2, 3, Interval.xor(leftInterval, rightInterval));
+		
+		leftInterval = Interval.of(15, 16);
+		rightInterval = Interval.of(15,15);
+		assertInterval(0, 31, Interval.xor(leftInterval, rightInterval));
+		
 		// TODO: Add more tests
+	}
+	
+	@Test
+	public void testXorFallback() {
+		Interval leftInterval;
+		Interval rightInterval;
+
+		leftInterval = Interval.of(0, 127);
+		rightInterval = Interval.of(0, 127);
+		assertInterval(0, 127, Interval.xor(leftInterval, rightInterval));
+
+		leftInterval = Interval.of(0, 127);
+		rightInterval = Interval.of(0, 128);
+		assertInterval(0, 255, Interval.xor(leftInterval, rightInterval));
 	}
 
 	@Test
@@ -574,7 +604,7 @@ public class IntervalTests {
 		assertEquals(expectedValue, interval.getUpper());
 	}
 
-	protected void assertIsTop(Interval interval) {
+	protected void assertTop(Interval interval) {
 		assertEquals(Interval.TOP, interval);
 	}
 
