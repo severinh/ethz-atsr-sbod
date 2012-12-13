@@ -318,6 +318,34 @@ public class Interval {
 			return TOP;
 		}
 	}
+	
+	public static Interval morePreciseOr(Interval leftInterval, Interval rightInterval) {
+		if (leftInterval.isBottom() || rightInterval.isBottom()) {
+			return BOTTOM;
+		}
+
+		if (leftInterval.isSingleValue() && rightInterval.isSingleValue()) {
+			int value = leftInterval.getLower() | rightInterval.getUpper();
+			Interval result = Interval.of(value);
+			return result;
+		} else if (leftInterval.isNonNegative()
+				&& rightInterval.isNonNegative()) {
+			int maxUpper = Math.max(leftInterval.getUpper(), rightInterval.getUpper());
+			int minUpper = Math.min(leftInterval.getUpper(), rightInterval.getUpper());
+			
+			// Idea: some parts of the resulting numbers can only be determined by the 
+			// 	greater of the two interval bounds.
+			// 	if you have a = 000000AAAAAAAAAA and b = 0000000000BBBBBB, then the greatest 
+			//	resulting number has the pattern 000000AAAA111111
+
+			int havoc = (1 << Integer.numberOfLeadingZeros(minUpper))-1;
+			maxUpper |= havoc;
+			
+			return Interval.of(Math.min(leftInterval.getLower(), rightInterval.getLower()), maxUpper);
+		} else {
+			return TOP;
+		}
+	}
 
 	public static Interval xor(Interval leftInterval, Interval rightInterval) {
 		if (leftInterval.isBottom() || rightInterval.isBottom()) {
@@ -330,6 +358,36 @@ public class Interval {
 			return result;
 		} else {
 			// TODO: Imprecise
+			return TOP;
+		}
+	}
+	
+	public static Interval morePreciseXor(Interval leftInterval, Interval rightInterval) {
+		if (leftInterval.isBottom() || rightInterval.isBottom()) {
+			return BOTTOM;
+		}
+
+		if (leftInterval.isSingleValue() && rightInterval.isSingleValue()) {
+			int value = leftInterval.getLower() ^ rightInterval.getUpper();
+			Interval result = Interval.of(value);
+			return result;
+		} else if(leftInterval.isNonNegative() && rightInterval.isNonNegative()) {
+			int maxUpper = Math.max(leftInterval.getUpper(), rightInterval.getUpper());
+			int minUpper = Math.min(leftInterval.getUpper(), rightInterval.getUpper());
+			
+			// Idea: some parts of the resulting numbers can only be determined by the 
+			// 	greater of the two interval bounds.
+			// 	if you have a = 000000AAAAAAAAAA and b = 0000000000BBBBBB, then the greatest 
+			//	resulting number has the pattern 000000AAAA111111
+
+			int havoc = (1 << Integer.numberOfLeadingZeros(minUpper))-1;
+			maxUpper |= havoc;
+			
+			// Important: Unlike with the ordinary bitwise or, the exclusive or
+			// 	could potentially cancel out all lower bits.
+			// We thus conservatively assume a lower bound of 0. 
+			return Interval.of(0, maxUpper);
+		} else {
 			return TOP;
 		}
 	}
