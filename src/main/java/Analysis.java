@@ -65,7 +65,7 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 	 * {@link #flowThrough(IntervalPerVar, Unit, List, List)} before widening
 	 * kicks in.
 	 */
-	private static final int LOOP_BACK_JUMP_COUNT_THRESHOLD = 100;
+	private static final int MAX_LOOP_BACK_JUMP_COUNT = 100;
 
 	private static final Logger LOG = Logger.getLogger(Analysis.class);
 
@@ -436,7 +436,7 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 		if (loopBackJumpCountMap.containsKey(stmt)) {
 			int newCount = loopBackJumpCountMap.get(stmt) + 1;
 			loopBackJumpCountMap.put(stmt, newCount);
-			if (newCount > LOOP_BACK_JUMP_COUNT_THRESHOLD) {
+			if (newCount > MAX_LOOP_BACK_JUMP_COUNT) {
 				isWideningNeeded = true;
 				LOG.debug("Widening for loop back jump statement " + stmt
 						+ "...");
