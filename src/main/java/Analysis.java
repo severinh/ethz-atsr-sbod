@@ -95,10 +95,10 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 
 			// For each loop, determine the set of variables that are assigned
 			// to within the loop. When widening at the back jump statement
-			// of that loop, only widen the intervals of variables inside of
-			// loop. Otherwise, intervals of variables only used outside of the
-			// loop may be widened prematurely if they happen to have changed
-			// by coincidence.
+			// of that loop, only widen the intervals of variables assigned
+			// inside of loop. Otherwise, intervals of variables only assigned
+			// outside of the loop may be widened prematurely if they happen
+			// to have changed by coincidence.
 			Set<String> variablesAssignedInLopp = new HashSet<String>();
 			for (Stmt loopStatement : loop.getLoopStatements()) {
 				if (loopStatement instanceof DefinitionStmt) {
