@@ -336,6 +336,14 @@ public class IntervalTests {
 		leftInterval = Interval.of(5, 5);
 		rightInterval = Interval.of(3, 3);
 		assertInterval(1, 1, Interval.and(leftInterval, rightInterval));
+		
+		leftInterval = Interval.of(511, 1023);
+		rightInterval = Interval.of(256, 511);
+		assertInterval(0, 511, Interval.and(leftInterval, rightInterval));
+		
+		leftInterval = Interval.of(-511, -1);
+		rightInterval = Interval.of(-511, -3);
+		assertTop(Interval.and(leftInterval, rightInterval));
 
 		// TODO: Add more tests
 	}
