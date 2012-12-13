@@ -131,9 +131,12 @@ public class Interval {
 		}
 	}
 
-	interface BinOp {
+	static abstract class BinOp {
 
-		public int op(int firstValue, int rightValue);
+		public abstract int op(int firstValue, int rightValue);
+		public Interval fallback(Interval leftInterval, Interval rightInterval) {
+			return Interval.TOP;
+		}
 
 	}
 
@@ -161,13 +164,13 @@ public class Interval {
 		// long overflow due to the multiplication following it
 		if (leftValueCount > MAX_PRECISE_COMBINATIONS
 				|| rightValueCount > MAX_PRECISE_COMBINATIONS) {
-			return Interval.TOP;
+			return binOp.fallback(leftInterval, rightInterval);
 		}
 
 		long combinationCount = leftValueCount * rightValueCount;
 
 		if (combinationCount > MAX_PRECISE_COMBINATIONS) {
-			return Interval.TOP;
+			return binOp.fallback(leftInterval, rightInterval);
 		}
 
 		int lower = Integer.MAX_VALUE;
@@ -188,99 +191,98 @@ public class Interval {
 	}
 
 	public static Interval plus(Interval leftInterval, Interval rightInterval) {
-		Interval result = binOp(leftInterval, rightInterval, new BinOp() {
+		return binOp(leftInterval, rightInterval, new BinOp() {
 
 			@Override
 			public int op(int firstValue, int rightValue) {
 				return firstValue + rightValue;
 			}
+			
+			@Override
+			public Interval fallback(Interval leftInterval, Interval rightInterval) {
+				long firstLower = leftInterval.getLower();
+				long secondLower = rightInterval.getLower();
+				long firstUpper = leftInterval.getUpper();
+				long secondUpper = rightInterval.getUpper();
+				long lower = firstLower + secondLower;
+				long upper = firstUpper + secondUpper;
+				return Interval.of(lower, upper);
+			}
 		});
-
-		if (result.isTop()) {
-			long firstLower = leftInterval.getLower();
-			long secondLower = rightInterval.getLower();
-			long firstUpper = leftInterval.getUpper();
-			long secondUpper = rightInterval.getUpper();
-			long lower = firstLower + secondLower;
-			long upper = firstUpper + secondUpper;
-			leftInterval = Interval.of(lower, upper);
-		}
-		return result;
 	}
 
 	public static Interval sub(Interval leftInterval, Interval rightInterval) {
-		Interval result = binOp(leftInterval, rightInterval, new BinOp() {
+		return binOp(leftInterval, rightInterval, new BinOp() {
 
 			@Override
 			public int op(int firstValue, int rightValue) {
 				return firstValue - rightValue;
 			}
-		});
 
-		if (result.isTop()) {
-			long firstLower = leftInterval.getLower();
-			long secondLower = rightInterval.getLower();
-			long firstUpper = leftInterval.getUpper();
-			long secondUpper = rightInterval.getUpper();
-			long lower = firstLower - secondLower;
-			long upper = firstUpper - secondUpper;
-			result = Interval.of(lower, upper);
-		}
-		return result;
+			@Override
+			public Interval fallback(Interval leftInterval, Interval rightInterval) {
+				long firstLower = leftInterval.getLower();
+				long secondLower = rightInterval.getLower();
+				long firstUpper = leftInterval.getUpper();
+				long secondUpper = rightInterval.getUpper();
+				long lower = firstLower - secondLower;
+				long upper = firstUpper - secondUpper;
+				return Interval.of(lower, upper);
+			}
+		});
 	}
 
 	public static Interval mul(Interval leftInterval, Interval rightInterval) {
-		Interval result = binOp(leftInterval, rightInterval, new BinOp() {
+		return binOp(leftInterval, rightInterval, new BinOp() {
 
 			@Override
 			public int op(int firstValue, int rightValue) {
 				return firstValue * rightValue;
 			}
 
+			@Override
+			public Interval fallback(Interval leftInterval, Interval rightInterval) {
+				long a = leftInterval.getLower();
+				long b = leftInterval.getUpper();
+				long c = rightInterval.getLower();
+				long d = rightInterval.getUpper();
+				long e = Math.min(a * c, Math.min(a * d, Math.min(b * c, b * d)));
+				long f = Math.max(a * c, Math.max(a * d, Math.max(b * c, b * d)));
+				return Interval.of(e, f); 
+			}
 		});
-
-		if (result.isTop()) {
-			long a = leftInterval.getLower();
-			long b = leftInterval.getUpper();
-			long c = rightInterval.getLower();
-			long d = rightInterval.getUpper();
-			long e = Math.min(a * c, Math.min(a * d, Math.min(b * c, b * d)));
-			long f = Math.max(a * c, Math.max(a * d, Math.max(b * c, b * d)));
-			result = Interval.of(e, f);
-		}
-		return result;
 	}
 
 	public static Interval div(Interval leftInterval, Interval rightInterval) {
-		Interval result = binOp(leftInterval, rightInterval, new BinOp() {
+		return binOp(leftInterval, rightInterval, new BinOp() {
 
 			@Override
 			public int op(int leftValue, int rightValue) {
 				return leftValue / rightValue;
 			}
+			
+			@Override
+			public Interval fallback(Interval leftInterval, Interval rightInterval) {
+				LOG.warn("loss of precision due to unsupported division expression");
+				return super.fallback(leftInterval, rightInterval);
+			}
 		});
-
-		if (result.isTop()) {
-			// We do not need to be more precise
-			LOG.warn("loss of precision due to unsupported division expression");
-		}
-		return result;
 	}
 
 	public static Interval rem(Interval leftInterval, Interval rightInterval) {
-		Interval result = binOp(leftInterval, rightInterval, new BinOp() {
+		return binOp(leftInterval, rightInterval, new BinOp() {
 
 			@Override
 			public int op(int leftValue, int rightValue) {
 				return leftValue % rightValue;
 			}
+			
+			@Override
+			public Interval fallback(Interval leftInterval, Interval rightInterval) {
+				LOG.warn("loss of precision due to unsupported modulo expression");
+				return super.fallback(leftInterval, rightInterval);
+			}
 		});
-
-		if (result.isTop()) {
-			// We do not need to be more precise
-			LOG.warn("loss of precision due to unsupported modulo expression");
-		}
-		return result;
 	}
 
 	public static Interval neg(Interval interval) {
@@ -296,125 +298,110 @@ public class Interval {
 		}
 	}
 
-	static final long MASK_32 = 0x20 - 1;
-
 	public static Interval shl(Interval leftInterval, Interval rightInterval) {
-		Interval result = binOp(leftInterval, rightInterval, new BinOp() {
+		return binOp(leftInterval, rightInterval, new BinOp() {
 
 			@Override
 			public int op(int firstValue, int rightValue) {
 				return firstValue << rightValue;
 			}
 		});
-
-		if (result.isTop()) {
-			// long a = leftInterval.getLower();
-			// long b = leftInterval.getUpper();
-			// long c = rightInterval.getLower();
-			// long d = rightInterval.getUpper();
-			//
-			// c = c & MASK_32;
-			// d = d & MASK_32;
-			//
-			// if (c < 0 || d < 0) {
-			// return TOP;
-			// }
-			//
-			// long lower = Math.min(a << c, a << d);
-			// long upper = Math.max(b << c, b << d);
-			// result = Interval.of(lower, upper);
-		}
-		return result;
 	}
 
 	public static Interval shr(Interval leftInterval, Interval rightInterval) {
-		Interval result = binOp(leftInterval, rightInterval, new BinOp() {
+		return binOp(leftInterval, rightInterval, new BinOp() {
 
 			@Override
 			public int op(int firstValue, int rightValue) {
 				return firstValue >> rightValue;
 			}
 		});
-		return result;
 	}
 
 	public static Interval ushr(Interval leftInterval, Interval rightInterval) {
-		Interval result = binOp(leftInterval, rightInterval, new BinOp() {
+		return binOp(leftInterval, rightInterval, new BinOp() {
 
 			@Override
 			public int op(int firstValue, int rightValue) {
 				return firstValue >>> rightValue;
 			}
 		});
-		return result;
 	}
 
 	public static Interval and(Interval leftInterval, Interval rightInterval) {
-		Interval result = binOp(leftInterval, rightInterval, new BinOp() {
+		return binOp(leftInterval, rightInterval, new BinOp() {
 
 			@Override
 			public int op(int firstValue, int rightValue) {
 				return firstValue & rightValue;
 			}
 		});
-		return result;
 	}
 
 	public static Interval or(Interval leftInterval, Interval rightInterval) {
-		Interval result = binOp(leftInterval, rightInterval, new BinOp() {
+		return binOp(leftInterval, rightInterval, new BinOp() {
 
 			@Override
 			public int op(int firstValue, int rightValue) {
 				return firstValue | rightValue;
 			}
-		});
+			
+			@Override
+			public Interval fallback(Interval leftInterval, Interval rightInterval) {
+				if (leftInterval.isNonNegative()
+						&& rightInterval.isNonNegative()) {
+					int maxUpper = Math.max(leftInterval.getUpper(), rightInterval.getUpper());
+					int minUpper = Math.min(leftInterval.getUpper(), rightInterval.getUpper());
+					
+					// Idea: some parts of the resulting numbers can only be determined by the 
+					// 	greater of the two interval bounds.
+					// 	if you have a = 000000AAAAAAAAAA and b = 0000000000BBBBBB, then the greatest 
+					//	resulting number has the pattern 000000AAAA111111
 
-		if (result.isTop()) {
-			if (leftInterval.isNonNegative() && rightInterval.isNonNegative()) {
-				// For the two lower bounds a and c, the resulting lower bound
-				// will
-				// be at least as large as the maximum of a and c.
-				int maxLower = Math.max(leftInterval.getLower(),
-						rightInterval.getLower());
-
-				// For the two upper bounds b and d, the resulting upper bound
-				// will
-				// be at least as large as the maximum of a and c.
-				int maxUpper = Math.max(leftInterval.getUpper(),
-						rightInterval.getUpper());
-
-				int lower = maxLower;
-				int upper = Integer.MAX_VALUE;
-
-				if (maxUpper > 0) {
-					// 00001***** == maxUpper results in
-					// 0001000000 == a
-					int a = 1 << (32 - Integer.numberOfLeadingZeros(maxUpper));
-
-					// 00001***** == maxUpper results in
-					// 0000111111 == upper
-					upper = a - 1;
+					int havoc = (1 << Integer.numberOfLeadingZeros(minUpper))-1;
+					maxUpper |= havoc;
+					
+					return Interval.of(Math.min(leftInterval.getLower(), rightInterval.getLower()), maxUpper);
+				} else {
+					return super.fallback(leftInterval, rightInterval);
 				}
-
-				result = Interval.of(lower, upper);
-			} else {
-				result = TOP;
 			}
-		}
-		return result;
+		});
 	}
 
 	public static Interval xor(Interval leftInterval, Interval rightInterval) {
-		Interval result = binOp(leftInterval, rightInterval, new BinOp() {
+		return binOp(leftInterval, rightInterval, new BinOp() {
 
 			@Override
 			public int op(int firstValue, int rightValue) {
 				return firstValue ^ rightValue;
 			}
-		});
-		return result;
-	}
+			
+			@Override 
+			public Interval fallback(Interval leftInterval, Interval rightInterval) {
+				if(leftInterval.isNonNegative() && rightInterval.isNonNegative()) {
+					int maxUpper = Math.max(leftInterval.getUpper(), rightInterval.getUpper());
+					int minUpper = Math.min(leftInterval.getUpper(), rightInterval.getUpper());
+					
+					// Idea: some parts of the resulting numbers can only be determined by the 
+					// 	greater of the two interval bounds.
+					// 	if you have a = 000000AAAAAAAAAA and b = 0000000000BBBBBB, then the greatest 
+					//	resulting number has the pattern 000000AAAA111111
 
+					int havoc = (1 << Integer.numberOfLeadingZeros(minUpper))-1;
+					maxUpper |= havoc;
+					
+					// Important: Unlike with the ordinary bitwise or, the exclusive or
+					// 	could potentially cancel out all lower bits.
+					// We thus conservatively assume a lower bound of 0. 
+					return Interval.of(0, maxUpper);
+				} else {
+					return super.fallback(leftInterval, rightInterval);
+				}
+			}
+		});
+	}
+	
 	public static Interval meet(Interval interval, Interval otherInterval) {
 		if (interval.isBottom() && otherInterval.isBottom()) {
 			return BOTTOM;
