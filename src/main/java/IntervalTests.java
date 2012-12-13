@@ -211,7 +211,8 @@ public class IntervalTests {
 
 		leftInterval = Interval.of(Integer.MAX_VALUE);
 		rightInterval = Interval.of(1, 2);
-		assertTrue(Interval.mul(leftInterval, rightInterval).isTop());
+		assertInterval(-2, Integer.MAX_VALUE,
+				Interval.mul(leftInterval, rightInterval));
 
 		leftInterval = Interval.of(Integer.MIN_VALUE);
 		rightInterval = Interval.of(-1);
