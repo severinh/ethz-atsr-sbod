@@ -1,6 +1,8 @@
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -75,6 +77,7 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 	 * {@link #flowThrough(IntervalPerVar, Unit, List, List)} method.
 	 */
 	private final Map<Stmt, Integer> loopBackJumpCountMap;
+	private final Map<Stmt, Set<String>> variablesAssignedInLoopMap;
 
 	private final LoopNestTree loopNestTree;
 
@@ -83,10 +86,36 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 		allocationNodeMap = new HashMap<NewArrayExpr, Interval>();
 		loopNestTree = new LoopNestTree(method.retrieveActiveBody());
 		loopBackJumpCountMap = new HashMap<Stmt, Integer>();
+		variablesAssignedInLoopMap = new HashMap<Stmt, Set<String>>();
 
 		// Set the counter for every back-jump statement to zero
 		for (Loop loop : loopNestTree) {
-			loopBackJumpCountMap.put(loop.getBackJumpStmt(), 0);
+			Stmt loopBackJumpStmt = loop.getBackJumpStmt();
+			loopBackJumpCountMap.put(loopBackJumpStmt, 0);
+
+			// For each loop, determine the set of variables that are assigned
+			// to within the loop. When widening at the back jump statement
+			// of that loop, only widen the intervals of variables inside of
+			// loop. Otherwise, intervals of variables only used outside of the
+			// loop may be widened prematurely if they happen to have changed
+			// by coincidence.
+			Set<String> variablesAssignedInLopp = new HashSet<String>();
+			for (Stmt loopStatement : loop.getLoopStatements()) {
+				if (loopStatement instanceof DefinitionStmt) {
+					DefinitionStmt defStmt = (DefinitionStmt) loopStatement;
+					Value left = defStmt.getLeftOp();
+					if (left instanceof JimpleLocal) {
+						String varName = ((JimpleLocal) left).getName();
+						variablesAssignedInLopp.add(varName);
+					}
+				}
+			}
+			variablesAssignedInLoopMap.put(loopBackJumpStmt,
+					variablesAssignedInLopp);
+
+			LOG.debug("Loop back jump statement: " + loopBackJumpStmt);
+			LOG.debug("\tVariables assigned in the loop: "
+					+ variablesAssignedInLopp);
 		}
 
 		LOG.debug(getGraph().toString());
@@ -409,24 +438,18 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 			loopBackJumpCountMap.put(stmt, newCount);
 			if (newCount > LOOP_BACK_JUMP_COUNT_THRESHOLD) {
 				isWideningNeeded = true;
+				LOG.debug("Widening for loop back jump statement " + stmt
+						+ "...");
 
-				// When there are nested loop and the threshold has been
-				// reached in the case of the inner loop, the intervals
-				// of the inner loop may change when the symbolic execution
-				// moves on to the second element of the outer loop.
-				// Because the threshold of the inner loop is still reached,
-				// another widening is performed, which accidentally affects
-				// the outer loop as well, even though the execution has only
-				// reached its second element.
-				// As a simple measure, reset the counter back to zero.
-				loopBackJumpCountMap.put(stmt, 0);
+				loopBackJumpCountMap.remove(stmt);
 			}
 		}
 
 		for (IntervalPerVar fnext : fallOut) {
 			if (fallState != null) {
 				if (isWideningNeeded) {
-					fnext.copyAndWidenFrom(fallState);
+					fnext.copyAndWidenFrom(fallState,
+							variablesAssignedInLoopMap.get(stmt));
 				} else {
 					fnext.copyFrom(fallState);
 				}
@@ -435,7 +458,8 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 		for (IntervalPerVar fnext : branchOuts) {
 			if (branchState != null) {
 				if (isWideningNeeded) {
-					fnext.copyAndWidenFrom(branchState);
+					fnext.copyAndWidenFrom(branchState,
+							variablesAssignedInLoopMap.get(stmt));
 				} else {
 					fnext.copyFrom(branchState);
 				}

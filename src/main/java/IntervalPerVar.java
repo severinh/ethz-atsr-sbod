@@ -81,20 +81,26 @@ public class IntervalPerVar {
 	 * 
 	 * @param newIntervalPerVar
 	 *            the new intervals
+	 * @param widenableVariables
+	 *            the set of names of all variables that may be widened
 	 */
-	public void copyAndWidenFrom(IntervalPerVar newIntervalPerVar) {
+	public void copyAndWidenFrom(IntervalPerVar newIntervalPerVar,
+			Set<String> widenableVariables) {
 		IntervalPerVar widenedIntervalPerVar = new IntervalPerVar();
 		if (newIntervalPerVar.isInDeadCode()) {
 			widenedIntervalPerVar.setInDeadCode();
 		}
-		LOG.debug("Widening " + newIntervalPerVar + "...");
+		LOG.debug("\tOld IntervalPerVar: " + this + "...");
+		LOG.debug("\tNew IntervalPerVar: " + newIntervalPerVar + "...");
+
 		for (Entry<String, Interval> otherEntry : newIntervalPerVar.values
 				.entrySet()) {
 			String varName = otherEntry.getKey();
 			Interval newInterval = otherEntry.getValue();
 			Interval oldInterval = values.get(varName);
 			Interval widenedInterval = newInterval;
-			if (oldInterval != null && !oldInterval.equals(Interval.BOTTOM)
+			if (widenableVariables.contains(varName) && oldInterval != null
+					&& !oldInterval.equals(Interval.BOTTOM)
 					&& !oldInterval.equals(newInterval)) {
 				int lower = newInterval.getLower();
 				int upper = newInterval.getUpper();
@@ -115,6 +121,7 @@ public class IntervalPerVar {
 			}
 			widenedIntervalPerVar.putIntervalForVar(varName, widenedInterval);
 		}
+		LOG.debug("\tWidened IntervalPerVar: " + widenedIntervalPerVar + "...");
 		copyFrom(widenedIntervalPerVar);
 	}
 
