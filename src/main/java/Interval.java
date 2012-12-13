@@ -115,7 +115,7 @@ public class Interval {
 		if (isBottom()) {
 			return 0;
 		} else {
-			return (long) getUpper() - (long) getLower();
+			return (long) getUpper() - (long) getLower() + 1;
 		}
 	}
 
@@ -340,6 +340,30 @@ public class Interval {
 			public int op(int firstValue, int rightValue) {
 				return firstValue & rightValue;
 			}
+			
+			@Override
+			public Interval fallback(Interval leftInterval, Interval rightInterval) {
+				if (leftInterval.isNonNegative()
+						&& rightInterval.isNonNegative()) {
+					int minUpper = Math.min(leftInterval.getUpper(), rightInterval.getUpper());
+					
+					// Idea: some parts of the resulting numbers can only be determined by the 
+					// 	greater of the two interval bounds.
+					// 	if you have a = 000000AAAAAAAAAA and b = 0000000000BBBBBB, then the greatest 
+					//	resulting number has the pattern 0000000000111111
+					//	                                 000000AAAAAAAAAA
+					//	                                 0000000000BBBBBB
+
+					int havoc = (1 << (32 - Integer.numberOfLeadingZeros(minUpper)))-1;
+					
+					// As with XOR, we can almost always generate a bit pattern that will cancel
+					// out the lower bits. To compensate, we conservatively assume a lower bound of
+					// zero.
+					return Interval.of(0, havoc);
+				} else {
+					return super.fallback(leftInterval, rightInterval);
+				}
+			}
 		});
 	}
 
@@ -363,7 +387,7 @@ public class Interval {
 					// 	if you have a = 000000AAAAAAAAAA and b = 0000000000BBBBBB, then the greatest 
 					//	resulting number has the pattern 000000AAAA111111
 
-					int havoc = (1 << Integer.numberOfLeadingZeros(minUpper))-1;
+					int havoc = (1 << (32 - Integer.numberOfLeadingZeros(minUpper)))-1;
 					maxUpper |= havoc;
 					
 					return Interval.of(Math.min(leftInterval.getLower(), rightInterval.getLower()), maxUpper);
@@ -393,7 +417,7 @@ public class Interval {
 					// 	if you have a = 000000AAAAAAAAAA and b = 0000000000BBBBBB, then the greatest 
 					//	resulting number has the pattern 000000AAAA111111
 
-					int havoc = (1 << Integer.numberOfLeadingZeros(minUpper))-1;
+					int havoc = (1 << (32-Integer.numberOfLeadingZeros(minUpper)))-1;
 					maxUpper |= havoc;
 					
 					// Important: Unlike with the ordinary bitwise or, the exclusive or
