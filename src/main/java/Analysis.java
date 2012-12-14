@@ -174,8 +174,7 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 	 */
 	static void unhandled(String what) {
 		LOG.error("Can't handle " + what);
-		System.exit(1); // TODO: is System.exit(1) a good idea for code that we
-						// want to unit-test?
+		System.exit(1);
 	}
 
 	@Override
@@ -384,14 +383,12 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 						&& rightBranchInterval.isBottom()) {
 					// If no values of the left and right intervals can satisfy
 					// the condition, mark the branch state as dead
-					// TODO: Replace this by a disjunction?
 					branchState.setInDeadCode();
 				} else if (leftFallInterval.isBottom()
 						&& rightFallInterval.isBottom()) {
 					// If no values of the left and right intervals can satisfy
 					// the negation of the condition, mark the fall through
 					// state as dead
-					// TODO: Replace this by disjunction?
 					fallState.setInDeadCode();
 				}
 
@@ -474,7 +471,6 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 
 	@Override
 	protected IntervalPerVar entryInitialFlow() {
-		// TODO: How do you model the entry point?
 		return new IntervalPerVar();
 	}
 
@@ -498,8 +494,6 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 	}
 
 	protected boolean isBooleanOrIntType(Type type) {
-		// TODO: In the case of booleans, one might also return [0, 1] rather
-		// than Interval.TOP.
 		return type.equals(IntType.v()) || type.equals(BooleanType.v());
 	}
 
