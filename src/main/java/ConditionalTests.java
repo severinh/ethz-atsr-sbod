@@ -92,7 +92,7 @@ public class ConditionalTests extends AbstractTest {
 	public static void testUnsafe() {
 		int[] array = new int[2];
 		// Flag could be either false or true
-		boolean flag = array.hashCode() == 123;
+		boolean flag = getAnyInt() == 123;
 		int index = 0;
 		if (flag) {
 			index = 1;
