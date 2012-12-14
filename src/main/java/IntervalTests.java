@@ -337,8 +337,6 @@ public class IntervalTests {
 		leftInterval = Interval.of(8, 8);
 		rightInterval = Interval.of(2, 2);
 		assertInterval(2, 2, Interval.shr(leftInterval, rightInterval));
-
-		// TODO: Add more tests
 	}
 
 	@Test
@@ -349,8 +347,6 @@ public class IntervalTests {
 		leftInterval = Interval.of(8, 8);
 		rightInterval = Interval.of(2, 2);
 		assertInterval(2, 2, Interval.ushr(leftInterval, rightInterval));
-
-		// TODO: Add more tests
 	}
 
 	@Test
@@ -369,8 +365,6 @@ public class IntervalTests {
 		leftInterval = Interval.of(-511, -1);
 		rightInterval = Interval.of(-511, -3);
 		assertTop(Interval.and(leftInterval, rightInterval));
-
-		// TODO: Add more tests
 	}
 
 	@Test
@@ -453,8 +447,6 @@ public class IntervalTests {
 		leftInterval = Interval.of(15, 15);
 		rightInterval = Interval.of(16, 16);
 		assertInterval(31, 31, Interval.xor(leftInterval, rightInterval));
-
-		// TODO: Add more tests
 	}
 
 	@Test
