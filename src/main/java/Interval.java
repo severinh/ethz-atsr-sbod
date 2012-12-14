@@ -196,6 +196,19 @@ public class Interval {
 	}
 
 	public static Interval plus(Interval leftInterval, Interval rightInterval) {
+		// Performance optimization for the case where it is certain that no
+		// overflow occurs
+		if (!leftInterval.isBottom() && !rightInterval.isBottom()) {
+			long lower = ((long) leftInterval.getLower())
+					+ ((long) rightInterval.getLower());
+			long upper = ((long) leftInterval.getUpper())
+					+ ((long) rightInterval.getUpper());
+			if (Integer.MIN_VALUE <= lower && lower <= Integer.MAX_VALUE
+					&& Integer.MIN_VALUE <= upper && upper <= Integer.MAX_VALUE) {
+				return Interval.of(lower, upper);
+			}
+		}
+		
 		return binOp(leftInterval, rightInterval, new BinOp() {
 
 			@Override
