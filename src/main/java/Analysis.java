@@ -65,7 +65,7 @@ public class Analysis extends ForwardBranchedFlowAnalysis<IntervalPerVar> {
 	 * {@link #flowThrough(IntervalPerVar, Unit, List, List)} before widening
 	 * kicks in.
 	 */
-	private static final int MAX_LOOP_BACK_JUMP_COUNT = 100;
+	private static final int MAX_LOOP_BACK_JUMP_COUNT = 50;
 
 	private static final Logger LOG = Logger.getLogger(Analysis.class);
 
