@@ -65,22 +65,6 @@ public class BufferOverflowDetector {
 		return testMethods;
 	}
 
-	/**
-	 * Runs an {@link Analysis} for each method in the given class and caches
-	 * the {@link Analysis} objects.
-	 */
-	private void analyzeClass(SootClass sootClass) {
-		LOG.info("Analyzing " + sootClass.getName() + "...");
-
-		// Need to analyze ALL methods, not just test methods,
-		// because we need interval information to determine
-		// array size (intervals) at the allocations sites reported
-		// by pointer analysis.
-		for (SootMethod method : sootClass.getMethods()) {
-			analyzeMethod(method);
-		}
-	}
-
 	private void analyzeMethod(SootMethod method) {
 		String methodName = method.getName();
 
