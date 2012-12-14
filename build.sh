@@ -3,6 +3,8 @@
 SRC_DIR=src/main/java
 BIN_DIR=target/classes
 
+mkdir -p $BIN_DIR
+
 export CLASSPATH=$(pwd)/$BIN_DIR
 export CLASSPATH=$CLASSPATH:$(pwd)/lib/junit-4.11.jar
 export CLASSPATH=$CLASSPATH:$(pwd)/lib/log4j-1.2.17.jar
