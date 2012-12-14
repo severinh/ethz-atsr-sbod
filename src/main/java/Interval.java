@@ -53,29 +53,34 @@ public class Interval {
 		if (lower > upper) {
 			return BOTTOM;
 		} else {
-			boolean hasOverflow = lower < Integer.MIN_VALUE
-					|| upper < Integer.MIN_VALUE || Integer.MAX_VALUE < lower
-					|| Integer.MAX_VALUE < upper;
-			boolean hasOnlyNegativeOverflow = lower < Integer.MIN_VALUE
-					&& upper < Integer.MIN_VALUE;
-			boolean hasOnlyPositiveOverflow = Integer.MAX_VALUE < lower
-					&& Integer.MAX_VALUE < upper;
-			if (hasOverflow && !hasOnlyNegativeOverflow
-					&& !hasOnlyPositiveOverflow) {
-				// An overflow is allowed only if both the lower and upper bound
-				// cause a negative overflow or both cause a positive overflow
-				// TODO: This is probably not enough yet, when considering large
-				// numbers that cause multiple wrap-arounds
+			// Check if lower and upper are part of the same integer "window"
+			// ...] [Integer.MIN_VALUE, Integer.MAX_VALUE] [...
+			// First, shift the values because we consider as windows
+			// ...] [0, Integer.MAX_VALUE - Integer.MIN_VALUE + 1] [...
+			long lowerShifted = lower - (long) Integer.MIN_VALUE;
+			long upperShifted = upper - (long) Integer.MIN_VALUE;
+			long windowSize = (long) Integer.MAX_VALUE - (long) Integer.MIN_VALUE + 1l;
+			
+			if (lowerShifted < 0 && upperShifted >= 0) {
+				// Clearly not in the same window
 				return TOP;
 			} else {
-				Interval interval = Interval.of((int) lower, (int) upper);
-				if (interval.isBottom()) {
-					throw new IllegalStateException(
-							"must not return BOTTOM for [" + lower + ","
-									+ upper + "]");
+				// When lowerShifted and upperShifted are negative, we need
+				// to handle it in a special way, such that the negative
+				// windows start at 0 rather than -1.
+				if (lowerShifted < 0) {
+					lowerShifted++;
+					upperShifted++;
 				}
-				return interval;
+
+				// Check if they are in the same window
+				if (lowerShifted / windowSize != upperShifted / windowSize) {
+					return TOP;
+				}
 			}
+
+			Interval interval = Interval.of((int) lower, (int) upper);
+			return interval;
 		}
 	}
 
@@ -266,7 +271,7 @@ public class Interval {
 				long d = rightInterval.getUpper();
 				long e = Math.min(a * c, Math.min(a * d, Math.min(b * c, b * d)));
 				long f = Math.max(a * c, Math.max(a * d, Math.max(b * c, b * d)));
-				return Interval.of(e, f); 
+				return Interval.of(e, f);
 			}
 		});
 	}
