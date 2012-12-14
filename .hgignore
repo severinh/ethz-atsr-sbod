@@ -6,3 +6,4 @@ syntax: regexp
 ^bin/
 syntax: glob
 *.class
+*.orig

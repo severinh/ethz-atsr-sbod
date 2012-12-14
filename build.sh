@@ -13,4 +13,5 @@ export CLASSPATH=$CLASSPATH:$(pwd)/lib/soot-2.5.0.jar
 javac $SRC_DIR/*.java
 
 mv $SRC_DIR/*.class $BIN_DIR
+cp $SRC_DIR/../resources/*.xml $BIN_DIR
 
